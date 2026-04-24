@@ -286,6 +286,7 @@ header{background:rgba(13,24,41,.95);border-bottom:1px solid var(--border2);padd
     </div>
     <div class="header-right">
       <a href="index.html" class="hdr-btn">← Home</a>
+      <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" class="hdr-btn" style="color:#fbbf24;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06);">Patch Tracker ↗</a>
       <span class="user-pill" id="user-pill"></span>
       <span class="superadmin-pill" id="superadmin-pill" style="display:none">★ Admin</span>
       <button class="hdr-btn audit" id="audit-btn" style="display:none" onclick="openAudit()">Audit log</button>
@@ -629,10 +630,34 @@ function refreshAvatar(sName,src){
   });
 }
 
+function nameFromSlug(sl){ return window.__slugToName?.[sl] || sl; }
+
+// Slug-safe wrappers for all onclick handlers
+function setScoreBySlug(btn){
+  const sName=nameFromSlug(btn.dataset.sslug);
+  const wsName=nameFromSlug(btn.dataset.wsslug)||btn.dataset.wsslug;
+  // find real ws name from slug
+  const s=STUDENTS.find(s=>slug(s.n)===btn.dataset.sslug);
+  const ws=(S5_WORKSHOPS[s?.l]||[]).find(w=>slug(w.name)===btn.dataset.wsslug);
+  const wsKey=ws?ws.name:btn.dataset.wsslug;
+  setScore(sName,wsKey,btn.dataset.val,btn);
+}
+function setCheckpointBySlug(btn){
+  const sName=nameFromSlug(btn.dataset.sslug);
+  const s=STUDENTS.find(s=>slug(s.n)===btn.dataset.sslug);
+  const ws=(S5_WORKSHOPS[s?.l]||[]).find(w=>slug(w.name)===btn.dataset.wsslug);
+  const wsKey=ws?ws.name:btn.dataset.wsslug;
+  setCheckpoint(sName,wsKey,btn.dataset.ck,btn.dataset.val,btn);
+}
+function openAssignBySlug(sl){ openAssign(nameFromSlug(sl)); }
+function clearPhotoBySlug(sl,ev){ clearPhoto(nameFromSlug(sl),ev); }
+function handlePhotoBySlug(input){ handlePhotoUpload(nameFromSlug(input.dataset.sslug),input); }
+function saveProfileBySlug(el){ saveProfile(nameFromSlug(el.dataset.sslug)); }
+
 // ── Toggle row ────────────────────────────────────────────────────
-function toggleRow(sName){
-  const body=document.getElementById(`body-${slug(sName)}`);
-  const btn=document.getElementById(`toggle-${slug(sName)}`);
+function toggleRow(sl){
+  const body=document.getElementById(`body-${sl}`);
+  const btn=document.getElementById(`toggle-${sl}`);
   if(!body)return;
   const open=body.classList.toggle('open');
   if(btn)btn.textContent=open?'▲ Collapse':'▼ Expand';
@@ -646,6 +671,80 @@ function renderList(){
   if(lf)students=students.filter(s=>s.l===lf);
   if(af==='__mine__')students=students.filter(s=>isMine(s));
   document.getElementById('count-pill').textContent=`${students.length} students`;
+
+  // Build a lookup so we can find name from slug safely
+  window.__slugToName={};
+  students.forEach(s=>{ window.__slugToName[slug(s.n)]=s.n; });
+
+  document.getElementById('students-list').innerHTML=students.map(s=>{
+    const guides=getGuides(s);const mine=guides.includes(currentUser);
+    const photo=s5data.__photos__?.[s.n];
+    const profile=s5data.__profiles__?.[s.n]||{};
+    const scores=s5data[s.n]||{};
+    const sl=slug(s.n);
+    const levelWs=S5_WORKSHOPS[s.l]||[];
+
+    const avatarHtml=photo
+      ?`<div class="student-avatar" data-avatar="${sl}"><img src="${photo}" alt="${s.n}"></div>`
+      :`<div class="student-avatar-initials" data-avatar="${sl}">${initials(s.n)}</div>`;
+
+    const guideTagsHtml=guides.length
+      ?guides.map(g=>`<span class="guide-tag">${g}</span>`).join('')
+      :'<span style="color:var(--muted);font-size:10px">No guides</span>';
+
+    const photoAreaHtml=photo
+      ?`<div class="photo-area has-photo" onclick="document.getElementById('phi-${sl}').click()"><img class="photo-preview" src="${photo}"><button class="photo-clear" onclick="clearPhotoBySlug('${sl}',event)">✕ Remove</button></div>`
+      :`<div class="photo-area" onclick="document.getElementById('phi-${sl}').click()"><div class="photo-hint"><div style="font-size:18px;margin-bottom:4px">📷</div><div>Upload</div><div style="color:var(--muted);font-size:8px">max 500KB</div></div></div>`;
+
+    const scoreLines=levelWs.map(ws=>{
+      const wsKey=ws.name;const cur=scores[wsKey];
+      // Use data attributes instead of inline string escaping
+      const wsSlug=slug(wsKey);
+      const chkRows=CHECKPOINTS.map(chk=>{
+        const kv=scores[chkKey(wsKey,chk.key)];
+        const opts=getChkOptions(chk.key);
+        const btns=opts.map(opt=>`<button class="score-btn ${kv===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" data-ck="${chk.key}" onclick="setCheckpointBySlug(this)">${opt.label}</button>`).join('');
+        return`<div class="score-line" style="padding-left:12px;opacity:.85;"><span class="score-ws-name" style="color:var(--muted);font-size:11px">↳ ${chk.label}</span><div class="score-btns">${btns}</div></div>`;
+      }).join('');
+      const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
+      const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" onclick="setScoreBySlug(this)">${opt.label}</button>`).join('');
+      return`<div style="border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:4px;">
+        <div class="score-line" style="background:var(--surface2);padding:7px 12px;">
+          <div style="flex:1"><span style="font-weight:600;color:var(--text);font-size:12px">${ws.code} · ${ws.name}</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-left:8px">${ws.guide} · ${ws.day}</span></div>
+          <div class="score-btns">${finalBtns}</div>
+        </div>
+        <div style="padding:4px 0 2px">${chkRows}</div>
+      </div>`;
+    }).join('');
+
+    return`<div class="student-row ${mine?'mine':''}">
+      <div class="row-top">
+        ${avatarHtml}
+        <div class="row-info">
+          <div class="row-name"><span class="row-level lv-${s.l}">${s.l}</span>${s.n}</div>
+          <div class="row-meta"><span id="guides-${sl}">${guideTagsHtml}</span>${s.note?`<span style="color:var(--muted);font-style:italic">* ${s.note}</span>`:''}</div>
+        </div>
+        <div class="row-actions">
+          ${s.patchUrl?`<a href="${s.patchUrl}" target="_blank" class="patch-link">Patches ↗</a>`:''}
+          <button class="row-btn" data-sslug="${sl}" onclick="openAssignBySlug(this.dataset.sslug)">Guides</button>
+          <button class="row-btn" id="toggle-${sl}" data-sslug="${sl}" onclick="toggleRow(this.dataset.sslug)">▼ Expand</button>
+        </div>
+      </div>
+      <div class="row-body" id="body-${sl}">
+        <div class="profile-section">
+          <div>${photoAreaHtml}<input type="file" id="phi-${sl}" accept="image/*" style="display:none" data-sslug="${sl}" onchange="handlePhotoBySlug(this)"></div>
+          <div class="profile-col">
+            <div><div class="field-label">Motivational model</div><textarea class="field-textarea" id="mot-${sl}" data-sslug="${sl}" onchange="saveProfileBySlug(this)" placeholder="What drives them, how they work best…">${profile.motivation||''}</textarea></div>
+          </div>
+          <div class="profile-col">
+            <div><div class="field-label">Guide notes</div><textarea class="field-textarea" id="note-${sl}" data-sslug="${sl}" onchange="saveProfileBySlug(this)" placeholder="This week's observations, action plan…">${profile.notes||''}</textarea></div>
+          </div>
+        </div>
+        <div class="scores-section">${scoreLines}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
   document.getElementById('students-list').innerHTML=students.map(s=>{
     const guides=getGuides(s);const mine=guides.includes(currentUser);
