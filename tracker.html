@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>T2P Patch Tracker — Alpha NYC</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>T2P Tracker — Alpha NYC</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
   --s1:#3b82f6;--s1-bg:#eff6ff;--s1-text:#1d4ed8;
@@ -12,6 +12,7 @@
   --s3:#10b981;--s3-bg:#ecfdf5;--s3-text:#065f46;
   --s4:#f59e0b;--s4-bg:#fffbeb;--s4-text:#92400e;
   --s5:#ef4444;--s5-bg:#fef2f2;--s5-text:#991b1b;
+  --alpha:#1a56db;
   --bg:#f7f6f2;--card:#fff;--border:#e5e4e0;
   --text:#1a1a1a;--muted:#999;--radius:14px;
 }
@@ -31,7 +32,58 @@ header{background:var(--text);color:white;padding:14px 28px;display:flex;align-i
 .edit-btn:hover{border-color:#888;color:#ccc;}
 .edit-btn.active{border-color:#3b82f6;color:#60a5fa;background:rgba(59,130,246,.1);}
 
-/* CONTROLS */
+/* WORKSHOP BREAKDOWN */
+.breakdown-section{background:white;border-bottom:2px solid var(--border);padding:20px 28px 24px;}
+.breakdown-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.breakdown-title{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);}
+.breakdown-collapse{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);background:transparent;border:1px solid var(--border);border-radius:20px;padding:3px 10px;cursor:pointer;transition:all .15s;}
+.breakdown-collapse:hover{color:var(--text);border-color:#aaa;}
+.breakdown-sess-block{margin-bottom:18px;}
+.breakdown-sess-block:last-child{margin-bottom:0;}
+.breakdown-sess-label{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.breakdown-sess-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.breakdown-sess-name{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.04em;}
+.breakdown-sess-line{flex:1;height:1px;background:var(--border);}
+.ws-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;}
+.ws-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px 13px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;}
+.ws-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.ws-card.s1::before{background:var(--s1);}
+.ws-card.s2::before{background:var(--s2);}
+.ws-card.s3::before{background:var(--s3);}
+.ws-card.s4::before{background:var(--s4);}
+.ws-card.s5::before{background:var(--s5);}
+.ws-card:hover{border-color:#bbb;box-shadow:0 3px 12px rgba(0,0,0,.07);transform:translateY(-1px);}
+.ws-card:hover .wsc-arrow{opacity:1;}
+.wsc-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.3;padding-right:16px;}
+.wsc-arrow{position:absolute;top:11px;right:11px;font-size:10px;color:var(--muted);opacity:0;transition:opacity .15s;}
+.wsc-stats{display:flex;align-items:baseline;gap:3px;}
+.wsc-passed{font-size:18px;font-weight:700;line-height:1;}
+.wsc-slash{font-size:11px;color:var(--muted);margin:0 1px;}
+.wsc-total{font-size:12px;color:var(--muted);}
+.wsc-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;}
+.wsc-bar{height:2px;background:#eee;border-radius:1px;overflow:hidden;margin-top:6px;}
+.wsc-bar-fill{height:100%;border-radius:1px;transition:width .4s;}
+
+/* WS DETAIL MODAL */
+.ws-modal{background:white;border-radius:16px;max-width:560px;width:100%;max-height:82vh;overflow-y:auto;transform:translateY(12px) scale(.98);transition:transform .2s;box-shadow:0 20px 60px rgba(0,0,0,.16);}
+.modal-overlay.open .ws-modal{transform:none;}
+.ws-modal-stripe{height:4px;border-radius:16px 16px 0 0;}
+.ws-modal-body{padding:20px 22px 24px;}
+.ws-modal-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px;}
+.ws-modal-name{font-size:18px;font-weight:600;line-height:1.2;}
+.ws-modal-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;}
+.ws-modal-stats{display:flex;gap:8px;margin-bottom:16px;}
+.ws-modal-stat{flex:1;background:var(--bg);border-radius:8px;padding:10px 12px;text-align:center;}
+.ws-modal-stat-val{font-size:22px;font-weight:700;}
+.ws-modal-stat-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.07em;}
+.ws-student-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:7px;font-size:12px;transition:background .1s;}
+.ws-student-row:hover{background:var(--bg);}
+
+/* SECTION DIVIDER */
+.section-divider{padding:14px 28px 0;display:flex;align-items:center;gap:12px;}
+.section-divider-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);}
+.section-divider-line{flex:1;height:1px;background:var(--border);}
+
 .controls{padding:10px 28px;background:white;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
 .sess-toggles{display:flex;gap:4px;flex-wrap:wrap;}
 .sess-btn{padding:4px 13px;border-radius:20px;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;border:1.5px solid var(--border);background:#f0f0ee;color:#bbb;cursor:pointer;transition:all .15s;}
@@ -46,7 +98,41 @@ select{padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;border:1
 select:focus{border-color:#3b82f6;}
 .count-pill{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border);}
 
-/* GRID */
+/* HERO */
+.tracker-hero{background:var(--bg);border-bottom:2px solid var(--border);padding:44px 40px 36px;}
+.tracker-hero-inner{max-width:860px;margin:0 auto;text-align:center;}
+.tracker-kicker{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--alpha);margin-bottom:14px;display:inline-flex;align-items:center;gap:10px;}
+.tracker-kicker::before,.tracker-kicker::after{content:'';height:1px;width:28px;background:currentColor;opacity:.35;}
+.tracker-h1{font-family:'Instrument Serif',serif;font-size:clamp(32px,5vw,54px);line-height:1.06;margin-bottom:10px;letter-spacing:-.4px;color:var(--text);}
+.tracker-h1 em{color:var(--alpha);font-style:italic;}
+.tracker-sub{font-size:14px;color:var(--muted);line-height:1.6;max-width:480px;margin:0 auto 24px;}
+.hero-sess-row{display:flex;justify-content:center;gap:4px;flex-wrap:wrap;}
+
+.hero-section-labels{display:flex;align-items:center;justify-content:center;gap:0;margin-top:28px;background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;max-width:500px;margin-left:auto;margin-right:auto;}
+.hero-section-item{display:flex;align-items:center;gap:8px;padding:12px 24px;cursor:pointer;transition:background .15s;flex:1;justify-content:center;}
+.hero-section-item:hover{background:#fafaf8;}
+.hero-section-arrow{font-size:12px;color:var(--muted);transition:transform .2s;}
+.hero-section-arrow.up{transform:rotate(180deg);}
+.hero-section-name{font-family:'Instrument Serif',serif;font-size:15px;color:var(--text);}
+.hero-section-name em{color:var(--alpha);font-style:italic;}
+.hero-section-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);background:var(--bg);border:1px solid var(--border);padding:1px 7px;border-radius:10px;}
+.hero-section-divider{width:1px;height:36px;background:var(--border);flex-shrink:0;}
+
+/* ACCORDION */
+.accordion{background:white;border-bottom:1px solid var(--border);}
+.accordion-hdr{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:white;border:none;cursor:pointer;transition:background .15s;text-align:left;gap:12px;}
+.accordion-hdr:hover{background:#fafaf8;}
+.accordion-hdr.open{border-bottom:1px solid var(--border);}
+.accordion-hdr-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.accordion-arrow{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);transition:transform .2s;display:inline-block;}
+.accordion-arrow.collapsed{transform:rotate(-90deg);}
+.accordion-title{font-size:14px;font-weight:600;color:var(--text);}
+.accordion-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;}
+.accordion-hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.accordion-body{overflow:hidden;transition:max-height .3s ease;}
+.breakdown-inner{padding:20px 28px 24px;}
+
+/* GRID stays same */
 .grid{padding:20px 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
 
 /* CARDS */
@@ -179,7 +265,7 @@ select:focus{border-color:#3b82f6;}
 <body>
 
 <header>
-  <span class="hdr-title">T2P Patch Tracker</span>
+  <span class="hdr-title">T2P Tracker</span>
   <div class="hdr-right">
     <span class="s5-dot">S5 Live</span>
     <span id="hdr-date" style="font-family:'DM Mono',monospace;font-size:11px;color:#666;"></span>
@@ -241,17 +327,13 @@ select:focus{border-color:#3b82f6;}
       <a href="workshops.html" target="_blank" style="padding:8px 16px;background:transparent;color:#60a5fa;border:1px solid #1e3a5f;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;text-decoration:none;transition:all .15s;" onmouseover="this.style.background='rgba(59,130,246,.1)'" onmouseout="this.style.background='transparent'">Workshop Directory ↗</a>
       <span style="font-size:11px;color:#555;font-family:'DM Mono',monospace;">Exports full patch record for all students across all sessions</span>
     </div>
-
     <!-- Workshop meta editor -->
     <div id="ws-meta-section" style="margin-top:14px;padding-top:14px;border-top:1px solid #333;">
       <div style="font-family:'DM Mono',monospace;font-size:11px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Edit Workshop Details</div>
       <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
         <select id="wm-sess" onchange="loadWsMeta()" style="background:#111f36;border:1px solid #264070;border-radius:6px;color:#e8f0fc;font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 10px;outline:none;">
-          <option value="S5">Session 5</option>
-          <option value="S4">Session 4</option>
-          <option value="S3">Session 3</option>
-          <option value="S2">Session 2</option>
-          <option value="S1">Session 1</option>
+          <option value="S5">Session 5</option><option value="S4">Session 4</option>
+          <option value="S3">Session 3</option><option value="S2">Session 2</option><option value="S1">Session 1</option>
         </select>
         <select id="wm-ws" onchange="loadWsMeta()" style="background:#111f36;border:1px solid #264070;border-radius:6px;color:#e8f0fc;font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 10px;outline:none;flex:1;min-width:180px;">
           <option value="">— Select workshop —</option>
@@ -273,32 +355,105 @@ select:focus{border-color:#3b82f6;}
   </div>
 </div>
 
-<!-- CONTROLS -->
-<div class="controls">
-  <div class="sess-toggles">
-    <button class="sess-btn active" data-s="S1" onclick="toggleSess('S1',this)">S1</button>
-    <button class="sess-btn active" data-s="S2" onclick="toggleSess('S2',this)">S2</button>
-    <button class="sess-btn active" data-s="S3" onclick="toggleSess('S3',this)">S3</button>
-    <button class="sess-btn active" data-s="S4" onclick="toggleSess('S4',this)">S4</button>
-    <button class="sess-btn" data-s="S5" onclick="toggleSess('S5',this)">S5 · Live</button>
+<!-- HERO -->
+<div class="tracker-hero">
+  <div class="tracker-hero-inner">
+    <div class="tracker-kicker">Alpha NYC · S1 — S5 · All sessions</div>
+    <h1 class="tracker-h1">Test<em>2</em>Pass <em>Tracker</em></h1>
+    <p class="tracker-sub">Patch records for every student across all sessions. Filter by session, level, or open a workshop to see the full breakdown.</p>
+    <div class="hero-sess-row">
+      <button class="sess-btn active" data-s="S1" onclick="toggleSess('S1',this)">S1</button>
+      <button class="sess-btn active" data-s="S2" onclick="toggleSess('S2',this)">S2</button>
+      <button class="sess-btn active" data-s="S3" onclick="toggleSess('S3',this)">S3</button>
+      <button class="sess-btn active" data-s="S4" onclick="toggleSess('S4',this)">S4</button>
+      <button class="sess-btn" data-s="S5" onclick="toggleSess('S5',this)">S5 · Live</button>
+    </div>
+    <!-- Embedded section labels -->
+    <div class="hero-section-labels">
+      <div class="hero-section-item" onclick="toggleAccordion('ws');this.closest('.tracker-hero').nextElementSibling.scrollIntoView({behavior:'smooth'})">
+        <span class="hero-section-arrow" id="hero-ws-arrow">↓</span>
+        <span class="hero-section-name">Workshop <em>Breakdown</em></span>
+        <span class="hero-section-count" id="hero-ws-count"></span>
+      </div>
+      <div class="hero-section-divider"></div>
+      <div class="hero-section-item" onclick="toggleAccordion('stu');document.getElementById('stu-acc-hdr').scrollIntoView({behavior:'smooth'})">
+        <span class="hero-section-arrow" id="hero-stu-arrow">↓</span>
+        <span class="hero-section-name">Student <em>Breakdown</em></span>
+        <span class="hero-section-count" id="hero-stu-count"></span>
+      </div>
+    </div>
   </div>
-  <div class="vdiv"></div>
-  <select id="lvlFilter" onchange="render()">
-    <option value="">All levels</option>
-    <option value="LL">LL</option><option value="L1">L1</option>
-    <option value="L2">L2</option><option value="MS">MS</option>
-  </select>
-  <select id="sortFilter" onchange="render()">
-    <option value="level">Sort: Level</option>
-    <option value="name">Sort: A–Z</option>
-    <option value="patches">Sort: Most patches</option>
-  </select>
-  <span class="count-pill" id="count-pill"></span>
 </div>
 
-<div id="grid-wrap"><div style="padding:60px;text-align:center;color:var(--muted)">Loading…</div></div>
+<!-- ACCORDION: WORKSHOP BREAKDOWN -->
+<div class="accordion">
+  <button class="accordion-hdr" id="ws-acc-hdr" onclick="toggleAccordion('ws')">
+    <div class="accordion-hdr-left">
+      <span class="accordion-arrow collapsed" id="ws-acc-arrow">▼</span>
+      <span class="accordion-title">Workshop Breakdown</span>
+      <span class="accordion-sub" id="ws-acc-sub"></span>
+    </div>
+    <div class="accordion-hdr-right" id="ws-acc-right">
+      <a href="workshops.html" target="_blank" onclick="event.stopPropagation()"
+         style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;white-space:nowrap;transition:all .15s;"
+         onmouseover="this.style.color=getComputedStyle(document.documentElement).getPropertyValue('--text');this.style.borderColor='#aaa'"
+         onmouseout="this.style.color='';this.style.borderColor=''">
+        Full descriptions ↗
+      </a>
+    </div>
+  </button>
+  <div class="accordion-body" id="ws-acc-body" style="display:none">
+    <div class="breakdown-inner" id="breakdown-body"></div>
+  </div>
+</div>
 
-<!-- DETAIL MODAL -->
+<!-- ACCORDION: STUDENT BREAKDOWN -->
+<div class="accordion">
+  <button class="accordion-hdr" id="stu-acc-hdr" onclick="toggleAccordion('stu')">
+    <div class="accordion-hdr-left">
+      <span class="accordion-arrow collapsed" id="stu-acc-arrow">▼</span>
+      <span class="accordion-title">Student Breakdown</span>
+      <span class="accordion-sub" id="stu-acc-sub"></span>
+    </div>
+    <div class="accordion-hdr-right">
+      <select id="lvlFilter" onclick="event.stopPropagation()" onchange="render()" style="font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:white;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;">
+        <option value="">All levels</option>
+        <option value="LL">LL</option>
+        <option value="L1">L1</option>
+        <option value="L2">L2</option>
+        <option value="MS">MS</option>
+      </select>
+      <select id="sortFilter" onclick="event.stopPropagation()" onchange="render()" style="font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:white;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;">
+        <option value="level">By level</option>
+        <option value="name">A–Z</option>
+        <option value="patches">Most patches</option>
+      </select>
+    </div>
+  </button>
+  <div class="accordion-body" id="stu-acc-body" style="display:none">
+    <div id="grid-wrap"><div style="padding:60px;text-align:center;color:var(--muted)">Loading…</div></div>
+  </div>
+</div>
+
+<!-- WORKSHOP DETAIL MODAL -->
+<div class="modal-overlay" id="ws-modal-overlay" onclick="if(event.target===this)closeWsModal()">
+  <div class="ws-modal">
+    <div class="ws-modal-stripe" id="ws-modal-stripe"></div>
+    <div class="ws-modal-body">
+      <div class="ws-modal-hdr">
+        <div>
+          <div class="ws-modal-name" id="ws-modal-name"></div>
+          <div class="ws-modal-meta" id="ws-modal-meta"></div>
+        </div>
+        <button class="modal-close" onclick="closeWsModal()">✕</button>
+      </div>
+      <div class="ws-modal-stats" id="ws-modal-stats"></div>
+      <div id="ws-modal-students"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT DETAIL MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-hdr">
@@ -330,39 +485,38 @@ const BASE = [
   {n:"Colm Bowen",l:"LL",note:"",scores:{"S1: Social Social Club":"Not passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Not passed","S2: Articulate Artists":"Not passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Ultimate Agent":"Not passed","S3: Storybook Studio":"Passed","S4: Rock Stars":"Absent"}},
   {n:"Harper Lembo",l:"LL",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Ultimate Agent":"Passed","S3: Storybook Studio":"Passed","S4: Rock Stars":"Not passed"}},
   {n:"Hildy (Alice) Grimm",l:"LL",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Not passed","S2: Articulate Artists":"Not passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Ultimate Agent":"Not passed","S3: Storybook Studio":"Passed","S4: Rock Stars":"Not passed"}},
-  {n:"Oliver McLeod",l:"LL",note:"Joined S4",scores:{"S4: Rock Stars":"Passed"}},
+  {n:"Oliver McLeod",l:"LL",note:"Joined S4",joinedS:4,scores:{"S4: Rock Stars":"Passed"}},
   {n:"Ada Cone",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"N/A","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Not passed","S4: Rock Stars":"Not passed"}},
   {n:"Blake Richheimer",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"N/A","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"N/A","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed"}},
   {n:"Conan Hogan",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
-  {n:"Harvey Caulin",l:"L1",note:"Joined S4",scores:{"S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
+  {n:"Harvey Caulin",l:"L1",note:"Joined S4",joinedS:4,scores:{"S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
   {n:"Lola Propp",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Not passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
   {n:"London Politi",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Not passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Not passed","S3: Speak like a Scientist":"Not passed","S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
-  {n:"Max Rzepecki",l:"L1",note:"Moved to PR after S4",scores:{}},
-  {n:"Oleander Poulson",l:"L1",note:"Joined S4",scores:{"S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Oleander Poulson",l:"L1",note:"Joined S4",joinedS:4,scores:{"S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
   {n:"Raika Ackman",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
   {n:"Van McDavid",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
-  {n:"Vasilios Giannopoulos",l:"L1",note:"Joined S2",scores:{"S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Vasilios Giannopoulos",l:"L1",note:"Joined S2",joinedS:2,scores:{"S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
   {n:"Annabelle Lembo",l:"L2",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Passed"}},
-  {n:"Casper White",l:"L2",note:"Joined S4",scores:{"S4: Rock Stars":"Passed"}},
-  {n:"Catherine Henry",l:"L2",note:"Joined S3",scores:{"S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Not passed"}},
-  {n:"Hunter Taback",l:"L2",note:"Joined S3",scores:{"S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Not passed"}},
+  {n:"Casper White",l:"L2",note:"Joined S4",joinedS:4,scores:{"S4: Rock Stars":"Passed"}},
+  {n:"Catherine Henry",l:"L2",note:"Joined S3",joinedS:3,scores:{"S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Not passed"}},
+  {n:"Hunter Taback",l:"L2",note:"Joined S3",joinedS:3,scores:{"S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Not passed"}},
   {n:"Jaya Vora",l:"L2",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Passed"}},
   {n:"Liv Brodsky",l:"L2",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Passed"}},
   {n:"Lucian McDavid",l:"L2",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"N/A","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Passed"}},
-  {n:"Nicholas Sidea",l:"L2",note:"Joined S4",scores:{"S3: Social Networking":"Passed"}},
+  {n:"Nicholas Sidea",l:"L2",note:"Joined S4",joinedS:4,scores:{"S3: Social Networking":"Passed"}},
   {n:"Pax Ovitz",l:"L2",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Passed"}},
-  {n:"Ayla White",l:"MS",note:"Joined S4",scores:{"S4: Rock Stars":"Passed"}},
+  {n:"Ayla White",l:"MS",note:"Joined S4",joinedS:4,scores:{"S4: Rock Stars":"Passed"}},
   {n:"Eli Slifka",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Museum Masters":"Not passed","S2: Articulate Artists":"Not passed","S2: President's AI Challenge":"N/A","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed"}},
   {n:"Emma Slifka",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Museum Masters":"Passed","S2: Articulate Artists":"Passed","S2: President's AI Challenge":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Not passed","S4: Rock Stars":"Not passed"}},
-  {n:"Georgia Flaherty",l:"MS",note:"Joined S4",scores:{"S4: Rock Stars":"Not passed"}},
+  {n:"Georgia Flaherty",l:"MS",note:"Joined S4",joinedS:4,scores:{"S4: Rock Stars":"Not passed"}},
   {n:"Glen-Eric Ostrander",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Museum Masters":"Passed","S2: Articulate Artists":"Passed","S2: President's AI Challenge":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Absent","S4: Rock Stars":"Passed"}},
-  {n:"Grace Lefkowitz",l:"MS",note:"Joined S5",newS5:true,scores:{}},
+  {n:"Grace Lefkowitz",l:"MS",note:"Joined S5",joinedS:5,newS5:true,scores:{}},
   {n:"Leah Abramovich",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Articulate Artists":"Passed","S2: President's AI Challenge":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Not passed","S3: Social Networking":"Passed"}},
   {n:"Leonie Weernink",l:"MS",note:"",scores:{}},
-  {n:"Max Brodsky",l:"MS",note:"Joined S3",scores:{"S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed"}},
+  {n:"Max Brodsky",l:"MS",note:"Joined S3",joinedS:3,scores:{"S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed"}},
   {n:"Mireille (Mimi) Prospere",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Museum Masters":"Absent","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"N/A","S2: Community Garden":"N/A","S2: Budget Battles: NYC Edition":"N/A","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Absent","S3: Social Networking":"Passed"}},
   {n:"Penelope Carrington",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Museum Masters":"Passed","S2: Articulate Artists":"Passed","S2: President's AI Challenge":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Rock Stars":"Passed"}},
-  {n:"Yorgos Weernink",l:"MS",note:"Joined S4",scores:{"S4: Rock Stars":"Passed"}},
+  {n:"Yorgos Weernink",l:"MS",note:"Joined S4",joinedS:4,scores:{"S4: Rock Stars":"Passed"}},
 ];
 
 // ── State ────────────────────────────────────────────────────────
@@ -419,11 +573,169 @@ function fullScores(name) {
 function getSess(k) { return k.match(/^(S\d):/)?.[1] || ''; }
 function col(s) { return SC[s]||'#aaa'; }
 
+// ── Accordion ─────────────────────────────────────────────────────
+const accState = { ws: false, stu: false }; // false = closed by default
+
+function toggleAccordion(id) {
+  accState[id] = !accState[id];
+  const body  = document.getElementById(id === 'ws' ? 'ws-acc-body' : 'stu-acc-body');
+  const arrow = document.getElementById(id === 'ws' ? 'ws-acc-arrow' : 'stu-acc-arrow');
+  const hdrArrow = document.getElementById(id === 'ws' ? 'hero-ws-arrow' : 'hero-stu-arrow');
+  const hdr   = document.getElementById(id === 'ws' ? 'ws-acc-hdr' : 'stu-acc-hdr');
+  body.style.display  = accState[id] ? 'block' : 'none';
+  arrow.classList.toggle('collapsed', !accState[id]);
+  if (hdrArrow) hdrArrow.classList.toggle('up', accState[id]);
+  hdr.classList.toggle('open', accState[id]);
+}
+
+// ── Workshop breakdown ────────────────────────────────────────────
+let breakdownCollapsed = false;
+
+function toggleBreakdown() {
+  breakdownCollapsed = !breakdownCollapsed;
+  document.getElementById('breakdown-body').style.display = breakdownCollapsed ? 'none' : 'block';
+  document.getElementById('breakdown-toggle').textContent = breakdownCollapsed ? '▼ Expand' : '▲ Collapse';
+}
+
+const SC_COL  = {S1:'#3b82f6',S2:'#8b5cf6',S3:'#10b981',S4:'#f59e0b',S5:'#ef4444'};
+const SC_SESS = {S1:'Session 1',S2:'Session 2',S3:'Session 3',S4:'Session 4',S5:'Session 5'};
+
+function renderBreakdown() {
+  const lf = document.getElementById('lvlFilter').value;
+  let list = students.filter(s => !lf || s.l === lf);
+  // Also respect S5-only-if-active filter (same as student grid)
+  // Build counts per workshop
+  const counts = {};
+  list.forEach(s => {
+    const sc = fullScores(s.n);
+    Object.entries(sc).forEach(([ws, val]) => {
+      if (!val || val === 'N/A') return;
+      const sess = getSess(ws);
+      if (!sess || !activeSess.has(sess)) return;
+      if (!counts[ws]) counts[ws] = { passed:0, notyet:0, absent:0, total:0, sess };
+      counts[ws].total++;
+      if (val === 'Passed')     counts[ws].passed++;
+      if (val === 'Not passed') counts[ws].notyet++;
+      if (val === 'Absent')     counts[ws].absent++;
+    });
+  });
+
+  const bySess = {};
+  Object.entries(counts).forEach(([ws, c]) => {
+    if (!bySess[c.sess]) bySess[c.sess] = [];
+    bySess[c.sess].push({ ws, ...c });
+  });
+  const sessOrder = ['S1','S2','S3','S4','S5'].filter(s => activeSess.has(s) && bySess[s]);
+
+  if (!sessOrder.length) {
+    document.getElementById('breakdown-body').innerHTML =
+      '<div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted);padding:4px 0">No workshop data for selected sessions.</div>';
+    return;
+  }
+
+  const totalWs = sessOrder.reduce((sum, s) => sum + bySess[s].length, 0);
+  const subEl = document.getElementById('ws-acc-sub');
+  if (subEl) subEl.textContent = `${totalWs} workshop${totalWs!==1?'s':''}`;
+  const heroWsCount = document.getElementById('hero-ws-count');
+  if (heroWsCount) heroWsCount.textContent = `${totalWs}`;
+
+  document.getElementById('breakdown-body').innerHTML = sessOrder.map(sess => {
+    const workshops = bySess[sess].sort((a,b) => a.ws.localeCompare(b.ws));
+    const scClass = sess.toLowerCase();
+    const cards = workshops.map(({ ws, passed, total }) => {
+      const name = ws.replace(/^S\d: /, '');
+      const pct = total > 0 ? Math.round(passed/total*100) : 0;
+      const safeWs = ws.replace(/'/g,"\\'");
+      return `<div class="ws-card ${scClass}" onclick="openWsModal('${safeWs}')">
+        <span class="wsc-arrow">→</span>
+        <div class="wsc-name">${name}</div>
+        <div class="wsc-stats">
+          <span class="wsc-passed" style="color:${SC_COL[sess]}">${passed}</span>
+          <span class="wsc-slash">/</span>
+          <span class="wsc-total">${total}</span>
+        </div>
+        <div class="wsc-label">passed</div>
+        <div class="wsc-bar"><div class="wsc-bar-fill" style="width:${pct}%;background:${SC_COL[sess]}"></div></div>
+      </div>`;
+    }).join('');
+
+    return `<div class="breakdown-sess-block">
+      <div class="breakdown-sess-label">
+        <div class="breakdown-sess-dot" style="background:${SC_COL[sess]}"></div>
+        <span class="breakdown-sess-name" style="color:${SC_COL[sess]}">${SC_SESS[sess]}</span>
+        <div class="breakdown-sess-line"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${workshops.length} workshops</span>
+      </div>
+      <div class="ws-card-grid">${cards}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Workshop modal ────────────────────────────────────────────────
+function openWsModal(wsKey) {
+  const sess = getSess(wsKey);
+  const name = wsKey.replace(/^S\d: /, '');
+  const lf = document.getElementById('lvlFilter').value;
+  let list = students.filter(s => !lf || s.l === lf);
+
+  // Build per-student results
+  const results = [];
+  list.forEach(s => {
+    const sc = fullScores(s.n);
+    const val = sc[wsKey];
+    if (val && val !== 'N/A') results.push({ name: s.n, level: s.l, val });
+  });
+
+  const passed  = results.filter(r => r.val === 'Passed').length;
+  const notyet  = results.filter(r => r.val === 'Not passed').length;
+  const absent  = results.filter(r => r.val === 'Absent').length;
+  const total   = results.length;
+  const pct     = total > 0 ? Math.round(passed/total*100) : 0;
+  const c       = SC_COL[sess] || '#888';
+
+  document.getElementById('ws-modal-stripe').style.background = c;
+  document.getElementById('ws-modal-name').textContent = name;
+  document.getElementById('ws-modal-meta').innerHTML =
+    `<span style="background:${SC_COL[sess]}15;color:${c};border:1px solid ${c}44;padding:2px 8px;border-radius:4px;font-weight:600">${sess}</span>`;
+  document.getElementById('ws-modal-stats').innerHTML = `
+    <div class="ws-modal-stat"><div class="ws-modal-stat-val" style="color:${c}">${passed}</div><div class="ws-modal-stat-lbl">Passed</div></div>
+    <div class="ws-modal-stat"><div class="ws-modal-stat-val" style="color:#ef4444">${notyet}</div><div class="ws-modal-stat-lbl">Not yet</div></div>
+    <div class="ws-modal-stat"><div class="ws-modal-stat-val" style="color:#f59e0b">${absent}</div><div class="ws-modal-stat-lbl">Absent</div></div>
+    <div class="ws-modal-stat"><div class="ws-modal-stat-val">${pct}%</div><div class="ws-modal-stat-lbl">Pass rate</div></div>`;
+
+  // Student list sorted: Passed → Not yet → Absent
+  const order = { 'Passed':0, 'Not passed':1, 'Absent':2 };
+  results.sort((a,b) => (order[a.val]??3)-(order[b.val]??3) || a.name.localeCompare(b.name));
+
+  document.getElementById('ws-modal-students').innerHTML = results.length
+    ? results.map(r => {
+        const sc = r.val==='Passed'?'st-pass':r.val==='Not passed'?'st-fail':'st-absent';
+        const lbl = r.val==='Not passed'?'Not yet':r.val;
+        return `<div class="ws-student-row">
+          <span class="level-tag tag-${r.level}">${r.level}</span>
+          <span style="flex:1;font-size:12px;font-weight:500">${r.name}</span>
+          <span class="modal-row-status ${sc}">${lbl}</span>
+        </div>`;
+      }).join('')
+    : '<div style="font-size:12px;color:var(--muted);padding:12px 10px;font-style:italic">No data recorded yet for this workshop.</div>';
+
+  document.getElementById('ws-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWsModal() {
+  document.getElementById('ws-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 // ── Render grid ──────────────────────────────────────────────────
 function render() {
+  renderBreakdown();
   const lf = document.getElementById('lvlFilter').value;
   const sf = document.getElementById('sortFilter').value;
   let list = [...students];
+  // Grace and other S5-only students should be hidden when S5 is greyed out
+  if (!activeSess.has('S5')) list = list.filter(s => !s.newS5);
   if (lf) list = list.filter(s=>s.l===lf);
   if (sf==='level') list.sort((a,b)=>{const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l);return d||a.n.localeCompare(b.n);});
   else if (sf==='name') list.sort((a,b)=>a.n.localeCompare(b.n));
@@ -433,7 +745,10 @@ function render() {
     return pb-pa;
   });
 
-  document.getElementById('count-pill').textContent = `${list.length} student${list.length!==1?'s':''}`;
+  document.getElementById('count-pill') && (document.getElementById('count-pill').textContent = `${list.length} student${list.length!==1?'s':''}`);
+  document.getElementById('stu-acc-sub').textContent = `${list.length} student${list.length!==1?'s':''}`;
+  const heroStuCount = document.getElementById('hero-stu-count');
+  if (heroStuCount) heroStuCount.textContent = `${list.length}`;
 
   const grid = document.createElement('div');
   grid.className = 'grid';
@@ -525,7 +840,7 @@ function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){closeModal();closeWsModal();} });
 
 // ── Editor ───────────────────────────────────────────────────────
 let editorOpen = false, editorUnlocked = false;
@@ -604,7 +919,7 @@ function loadEpStudent() {
 function deleteStudent() {
   const name = document.getElementById('ep-stu').value;
   if (!name) return;
-  if (!confirm(`Delete "${name}" from the patch tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
+  if (!confirm(`Delete "${name}" from the tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
   // Remove from students array
   const idx = students.findIndex(s=>s.n===name);
   if (idx > -1) students.splice(idx, 1);
@@ -786,7 +1101,7 @@ initWsMeta();
 </script>
 <!-- PAGE TOGGLE -->
 <div class="page-toggle">
-  <button class="toggle-btn tracker-active">Patch Tracker</button>
+  <button class="toggle-btn tracker-active">T2P Tracker</button>
   <button class="toggle-btn" onclick="window.location.href='workshops.html'">Workshop Directory</button>
 </div>
 
