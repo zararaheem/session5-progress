@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workshop Directory — Alpha NYC T2P</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f8f7f4;--text:#111;--muted:#888;--border:#e2e0db;--card:#fff;
+  --s1:#2563eb;--s2:#7c3aed;--s3:#059669;--s4:#d97706;--s5:#dc2626;
+  --ll:#e8a020;--l1:#e8522a;--l2:#2ab5a0;--ms:#e03d7c;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:50;background:rgba(248,247,244,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:stretch;justify-content:space-between;}
+.nav-left{display:flex;align-items:center;gap:0;}
+.nav-brand{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--s5);padding:16px 16px 16px 0;display:flex;align-items:center;}
+.nav-sep{width:1px;height:18px;background:var(--border);margin-right:14px;}
+.nav-title{font-size:13px;font-weight:500;color:var(--text);}
+.nav-right{display:flex;align-items:center;gap:6px;}
+.nav-link{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:6px;transition:all .15s;}
+.nav-link:hover{color:var(--text);border-color:#aaa;}
+.nav-link.hot{color:var(--s5);border-color:rgba(220,38,38,.3);background:rgba(220,38,38,.04);}
+.nav-link.hot:hover{background:rgba(220,38,38,.09);}
+
+/* ── HERO ── */
+.hero{padding:52px 40px 36px;max-width:820px;margin:0 auto;text-align:center;}
+.kicker{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--s5);margin-bottom:14px;display:inline-flex;align-items:center;gap:10px;}
+.kicker::before,.kicker::after{content:'';height:1px;width:28px;background:currentColor;opacity:.35;}
+h1{font-family:'Instrument Serif',serif;font-size:clamp(34px,5vw,58px);line-height:1.06;margin-bottom:10px;letter-spacing:-.4px;}
+h1 em{color:var(--s5);font-style:italic;}
+.hero-sub{font-size:14px;color:var(--muted);line-height:1.6;max-width:460px;margin:0 auto;}
+
+/* ── SESSION FILTER ── */
+.filters{display:flex;justify-content:center;gap:4px;padding:0 40px 32px;flex-wrap:wrap;}
+.f-btn{font-family:'DM Mono',monospace;font-size:11px;padding:6px 16px;border-radius:20px;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .14s;font-weight:500;}
+.f-btn:hover{border-color:#aaa;color:var(--text);}
+.f-btn.active.all{background:#111;color:#fff;border-color:#111;}
+.f-btn[data-s="S1"].active{background:var(--s1);color:#fff;border-color:var(--s1);}
+.f-btn[data-s="S2"].active{background:var(--s2);color:#fff;border-color:var(--s2);}
+.f-btn[data-s="S3"].active{background:var(--s3);color:#fff;border-color:var(--s3);}
+.f-btn[data-s="S4"].active{background:var(--s4);color:#fff;border-color:var(--s4);}
+.f-btn[data-s="S5"].active{background:var(--s5);color:#fff;border-color:var(--s5);}
+
+/* ── MAIN ── */
+.main{max-width:1060px;margin:0 auto;padding:0 40px 100px;}
+
+/* ── SESSION DIVIDER ── */
+.sess-hdr{display:flex;align-items:center;gap:14px;margin:40px 0 18px;}
+.sess-hdr:first-child{margin-top:0;}
+.s-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.s-name{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.05em;}
+.s-line{flex:1;height:1px;background:var(--border);}
+.s-ct{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+
+/* ── COMPACT CARD GRID ── */
+.ws-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;}
+
+.ws-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:14px 15px 12px;cursor:pointer;transition:all .18s;
+  position:relative;overflow:hidden;display:flex;flex-direction:column;gap:6px;
+  text-align:left;
+}
+.ws-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+}
+.ws-card.s1::after{background:var(--s1);}
+.ws-card.s2::after{background:var(--s2);}
+.ws-card.s3::after{background:var(--s3);}
+.ws-card.s4::after{background:var(--s4);}
+.ws-card.s5::after{background:var(--s5);}
+.ws-card:hover{
+  border-color:#bbb;box-shadow:0 4px 18px rgba(0,0,0,.08);
+  transform:translateY(-2px);
+}
+.ws-card-top{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.ws-code{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;flex-shrink:0;}
+.code-s1{background:#dbeafe;color:var(--s1);}
+.code-s2{background:#ede9fe;color:var(--s2);}
+.code-s3{background:#d1fae5;color:var(--s3);}
+.code-s4{background:#fef3c7;color:var(--s4);}
+.code-s5{background:#fee2e2;color:var(--s5);}
+.lv-badges{display:flex;gap:3px;flex-wrap:wrap;}
+.lv-b{font-family:'DM Mono',monospace;font-size:8px;font-weight:700;padding:1px 5px;border-radius:2px;}
+.lv-LL{background:#fff4e0;color:var(--ll);}
+.lv-L1{background:#ffeee8;color:var(--l1);}
+.lv-L2{background:#e0f7f4;color:var(--l2);}
+.lv-MS{background:#fde8f1;color:var(--ms);}
+.lv-ALL{background:#f0ede8;color:#666;}
+.ws-name{font-size:13px;font-weight:600;line-height:1.3;color:var(--text);}
+.ws-card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:2px;}
+.ws-ls{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);display:flex;align-items:center;gap:4px;}
+.ws-ls::before{content:'⚡';font-size:9px;}
+/* pass count badge */
+.ws-pass{font-family:'DM Mono',monospace;font-size:9px;font-weight:600;padding:1px 6px;border-radius:10px;background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;}
+.ws-ext{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);opacity:.6;}
+.ws-ext::after{content:'↗';}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .18s;backdrop-filter:blur(3px);}
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--card);border-radius:14px;max-width:500px;width:100%;
+  max-height:88vh;overflow-y:auto;
+  transform:translateY(10px) scale(.98);transition:transform .18s;
+  box-shadow:0 20px 60px rgba(0,0,0,.15);
+}
+.modal-bg.open .modal{transform:none;}
+.modal-stripe{height:4px;border-radius:14px 14px 0 0;}
+.modal-body{padding:22px 24px 24px;}
+.modal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.modal-code{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;}
+.modal-badges{display:flex;gap:4px;flex-wrap:wrap;}
+.modal-close{width:28px;height:28px;border-radius:6px;background:var(--bg);border:1px solid var(--border);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;transition:all .13s;}
+.modal-close:hover{background:var(--border);color:var(--text);}
+.modal-name{font-family:'Instrument Serif',serif;font-size:22px;line-height:1.2;margin-bottom:4px;}
+.modal-ls{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:5px;}
+.modal-ls::before{content:'⚡';}
+.modal-section{margin-bottom:14px;}
+.modal-label{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;}
+.modal-ican{font-size:13px;line-height:1.6;color:#333;font-style:italic;background:var(--bg);border-left:3px solid;padding:10px 13px;border-radius:0 6px 6px 0;}
+.modal-desc{font-size:13px;line-height:1.6;color:#444;}
+.modal-stats{display:flex;gap:8px;flex-wrap:wrap;}
+.stat-pill{font-family:'DM Mono',monospace;font-size:11px;padding:5px 12px;border-radius:20px;font-weight:600;}
+.stat-pass{background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;}
+.stat-notyet{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;}
+.stat-absent{background:#fffbeb;color:#d97706;border:1px solid #fde68a;}
+.modal-ext-btn{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:8px 16px;border-radius:8px;font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:white;text-decoration:none;transition:opacity .15s;}
+.modal-ext-btn:hover{opacity:.85;}
+
+/* ── TOGGLE ── */
+.page-toggle{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;display:flex;background:#111;border:1px solid #2a2a2a;border-radius:30px;padding:4px;gap:2px;box-shadow:0 4px 24px rgba(0,0,0,.22);}
+.tog{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:7px 18px;border-radius:24px;border:none;cursor:pointer;transition:all .18s;white-space:nowrap;letter-spacing:.03em;background:transparent;color:#666;}
+.tog:hover{color:#ccc;}
+.tog.on{background:#2563eb;color:white;}
+
+footer{padding:20px 40px 80px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+footer a{color:#999;text-decoration:none;}
+footer a:hover{color:var(--text);}
+@media(max-width:640px){
+  nav,.hero,.filters,.main,footer{padding-left:16px;padding-right:16px;}
+  .hero{padding-top:36px;padding-bottom:28px;}
+  .ws-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:420px){.ws-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-left">
+    <span class="nav-brand">Alpha · NYC</span>
+    <div class="nav-sep"></div>
+    <span class="nav-title">Workshop Directory</span>
+  </div>
+  <div class="nav-right">
+    <a href="index.html" class="nav-link">← Home</a>
+    <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" class="nav-link hot">Patch Tracker ↗</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="kicker">S1 — S5 · All Sessions</div>
+  <h1>Workshop <em>Directory</em></h1>
+  <p class="hero-sub">Every workshop across all five sessions. Click any card to see the lifeskill, I-can statement, and patch count.</p>
+</div>
+
+<div class="filters">
+  <button class="f-btn all active" onclick="filter('all',this)">All sessions</button>
+  <button class="f-btn" data-s="S1" onclick="filter('S1',this)">Session 1</button>
+  <button class="f-btn" data-s="S2" onclick="filter('S2',this)">Session 2</button>
+  <button class="f-btn" data-s="S3" onclick="filter('S3',this)">Session 3</button>
+  <button class="f-btn" data-s="S4" onclick="filter('S4',this)">Session 4</button>
+  <button class="f-btn" data-s="S5" onclick="filter('S5',this)">Session 5</button>
+</div>
+
+<div class="main" id="main"></div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal">
+    <div class="modal-stripe" id="modal-stripe"></div>
+    <div class="modal-body">
+      <div class="modal-top">
+        <div>
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+            <span class="modal-code" id="modal-code"></span>
+            <div class="modal-badges" id="modal-badges"></div>
+          </div>
+          <div class="modal-name" id="modal-name"></div>
+          <div class="modal-ls" id="modal-ls"></div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-section" id="modal-ican-section">
+        <div class="modal-label">I can statement</div>
+        <div class="modal-ican" id="modal-ican"></div>
+      </div>
+      <div class="modal-section" id="modal-desc-section">
+        <div class="modal-label">About this workshop</div>
+        <div class="modal-desc" id="modal-desc"></div>
+      </div>
+      <div class="modal-section" id="modal-stats-section" style="display:none">
+        <div class="modal-label">Patch tracker</div>
+        <div class="modal-stats" id="modal-stats"></div>
+      </div>
+      <div id="modal-link-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>Alpha Space Agency · NYC</span>
+  <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank">T2P Patch Tracker ↗</a>
+</footer>
+
+<div class="page-toggle">
+  <button class="tog" onclick="window.location.href='https://t2p-dashboard.vercel.app/tracker.html'">Patch Tracker</button>
+  <button class="tog on">Workshop Directory</button>
+</div>
+
+<script>
+const MC = 'https://alpha-mission-control.vercel.app/workshops/';
+const SESS_COLORS = {S1:'#2563eb',S2:'#7c3aed',S3:'#059669',S4:'#d97706',S5:'#dc2626'};
+const SESS_LABELS = {S1:'Session 1',S2:'Session 2',S3:'Session 3',S4:'Session 4',S5:'Session 5 · Live'};
+
+function lvBadges(level) {
+  if (!level) return '';
+  if (level === 'ALL') return `<span class="lv-b lv-ALL">All</span>`;
+  return level.split('/').map(l=>`<span class="lv-b lv-${l.trim()}">${l.trim()}</span>`).join('');
+}
+function lvBadgesLg(level) {
+  if (!level) return '';
+  if (level === 'ALL') return `<span class="lv-b lv-ALL" style="font-size:10px;padding:2px 7px">All levels</span>`;
+  return level.split('/').map(l=>`<span class="lv-b lv-${l.trim()}" style="font-size:10px;padding:2px 7px">${l.trim()}</span>`).join('');
+}
+
+const W = [
+  // ── S1 ─────────────────────────────────────────────────────────
+  {sess:'S1',code:'S1-01',name:'Social Social Club',level:'LL/L1',lifeskill:'Socialization',
+   ican:'I can plan out all of the logistics of a playdate and reach out to my peer and their parents to coordinate and schedule it.',
+   desc:'Students plan and coordinate a real playdate with a peer — logistics, outreach to parents, and scheduling all handled independently.'},
+  {sess:'S1',code:'S1-02',name:'Pressure Playbook',level:'LL/L1',lifeskill:'Uplifting Others',
+   ican:'I can complete the Escape Room with 80% positive language.',
+   desc:'Students complete an Escape Room challenge, earning their pass by using 80% positive and uplifting language throughout.'},
+  {sess:'S1',code:'S1-03',name:'Alpha Legends',level:'LL/L1',lifeskill:'Grit',
+   ican:'I can use grit to pass 4 out of 6 Legend Challenges within 1 minute each.',
+   desc:'A gauntlet of six legend challenges — students must pass 4 out of 6 within one minute each.'},
+  {sess:'S1',code:'S1-04',name:'Community Garden',level:'ALL',lifeskill:'Upholding Community Standards',
+   ican:'I can uphold community standards while working with others to run our community garden.',
+   desc:'Students work together to run a real community garden, holding each other accountable to shared standards.'},
+  {sess:'S1',code:'S1-05',name:'10x-ers',level:'L1/L2/MS',lifeskill:'Independence',
+   ican:'I can turn an idea I care about into a finished project by making my own decisions, managing my work, and solving problems with minimal adult help.',
+   desc:'Each student turns a personal idea into a finished project — decisions, execution, and problem-solving handled independently.'},
+  {sess:'S1',code:'S1-06',name:'Artful Insights',level:'L2/MS',lifeskill:'Giving and Receiving Feedback',
+   ican:'I can apply peer feedback to create a second version of my artwork that is visibly improved.',
+   desc:'Students apply peer feedback to produce a visibly improved second version of their artwork.'},
+  {sess:'S1',code:'S1-07',name:'Just Do It!',level:'L1/L2/MS',lifeskill:'Independence',
+   ican:'',
+   desc:'Students take on a self-directed challenge with a bias toward action over planning.'},
+
+  // ── S2 ─────────────────────────────────────────────────────────
+  {sess:'S2',code:'S2-01',name:'Museum Masters',level:'MS',lifeskill:'Storytelling',
+   ican:'I can create and present an original artwork inspired by something I saw at a New York City museum.',
+   desc:'Each student creates and presents an original piece inspired by a work they encountered at a NYC museum.'},
+  {sess:'S2',code:'S2-02',name:'Taste Buds',level:'LL/L1',lifeskill:'Independence',
+   ican:'I can independently plan, shop for, and cook an 8–10 step recipe using chopping and heat while explaining the steps in a cooking-show video.',
+   desc:'Each chef selects a recipe, builds a digital grocery order, and independently cooks using heat and chopping. AI-scored for safety, accuracy, and sequencing.'},
+  {sess:'S2',code:'S2-03',name:'Articulate Artists',level:'ALL',lifeskill:'Public Speaking',
+   ican:'I can present my artwork to an audience, explain my creative choices and techniques, and show how my portfolio reflects my growth and artistic voice.',
+   desc:'At the Art-i-facts Showcase, each student presents three original artworks, one AI-collaborative piece, and a printed artist bio.'},
+  {sess:'S2',code:'S2-04',name:"President's AI Challenge",level:'MS',lifeskill:'Innovation',
+   ican:"I can help build an AI solution that works during a live demo and officially submit our project to the Presidential AI Challenge.",
+   desc:'Students build and submit a completed AI project to the Presidential AI Challenge, demoing live to an audience.'},
+  {sess:'S2',code:'S2-05',name:'Hard Things on the Hard Court',level:'ALL',lifeskill:'Grit',
+   ican:'I can learn a new tennis skill, demonstrate it live, and explain how I kept going when it got hard.',
+   desc:'Students complete a live tennis skill attempt and articulate the moments they wanted to quit and what helped them persist.'},
+  {sess:'S2',code:'S2-06',name:'Community Garden',level:'ALL',lifeskill:'Upholding Community Standards',
+   ican:'I can grow food with my team and use it to help cook a meal for 50 people in our community.',
+   desc:'Students grow enough produce — outdoors and via Flex Farm hydroponics — to cook and serve a shared meal for 50 people.'},
+  {sess:'S2',code:'S2-07',name:'Budget Battles: NYC Edition',level:'L1/L2/MS',lifeskill:'Financial Literacy',
+   ican:'I can design a luxury New York City trip that fits within a fixed budget.',
+   desc:'In a 10-minute live challenge, students design a luxury NYC itinerary within a fixed budget (e.g. $15,000 for five days for four people).'},
+  {sess:'S2',code:'S2-08',name:'Unbreakable Bridgatoni',level:'LL/L1',lifeskill:'Teamwork',
+   ican:'I can collaborate with my peers to design, build, and improve a pasta bridge that holds 100 pounds for 60 seconds.',
+   desc:'Engineer a spaghetti-stick bridge to hold 100 lbs of weight for 60 seconds.'},
+  {sess:'S2',code:'S2-09',name:'Alpha Bets',level:'ALL',lifeskill:'Uplifting Others',
+   ican:'I can play a strategic poker game while using positive and respectful language with other players.',
+   desc:'A high-stakes poker game at T2P Night with parents and classmates. Students are mic\'d up and AI-scored on uplifting language.'},
+
+  // ── S3 ─────────────────────────────────────────────────────────
+  {sess:'S3',code:'S3-01',name:'Goalgetters',level:'ALL',lifeskill:'Goal Setting',
+   ican:'I can set a goal for soccer, achieve it, and maintain it.',
+   desc:'Students become goal-driven athletes by setting a personal soccer performance goal and training toward it. Through intentional drills, they track real performance data, test small adjustments, and experience how consistent practice leads to measurable improvement.'},
+  {sess:'S3',code:'S3-02',name:'Ultimate Agent',level:'LL',lifeskill:'Receiving Feedback',
+   ican:'',
+   desc:'Students step into the role of a working performer by completing a real acting audition. They practice listening carefully, asking clarifying questions, and applying professional feedback immediately.'},
+  {sess:'S3',code:'S3-03',name:'Storybook Studio',level:'LL',lifeskill:'Creativity and Early Entrepreneurship',
+   ican:'I can present my own science experiment with audience engagement, entertainment, and stage presence.',
+   desc:'Students become published authors while discovering that creativity grows through revision. They write, illustrate, and refine an original book, explaining how their ideas changed and improved over time.'},
+  {sess:'S3',code:'S3-04',name:'Idea to Object',level:'L1',lifeskill:'Becoming an Expert',
+   ican:'I can successfully present my 3D object to an unknown adult and explain in technical terms how I built it.',
+   desc:'Students transform ideas into real objects through 3D-printing product design. Using Tinkercad, they move from guided practice to independent creation as they design, refine, and prepare objects for printing.'},
+  {sess:'S3',code:'S3-05',name:'Speak like a Scientist',level:'L1',lifeskill:'Storytelling and Public Speaking',
+   ican:'I can present my own science experiment with audience engagement, entertainment, and stage presence.',
+   desc:'Students turn a science experiment into a live show, using storytelling and stage presence to keep an audience hooked from the first line to the final reveal.'},
+  {sess:'S3',code:'S3-06',name:'Money Machines',level:'L2',lifeskill:'Entrepreneurship and Financial Literacy',
+   ican:'',
+   desc:'Students become entrepreneurs by running a real vending-machine business. They make pricing and inventory decisions, analyze profit data, and refine strategy through real outcomes.'},
+  {sess:'S3',code:'S3-07',name:'Master Carpenters',level:'L2/MS',lifeskill:'Becoming an Expert',
+   ican:'I can successfully present my 3D object to an unknown adult and explain in technical terms how I built it.',
+   desc:'Students prove true expertise by completing a professional-grade carpentry build. They work independently with unfamiliar tools while balancing safety, precision, and real-time decision-making.'},
+  {sess:'S3',code:'S3-08',name:'Social Networking',level:'MS',lifeskill:'Socialization',
+   ican:'',
+   desc:'Students build confidence and presence through live, unscripted speed networking and interviews with unfamiliar adults. They practice curiosity, adaptability, and professional communication.'},
+
+  // ── S4 ─────────────────────────────────────────────────────────
+  {sess:'S4',code:'S4-01',name:'Community Builders',level:'ALL',lifeskill:'Entrepreneurship — Value Creation',
+   ican:'',
+   desc:'Students partner with NYC animal shelters to build durable products that improve adoption outcomes. The T2P culminates in a public demonstration of installed builds and measurable impact.'},
+  {sess:'S4',code:'S4-02',name:'Alpha Emporium Exchange',level:'ALL',lifeskill:'Entrepreneurship — Value Creation',
+   ican:'',
+   desc:'An inter-campus, student-run marketplace across the Alpha ecosystem. Students learn to price, market, and ship products to other campuses using Alphas, applying real financial literacy in action.'},
+  {sess:'S4',code:'S4-03',name:'Polite Society',level:'LL',lifeskill:'Socialization — Public Confidence',
+   ican:'',
+   desc:'Learning Lab students build the confidence to independently manage real-world social interactions — greeting unfamiliar adults, ordering, adapting to changes, and closing conversations without prompting.'},
+  {sess:'S4',code:'S4-04',name:'Space Race',level:'L1',lifeskill:'Critical Thinking — Problem Solving',
+   ican:'',
+   desc:'Students design, build, and refine robotic systems to navigate increasingly complex terrain courses. Through iteration, testing, and adjustment, they develop structured problem-solving skills under real constraints.'},
+  {sess:'S4',code:'S4-05',name:'Money Machines',level:'L2',lifeskill:'Financial Fluency',
+   ican:'',
+   desc:'Continuing from Session 3, students refine and scale a real revenue-generating venture. They analyze performance data, adjust pricing and strategy, optimize operations, and improve margins through disciplined iteration.'},
+  {sess:'S4',code:'S4-06',name:'The Coachability Combine',level:'MS',lifeskill:'Receiving Feedback — Feedback Implementation',
+   ican:'',
+   desc:'A live admissions-style interview event where students complete two MAX project interviews back-to-back, receive direct critique, and return 10 minutes later to demonstrate measurable improvement in real time.'},
+  {sess:'S4',code:'S4-07',name:'Rock Stars',level:'ALL',lifeskill:'Grit — Growth Mindset',
+   ican:'',
+   desc:'A bouldering challenge at Brooklyn Bouldering where students attempt a climbing route one class above their recorded baseline, demonstrating a full grit cycle: attempt, setback, adjustment, and renewed effort.'},
+
+  // ── S5 ─────────────────────────────────────────────────────────
+  {sess:'S5',code:'SP-01 · OP-01 · FC-01 · MS-01',name:'Mission Laika',level:'ALL',lifeskill:'Collaboration',
+   ican:'',
+   desc:'Campus-wide Monday mission — one project, four branches. LL: Storytelling — author and illustrate a picture book for the shelter. L1: Media + Outreach — drive real foot traffic and press coverage. L2: Product + Sales — ship a branded adopter starter-kit that sells out. MS: Strategy + Execution — pitch a sustainable program that gets permanently adopted by the shelter.',
+   link:MC+'mission-laika-storybook-crew'},
+  {sess:'S5',code:'SP-02',name:'Propulsion Lab',level:'LL',lifeskill:'Critical Thinking',
+   ican:'I can diagnose a failed rocket launch, make a targeted fix, successfully relaunch, and recover usable payload footage.',
+   desc:'Students build, launch, and relaunch rockets — culminating in a high-altitude balloon launch with real payload footage recovery.',
+   link:MC+'propulsion-lab'},
+  {sess:'S5',code:'SP-03',name:'Mission Control',level:'LL',lifeskill:'Leadership',
+   ican:'I can lead a team through a live hackathon with zero adult intervention and earn a 90%+ leadership rating.',
+   desc:'Students lead a live hackathon team with zero adult intervention, rated on leadership by an external rubric.',
+   link:MC+'mission-control'},
+  {sess:'S5',code:'SP-04',name:'Cadet Qualification Training',level:'LL',lifeskill:'Grit',
+   ican:'I can complete all five qualifications and earn Cadet Wings through the final combined course.',
+   desc:'Students complete all five qualifications and earn Cadet Wings through a final combined course.',
+   link:MC+'cadet-qualification-training'},
+  {sess:'S5',code:'OP-02 · FC-03',name:'Drone Wing',level:'L1/L2',lifeskill:'Teamwork',
+   ican:'I can pass the FAA TRUST exam and complete a full rescue mission with defined roles and successful execution.',
+   desc:'Students earn federal drone-pilot credentials via the FAA TRUST exam, then execute a full rescue mission. L1 flies with Parthvi Harde; L2 runs a parallel track.',
+   link:MC+'drone-wing-faa-trust'},
+  {sess:'S5',code:'OP-03',name:'Stock Simulator',level:'L1',lifeskill:'Financial Literacy',
+   ican:'I can outperform the starting portfolio and defend at least three trading decisions using market reasoning.',
+   desc:'Students manage a live stock portfolio, outperform their baseline, and defend trading decisions in front of peers.',
+   link:MC+'stock-simulator'},
+  {sess:'S5',code:'OP-04',name:'Recon Expedition',level:'L1',lifeskill:'Grit',
+   ican:'I can complete the full recon course and 5K within the mission window.',
+   desc:'Students complete a full recon obstacle course plus a 5K within a timed mission window.',
+   link:MC+'recon-expedition'},
+  {sess:'S5',code:'FC-02',name:'Alpha Emporium Exchange',level:'L2',lifeskill:'Entrepreneurship',
+   ican:'I can run a live marketplace exchange and hit my profit targets.',
+   desc:'Students operate a live marketplace exchange as the commercial engine of the Alpha Space Agency.',
+   link:MC+'alpha-emporium-exchange'},
+  {sess:'S5',code:'FC-04 · MS-04',name:'Tri Hard (Row · Ride · Run)',level:'L2/MS',lifeskill:'Grit',
+   ican:'I can complete the full Row · Ride · Run event and demonstrate measurable improvement from baseline across all three disciplines.',
+   desc:'Students complete a full triathlon-format event — rowing, cycling, and running — with measurable improvement from baseline. Runs for both L2 (Chauncey Nartey) and MS.',
+   link:MC+'tri-hard'},
+  {sess:'S5',code:'MS-02',name:'Sail La Vie',level:'MS',lifeskill:'Teamwork',
+   ican:'I can navigate a celestial course and complete the sailing challenge.',
+   desc:'Students skipper boats in New York Harbor, navigating a celestial course with zero adult intervention.',
+   link:MC+'sail-la-vie-celestial-nav'},
+  {sess:'S5',code:'MS-03',name:'Rover Engineering Corps',level:'MS',lifeskill:'Independence',
+   ican:"I can build a fully functional street-legal Class 2 e-rover that passes a licensed mechanic's review and completes a multi-mile ride.",
+   desc:"Students build a street-legal Class 2 e-rover from scratch — must pass a licensed mechanic's review and complete a multi-mile ride.",
+   link:MC+'rover-engineering-corps'},
+  {sess:'S5',code:'SP-05 · OP-05 · FC-05 · MS-05',name:'Island Standard',level:'ALL',lifeskill:'Teamwork / Leadership',
+   ican:'',
+   desc:'Friday Governors Island mission — all four crews on site. LL, L1, L2 run Junior Space Camp: coordinating team challenges in defined roles. MS runs Mission Command: designing, coaching, and running the full day for younger students with zero adult intervention.',
+   link:MC+'junior-space-camp'},
+];
+
+let activeSess = 'all';
+let passRates = {};
+
+async function loadPassRates() {
+  // Try window.storage first (cross-page persistent store)
+  try {
+    const r = await window.storage.get('t2p_overrides');
+    if (r?.value) {
+      computeRates(JSON.parse(r.value));
+      render(); return;
+    }
+  } catch(e) {}
+  // Fallback: localStorage (same-domain only)
+  try {
+    const raw = localStorage.getItem('t2p_overrides');
+    if (raw) { computeRates(JSON.parse(raw)); render(); return; }
+  } catch(e) {}
+  render();
+}
+
+function computeRates(tov) {
+  Object.entries(tov).forEach(([key, student]) => {
+    if (key.startsWith('__deleted__') || student.deleted || !student.scores) return;
+    Object.entries(student.scores).forEach(([ws, val]) => {
+      if (!val || val === 'N/A') return;
+      if (!passRates[ws]) passRates[ws] = {pass:0, notyet:0, absent:0, total:0};
+      passRates[ws].total++;
+      if (val === 'Passed')     passRates[ws].pass++;
+      if (val === 'Not passed') passRates[ws].notyet++;
+      if (val === 'Absent')     passRates[ws].absent++;
+    });
+  });
+}
+
+function filter(sess, btn) {
+  activeSess = sess;
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  const sessions = activeSess === 'all' ? ['S1','S2','S3','S4','S5'] : [activeSess];
+  let html = '';
+  sessions.forEach(sess => {
+    const workshops = W.filter(w => w.sess === sess);
+    if (!workshops.length) return;
+    const col = SESS_COLORS[sess];
+    html += `<div class="sess-hdr">
+      <div class="s-dot" style="background:${col}"></div>
+      <span class="s-name" style="color:${col}">${SESS_LABELS[sess]}</span>
+      <div class="s-line"></div>
+      <span class="s-ct">${workshops.length} workshops</span>
+    </div><div class="ws-grid">`;
+    workshops.forEach((w, idx) => {
+      const wsKey = `${sess}: ${w.name}`;
+      const pr = passRates[wsKey];
+      html += `<button class="ws-card s${sess.slice(1)}" onclick="openModal(${W.indexOf(w)})">
+        <div class="ws-card-top">
+          <span class="ws-code code-s${sess.slice(1)}">${w.code}</span>
+          <div class="lv-badges">${lvBadges(w.level)}</div>
+        </div>
+        <div class="ws-name">${w.name}</div>
+        <div class="ws-card-foot">
+          ${w.lifeskill ? `<span class="ws-ls">${w.lifeskill}</span>` : '<span></span>'}
+          ${pr?.pass ? `<span class="ws-pass">${pr.pass} passed</span>` : ''}
+          ${w.link ? `<span class="ws-ext"></span>` : ''}
+        </div>
+      </button>`;
+    });
+    html += '</div>';
+  });
+  document.getElementById('main').innerHTML = html || '<div style="padding:60px;text-align:center;color:#aaa">No workshops found.</div>';
+}
+
+function openModal(idx) {
+  const w = W[idx];
+  const col = SESS_COLORS[w.sess];
+  document.getElementById('modal-stripe').style.background = col;
+  document.getElementById('modal-code').textContent = w.code;
+  document.getElementById('modal-code').className = `modal-code code-s${w.sess.slice(1)}`;
+  document.getElementById('modal-badges').innerHTML = lvBadgesLg(w.level);
+  document.getElementById('modal-name').textContent = w.name;
+  document.getElementById('modal-ls').textContent = w.lifeskill || '';
+
+  const icanEl = document.getElementById('modal-ican');
+  const icanSec = document.getElementById('modal-ican-section');
+  if (w.ican) {
+    icanEl.textContent = w.ican;
+    icanEl.style.borderLeftColor = col;
+    icanSec.style.display = 'block';
+  } else { icanSec.style.display = 'none'; }
+
+  const descEl = document.getElementById('modal-desc');
+  const descSec = document.getElementById('modal-desc-section');
+  if (w.desc) { descEl.textContent = w.desc; descSec.style.display = 'block'; }
+  else { descSec.style.display = 'none'; }
+
+  const wsKey = `${w.sess}: ${w.name}`;
+  const pr = passRates[wsKey];
+  const statsSec = document.getElementById('modal-stats-section');
+  if (pr?.total) {
+    statsSec.style.display = 'block';
+    document.getElementById('modal-stats').innerHTML =
+      `<span class="stat-pill stat-pass">${pr.pass} passed</span>
+       ${pr.notyet ? `<span class="stat-pill stat-notyet">${pr.notyet} not yet</span>` : ''}
+       ${pr.absent ? `<span class="stat-pill stat-absent">${pr.absent} absent</span>` : ''}`;
+  } else { statsSec.style.display = 'none'; }
+
+  document.getElementById('modal-link-wrap').innerHTML = w.link
+    ? `<a href="${w.link}" target="_blank" class="modal-ext-btn" style="background:${col}">Full mission briefing ↗</a>`
+    : '';
+
+  document.getElementById('modal-bg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+loadPassRates(); // async — calls render() when done
+</script>
+</body>
+</html>

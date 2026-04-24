@@ -60,10 +60,10 @@ select:focus{border-color:#3b82f6;}
 .card-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .card-arrow{font-size:12px;color:var(--muted);opacity:0;transform:translateX(-4px);transition:all .2s;}
 .level-tag{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 6px;border-radius:4px;flex-shrink:0;}
-.tag-LL{background:#e8f0fe;color:#1a56db;}
-.tag-L1{background:#fce8ff;color:#9333ea;}
-.tag-L2{background:#e8fdf4;color:#0f766e;}
-.tag-MS{background:#fff4e8;color:#b45309;}
+.tag-LL{background:#fff4e0;color:#e8a020;}
+.tag-L1{background:#ffeee8;color:#e8522a;}
+.tag-L2{background:#e0f7f4;color:#2ab5a0;}
+.tag-MS{background:#fde8f1;color:#e03d7c;}
 .s5-pin{width:6px;height:6px;border-radius:50%;background:#ef4444;animation:pulse 1.5s infinite;flex-shrink:0;}
 .patch-list{padding:6px 0;}
 .patch-row{display:flex;align-items:center;gap:8px;padding:4px 14px;transition:background .1s;}
@@ -145,6 +145,8 @@ select:focus{border-color:#3b82f6;}
 .ep-add-ws:hover{background:rgba(59,130,246,.1);}
 .ep-add-stu{padding:8px 14px;background:transparent;color:#a78bfa;border:1px solid #3b2a5a;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s;}
 .ep-add-stu:hover{background:rgba(167,139,250,.1);}
+.ep-del-stu{padding:8px 14px;background:transparent;color:#f87171;border:1px solid #5a1a1a;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s;}
+.ep-del-stu:hover{background:rgba(248,113,113,.1);}
 .ep-toast{font-family:'DM Mono',monospace;font-size:11px;color:#34d399;display:none;}
 .ep-toast.show{display:inline;}
 .ep-empty{font-family:'DM Mono',monospace;font-size:11px;color:#4a6080;padding:8px 0;}
@@ -155,6 +157,23 @@ select:focus{border-color:#3b82f6;}
   #ep-content{padding:0 14px 20px;}
   header{padding:12px 14px;}
 }
+
+/* PAGE TOGGLE */
+.page-toggle{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:200;display:flex;background:#111;border:1px solid #333;
+  border-radius:30px;padding:4px;gap:2px;
+  box-shadow:0 4px 24px rgba(0,0,0,.25);
+}
+.toggle-btn{
+  font-family:'DM Mono',monospace;font-size:11px;font-weight:500;
+  padding:7px 18px;border-radius:24px;border:none;cursor:pointer;
+  transition:all .2s;white-space:nowrap;letter-spacing:.03em;
+  background:transparent;color:#777;
+}
+.toggle-btn:hover{color:#ccc;}
+.toggle-btn.tracker-active{background:#ef4444;color:white;}
+.toggle-btn.ws-active{background:#2563eb;color:white;}
 </style>
 </head>
 <body>
@@ -165,6 +184,7 @@ select:focus{border-color:#3b82f6;}
     <span class="s5-dot">S5 Live</span>
     <span id="hdr-date" style="font-family:'DM Mono',monospace;font-size:11px;color:#666;"></span>
     <a href="index.html" class="hdr-link">← Home</a>
+    <a href="workshops.html" class="hdr-link" style="color:#60a5fa;border-color:#1e3a5f;">Workshop Directory</a>
     <button class="edit-btn" id="edit-btn" onclick="toggleEdit()">✏ Edit</button>
   </div>
 </header>
@@ -199,6 +219,7 @@ select:focus{border-color:#3b82f6;}
         </div>
         <div class="ep-actions">
           <button class="ep-add-stu" onclick="addNewStudent()">+ Add student</button>
+          <button class="ep-del-stu" onclick="deleteStudent()" id="ep-del-btn" style="display:none">✕ Delete student</button>
         </div>
       </div>
       <div class="ep-col">
@@ -213,6 +234,40 @@ select:focus{border-color:#3b82f6;}
           <button class="ep-save" onclick="saveEdits()">↑ Save</button>
           <span class="ep-toast" id="ep-toast">✓ Saved</span>
         </div>
+      </div>
+    </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid #333;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <button class="ep-save" onclick="exportCSV()" style="background:#1a3a1a;color:#4ade80;border:1px solid #2a5a2a;">↓ Export all as CSV</button>
+      <a href="workshops.html" target="_blank" style="padding:8px 16px;background:transparent;color:#60a5fa;border:1px solid #1e3a5f;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;text-decoration:none;transition:all .15s;" onmouseover="this.style.background='rgba(59,130,246,.1)'" onmouseout="this.style.background='transparent'">Workshop Directory ↗</a>
+      <span style="font-size:11px;color:#555;font-family:'DM Mono',monospace;">Exports full patch record for all students across all sessions</span>
+    </div>
+
+    <!-- Workshop meta editor -->
+    <div id="ws-meta-section" style="margin-top:14px;padding-top:14px;border-top:1px solid #333;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Edit Workshop Details</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <select id="wm-sess" onchange="loadWsMeta()" style="background:#111f36;border:1px solid #264070;border-radius:6px;color:#e8f0fc;font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 10px;outline:none;">
+          <option value="S5">Session 5</option>
+          <option value="S4">Session 4</option>
+          <option value="S3">Session 3</option>
+          <option value="S2">Session 2</option>
+          <option value="S1">Session 1</option>
+        </select>
+        <select id="wm-ws" onchange="loadWsMeta()" style="background:#111f36;border:1px solid #264070;border-radius:6px;color:#e8f0fc;font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 10px;outline:none;flex:1;min-width:180px;">
+          <option value="">— Select workshop —</option>
+        </select>
+      </div>
+      <div id="wm-form" style="display:none;background:#0d1829;border:1px solid #1e3050;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:#7090b0;margin-bottom:4px;text-transform:uppercase;letter-spacing:.07em;">Lifeskill</div>
+          <input id="wm-lifeskill" type="text" placeholder="e.g. Grit, Financial Literacy, Leadership…" style="width:100%;background:#111f36;border:1px solid #264070;border-radius:6px;color:#e8f0fc;font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 10px;outline:none;">
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:#7090b0;margin-bottom:4px;text-transform:uppercase;letter-spacing:.07em;">Short description</div>
+          <textarea id="wm-desc" rows="2" placeholder="One or two sentences about what students did in this workshop…" style="width:100%;background:#111f36;border:1px solid #264070;border-radius:6px;color:#e8f0fc;font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 10px;outline:none;resize:vertical;line-height:1.5;"></textarea>
+        </div>
+        <button onclick="saveWsMeta()" style="align-self:flex-start;padding:7px 18px;background:#3b82f6;color:white;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Save workshop details</button>
+        <span id="wm-toast" style="font-family:'DM Mono',monospace;font-size:11px;color:#34d399;display:none;">✓ Saved</span>
       </div>
     </div>
   </div>
@@ -514,6 +569,8 @@ function populateEditorDropdown() {
 
 function loadEpStudent() {
   const name = document.getElementById('ep-stu').value;
+  const delBtn = document.getElementById('ep-del-btn');
+  if (delBtn) delBtn.style.display = name ? 'inline-block' : 'none';
   if (!name) { document.getElementById('ep-ws-list').innerHTML='<div class="ep-empty">Select a student to edit</div>'; return; }
   const s = students.find(s=>s.n===name);
   if (s) document.getElementById('ep-level').value = s.l;
@@ -530,7 +587,6 @@ function loadEpStudent() {
   document.getElementById('ep-ws-list').innerHTML = all.map(([ws, val])=>{
     const safeWs = ws.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     const sess = getSess(ws)||'';
-    // pending edit takes priority
     const cur = pendingEdits[name]?.[ws] ?? val;
     return `<div class="ep-ws-row">
       <span class="ep-ws-sess">${sess}</span>
@@ -543,6 +599,61 @@ function loadEpStudent() {
       </div>
     </div>`;
   }).join('');
+}
+
+function deleteStudent() {
+  const name = document.getElementById('ep-stu').value;
+  if (!name) return;
+  if (!confirm(`Delete "${name}" from the patch tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
+  // Remove from students array
+  const idx = students.findIndex(s=>s.n===name);
+  if (idx > -1) students.splice(idx, 1);
+  // Remove from overrides
+  delete overrides[name];
+  // Mark as deleted so sheet won't re-add
+  overrides[`__deleted__${name}`] = { deleted: true };
+  localStorage.setItem('t2p_overrides', JSON.stringify(overrides));
+  delete pendingEdits[name];
+  // Reset UI
+  populateEditorDropdown();
+  document.getElementById('ep-stu').value = '';
+  document.getElementById('ep-ws-list').innerHTML = '<div class="ep-empty">Select a student to edit</div>';
+  document.getElementById('ep-del-btn').style.display = 'none';
+  render();
+}
+
+function exportCSV() {
+  // Gather all unique workshop keys across all students
+  const allWsKeys = new Set();
+  students.forEach(s => {
+    const sc = fullScores(s.n);
+    Object.keys(sc).forEach(k => { if (!k.startsWith('__')) allWsKeys.add(k); });
+  });
+  const wsKeys = [...allWsKeys].sort();
+
+  // Build CSV
+  const headers = ['Student', 'Level', 'Note', ...wsKeys];
+  const rows = [...students]
+    .sort((a,b)=>{ const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l); return d||a.n.localeCompare(b.n); })
+    .map(s => {
+      const sc = fullScores(s.n);
+      const vals = wsKeys.map(k => {
+        const v = sc[k] || '';
+        // Quote if contains comma
+        return v.includes(',') ? `"${v}"` : v;
+      });
+      const note = s.note?.includes(',') ? `"${s.note}"` : (s.note||'');
+      return [s.n.includes(',') ? `"${s.n}"` : s.n, s.l, note, ...vals].join(',');
+    });
+
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `alpha-t2p-patches-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function setEp(ws, val, btn) {
@@ -615,7 +726,69 @@ function showEpToast() {
   setTimeout(()=>t.classList.remove('show'), 2000);
 }
 
+// ── Workshop meta editor ──────────────────────────────────────────
+const WS_BY_SESS = {
+  S5:['SP-01|Mission Laika — Storytelling','SP-02|Propulsion Lab','SP-03|Mission Control','SP-04|Cadet Qualification Training','SP-05|Junior Space Camp — Island Standard','OP-01|Mission Laika — Media + Outreach','OP-02|Drone Wing','OP-03|Stock Simulator','OP-04|Recon Expedition','OP-05|Junior Space Camp — Island Standard (L1)','FC-01|Mission Laika — Product + Sales','FC-02|Alpha Emporium Exchange','FC-03|Drone Wing (L2)','FC-04|Tri Hard (Row · Ride · Run)','FC-05|Junior Space Camp — Island Standard (L2)','MS-01|Mission Laika — Strategy + Execution','MS-02|Sail La Vie','MS-03|Rover Engineering Corps','MS-04|Tri Hard (Row · Ride · Run) (MS)','MS-05|Mission Command — Island Standard'],
+  S4:['S4-01|Community Builders','S4-02|Alpha Emporium Exchange','S4-03|Polite Society (LL)','S4-04|Space Race (L1)','S4-05|Money Machines (L2)','S4-06|The Coachability Combine (MS)','S4-07|Rock Stars — Bouldering'],
+  S3:['S3-01|Goalgetters','S3-02|Ultimate Agent','S3-03|Storybook Studio','S3-04|Idea to Object','S3-05|Speak like a Scientist','S3-06|Money Machines','S3-07|Master Carpenters','S3-08|Social Networking'],
+  S2:['S2-01|Museum Masters','S2-02|Taste Buds','S2-03|Articulate Artists','S2-04|President\'s AI Challenge','S2-05|Hard Things on the Hard Court','S2-06|Community Garden','S2-07|Budget Battles: NYC Edition','S2-08|Unbreakable Bridgatoni'],
+  S1:['S1-01|Social Social Club','S1-02|Pressure Playbook','S1-03|Alpha Legends','S1-04|10x-ers','S1-05|Artful Insights','S1-06|Community Garden'],
+};
+
+let wsMeta = {}; // {code: {lifeskill, desc}}
+
+function initWsMeta() {
+  try { const r = localStorage.getItem('ws_meta'); if (r) wsMeta = JSON.parse(r); } catch(e) {}
+  populateWsDropdown();
+}
+
+function populateWsDropdown() {
+  const sess = document.getElementById('wm-sess').value;
+  const sel  = document.getElementById('wm-ws');
+  sel.innerHTML = '<option value="">— Select workshop —</option>';
+  (WS_BY_SESS[sess]||[]).forEach(entry => {
+    const [code, name] = entry.split('|');
+    const o = document.createElement('option');
+    o.value = code; o.textContent = `${code} — ${name}`;
+    sel.appendChild(o);
+  });
+  document.getElementById('wm-form').style.display = 'none';
+}
+
+function loadWsMeta() {
+  const sess = document.getElementById('wm-sess').value;
+  const code = document.getElementById('wm-ws').value;
+  // repopulate dropdown if session changed
+  const sel = document.getElementById('wm-ws');
+  if (!sel.querySelector(`option[value="${code}"]`) || !code) populateWsDropdown();
+  const currentCode = document.getElementById('wm-ws').value;
+  if (!currentCode) { document.getElementById('wm-form').style.display = 'none'; return; }
+  const meta = wsMeta[currentCode] || {};
+  document.getElementById('wm-lifeskill').value = meta.lifeskill || '';
+  document.getElementById('wm-desc').value      = meta.desc      || '';
+  document.getElementById('wm-form').style.display = 'flex';
+}
+
+function saveWsMeta() {
+  const code = document.getElementById('wm-ws').value;
+  if (!code) return;
+  wsMeta[code] = {
+    lifeskill: document.getElementById('wm-lifeskill').value.trim(),
+    desc:      document.getElementById('wm-desc').value.trim(),
+  };
+  localStorage.setItem('ws_meta', JSON.stringify(wsMeta));
+  const t = document.getElementById('wm-toast');
+  t.style.display = 'inline'; setTimeout(() => t.style.display = 'none', 2000);
+}
+
 init();
+initWsMeta();
 </script>
+<!-- PAGE TOGGLE -->
+<div class="page-toggle">
+  <button class="toggle-btn tracker-active">Patch Tracker</button>
+  <button class="toggle-btn" onclick="window.location.href='workshops.html'">Workshop Directory</button>
+</div>
+
 </body>
 </html>
