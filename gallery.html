@@ -182,7 +182,8 @@ let gdata = { S1:{photos:[],video:'',notes:[]}, S2:{photos:[],video:'',notes:[]}
               S5:{photos:[],video:'',notes:[]} };
 
 // S4 has a default Frame.io embed
-const S4_video = 'https://drive.google.com/file/d/1twf7lfopcLu7iWt-A08jGsLQ6BKBalvK/preview';
+const S4_FRAMEIO = 'https://app.frame.io/reviews/ep4qPU7H';
+const S4_FRAMEIO_SHORT = 'https://f.io/ep4qPU7H';
 
 // ── Storage ────────────────────────────────────────────────────────
 async function load() {
@@ -250,30 +251,29 @@ function unlock() {
 }
 
 // ── Photos ─────────────────────────────────────────────────────────
-function handleDrop(files) {
-  Array.from(files).forEach(file => {
-    if (file.size > 5 * 1024 * 1024) {
-      alert(`${file.name} too large`);
-      return;
-    }
+function addPhotoUrl() {
+  const url  = document.getElementById('p-url').value.trim();
+  const cap  = document.getElementById('p-cap').value.trim();
+  if (!url) return;
+  gdata[activeSess].photos.unshift({ url, cap, ts: Date.now() });
+  document.getElementById('p-url').value = '';
+  document.getElementById('p-cap').value = '';
+  save(); render();
+}
 
+function uploadPhotos(input) {
+  const cap = document.getElementById('p-cap')?.value.trim() || '';
+  Array.from(input.files).forEach(file => {
+    if (file.size > 2.5 * 1024 * 1024) { alert(`${file.name} too large (max 2.5MB)`); return; }
     const reader = new FileReader();
-
     reader.onload = e => {
-      gdata[activeSess].photos.unshift({
-        url: e.target.result,
-        cap: file.name,
-        ts: Date.now()
-      });
-
-      save();
-      render();
+      gdata[activeSess].photos.unshift({ url: e.target.result, cap, ts: Date.now() });
+      save(); render();
     };
-
     reader.readAsDataURL(file);
   });
+  input.value = '';
 }
-  
 
 function deletePhoto(idx) {
   if (!confirm('Remove this photo?')) return;
@@ -421,53 +421,38 @@ function render() {
     }
 
     // S4 Frame.io gallery + local photos
-<style>
-/* GREY OUT S1–S3 */
-.sess-disabled {
-  opacity: 0.35;
-  pointer-events: none;
-  filter: grayscale(100%);
-}
-<div id="uploadZone" class="upload-zone">
-  <p>Drag & drop photos/videos here or click to upload</p>
-  <input type="file" id="fileInput" multiple accept="image/*,video/*" hidden>
-</div>
-/* GALLERY */
-.media-gallery {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 10px;
-  scroll-snap-type: x mandatory;
-}
+    if (isS4) {
+      html += `<div class="video-wrap" style="margin-bottom:20px;">
+        <iframe src="${S4_FRAMEIO}" height="560" allow="fullscreen" title="S4 Frame.io Gallery"></iframe>
+        <div class="video-meta"><span>Session 4 · Frame.io</span><a href="${S4_FRAMEIO_SHORT}" target="_blank">Open in Frame.io ↗</a></div>
+      </div>`;
+    }
 
-.media-item {
-  flex: 0 0 auto;
-  width: 280px;
-  scroll-snap-align: start;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #000;
-  position: relative;
-}
+    if (!sess.photos.length && !isS4) {
+      html += `<div class="empty-state"><span class="empty-icon">📷</span><div>No photos yet for ${activeSess}.</div>${adminUnlocked?'<div style="margin-top:8px;font-size:12px;color:var(--muted)">Use the panel above to add photos.</div>':''}</div>`;
+    } else if (sess.photos.length) {
+      html += `<div class="photo-grid">${sess.photos.map((p,i) => `
+        <div class="photo-item" onclick="openLightbox('${p.url.replace(/'/g,"\\'")}','${(p.cap||'').replace(/'/g,"\\'")}')">
+          <img src="${p.url}" alt="${p.cap||''}" loading="lazy" onerror="this.parentElement.style.display='none'">
+          ${p.cap ? `<div class="photo-caption">${p.cap}</div>` : ''}
+          ${adminUnlocked ? `<button class="photo-del" onclick="event.stopPropagation();deletePhoto(${i})">✕ Remove</button>` : ''}
+        </div>`).join('')}</div>`;
+    }
+  }
 
-.media-item iframe,
-.media-item img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border: none;
-  display: block;
-}
-
-.media-caption {
-  font-size: 11px;
-  padding: 6px 8px;
-  background: #111;
-  color: #fff;
-}
-</style>
-  
+  else if (activeTab === 'video') {
+    if (adminUnlocked) {
+      html += `<div class="admin-panel">
+        <div class="admin-panel-title">Video — ${activeSess}</div>
+        <div class="admin-row">
+          <input class="adm-inp" id="v-url" placeholder="YouTube, Vimeo, Google Drive, Frame.io, or direct .mp4 URL" value="${sess.video||''}">
+          <button class="adm-btn" onclick="saveVideo()">Save video</button>
+          ${sess.video ? `<button class="adm-btn sec" onclick="clearVideo()">✕ Remove</button>` : ''}
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;">Supports: YouTube · Vimeo · Google Drive · Frame.io · Direct .mp4 link</div>
+        ${isS4 ? `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);margin-top:8px;">S4 already has Frame.io embedded below. Paste a URL above to add a highlight reel on top.</div>` : ''}
+      </div>`;
+    }
 
     // Custom video first
     const embed = videoEmbed(sess.video, 520);
@@ -477,6 +462,46 @@ function render() {
       </div>`;
     }
 
+    // S4 always also shows Frame.io
+    if (isS4) {
+      html += `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;margin-top:${embed?'20px':'0'}">Session 4 · Frame.io Review</div>
+        <div class="video-wrap">
+          <iframe src="${S4_FRAMEIO}" height="540" allow="fullscreen" title="S4 Frame.io"></iframe>
+          <div class="video-meta"><span>Frame.io · Session 4</span><a href="${S4_FRAMEIO_SHORT}" target="_blank">Open in Frame.io ↗</a></div>
+        </div>`;
+    }
+
+    if (!embed && !isS4) {
+      html += `<div class="empty-state"><span class="empty-icon">🎬</span>
+        <div>No video yet for ${activeSess}.</div>
+        ${adminUnlocked ? '<div style="margin-top:8px;font-size:12px;color:var(--muted)">Paste a video URL in the panel above.</div>' : '<div style="margin-top:8px;font-size:12px;color:var(--muted)">Video will appear here once added.</div>'}
+      </div>`;
+    }
+  }
+
+  else if (activeTab === 'notes') {
+    if (adminUnlocked) {
+      html += `<div class="admin-panel">
+        <div class="admin-panel-title">Add note — ${activeSess}</div>
+        <input class="adm-inp" id="n-title" placeholder="Title (optional)" style="width:100%;margin-bottom:8px">
+        <textarea class="adm-textarea" id="n-body" placeholder="Write a note, reflection, weekly recap, or field trip description…"></textarea>
+        <button class="adm-btn" onclick="addNote()">+ Add note</button>
+      </div>`;
+    }
+
+    if (!sess.notes.length) {
+      html += `<div class="empty-state"><span class="empty-icon">📝</span><div>No notes yet for ${activeSess}.</div></div>`;
+    } else {
+      html += `<div class="notes-list">${sess.notes.map((n,i) => `
+        <div class="note-card">
+          ${adminUnlocked ? `<button class="note-del" onclick="deleteNote(${i})">✕</button>` : ''}
+          ${n.title ? `<div class="note-title">${n.title}</div>` : ''}
+          <div class="note-body">${n.body}</div>
+          <div class="note-date">${new Date(n.ts).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+        </div>`).join('')}
+      </div>`;
+    }
+  }
 
   document.getElementById('page-content').innerHTML = html;
 }
