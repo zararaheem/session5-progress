@@ -250,29 +250,30 @@ function unlock() {
 }
 
 // ── Photos ─────────────────────────────────────────────────────────
-function addPhotoUrl() {
-  const url  = document.getElementById('p-url').value.trim();
-  const cap  = document.getElementById('p-cap').value.trim();
-  if (!url) return;
-  gdata[activeSess].photos.unshift({ url, cap, ts: Date.now() });
-  document.getElementById('p-url').value = '';
-  document.getElementById('p-cap').value = '';
-  save(); render();
-}
+function handleDrop(files) {
+  Array.from(files).forEach(file => {
+    if (file.size > 5 * 1024 * 1024) {
+      alert(`${file.name} too large`);
+      return;
+    }
 
-function uploadPhotos(input) {
-  const cap = document.getElementById('p-cap')?.value.trim() || '';
-  Array.from(input.files).forEach(file => {
-    if (file.size > 2.5 * 1024 * 1024) { alert(`${file.name} too large (max 2.5MB)`); return; }
     const reader = new FileReader();
+
     reader.onload = e => {
-      gdata[activeSess].photos.unshift({ url: e.target.result, cap, ts: Date.now() });
-      save(); render();
+      gdata[activeSess].photos.unshift({
+        url: e.target.result,
+        cap: file.name,
+        ts: Date.now()
+      });
+
+      save();
+      render();
     };
+
     reader.readAsDataURL(file);
   });
-  input.value = '';
 }
+  
 
 function deletePhoto(idx) {
   if (!confirm('Remove this photo?')) return;
