@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T2P Data Tracker — Session 5</title>
+<script src="config.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080e1a;--surface:#0d1829;--surface2:#111f36;--surface3:#162440;
+  --border:#1e3050;--border2:#264070;
+  --text:#e8f0fc;--muted:#4a6080;--muted2:#7090b0;
+  --accent:#3b82f6;--accent2:#60a5fa;--glow:rgba(59,130,246,0.15);
+  --pass:#34d399;--fail:#f87171;--absent:#fbbf24;--track:#60a5fa;--ahead:#a78bfa;--admin:#818cf8;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(59,130,246,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.03) 1px,transparent 1px);
+  background-size:40px 40px;}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1;background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,.12) 0%,transparent 60%);}
+.login-box{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:44px 38px;width:100%;max-width:380px;text-align:center;box-shadow:0 0 0 1px rgba(59,130,246,.1),0 24px 60px rgba(0,0,0,.5);}
+.login-logo{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);margin-bottom:6px;display:block;}
+.login-title{font-size:22px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.login-divider{width:40px;height:1px;background:var(--border2);margin:8px auto 20px;}
+.login-sub{font-size:12px;color:var(--muted2);margin-bottom:28px;}
+.login-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;display:block;text-align:left;margin-bottom:6px;}
+.login-box input,.login-box select{width:100%;padding:12px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:14px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.login-box select option{background:var(--surface2);}
+.login-box input[type="password"]{font-family:'DM Mono',monospace;letter-spacing:.15em;text-align:center;}
+.login-box input:focus,.login-box select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow);}
+.login-btn{width:100%;padding:12px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:4px;box-shadow:0 4px 16px rgba(59,130,246,.3);}
+.login-btn:hover{background:var(--accent2);transform:translateY(-1px);}
+.login-error{color:var(--fail);font-size:12px;margin-top:12px;min-height:18px;font-family:'DM Mono',monospace;}
+
+/* APP */
+#app{display:none;position:relative;z-index:1;}
+header{background:rgba(13,24,41,.95);border-bottom:1px solid var(--border2);padding:0 28px;display:flex;align-items:stretch;justify-content:space-between;position:sticky;top:0;z-index:50;backdrop-filter:blur(8px);}
+.header-left{display:flex;align-items:center;}
+.header-wordmark{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent2);padding:18px 20px 18px 0;border-right:1px solid var(--border);margin-right:16px;}
+.header-title{font-size:14px;font-weight:500;color:var(--text);}
+.s5-badge{font-family:'DM Mono',monospace;font-size:9px;font-weight:600;background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);padding:2px 7px;border-radius:4px;letter-spacing:.08em;margin-left:10px;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.user-pill{font-family:'DM Mono',monospace;font-size:11px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:var(--accent2);padding:5px 12px;border-radius:6px;}
+.superadmin-pill{font-family:'DM Mono',monospace;font-size:10px;background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:var(--admin);padding:3px 8px;border-radius:4px;}
+.hdr-btn{font-family:'DM Mono',monospace;font-size:11px;padding:6px 13px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted2);cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.hdr-btn:hover{color:var(--accent2);border-color:var(--accent);}
+.hdr-btn.primary{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 2px 8px rgba(59,130,246,.3);}
+.hdr-btn.primary:hover{background:var(--accent2);}
+.hdr-btn.saving{opacity:.5;pointer-events:none;}
+.hdr-btn.audit{color:var(--admin);border-color:rgba(129,140,248,.3);background:rgba(129,140,248,.08);}
+.hdr-btn.audit:hover{background:rgba(129,140,248,.15);}
+
+/* TAB BAR */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--surface);padding:0 28px;}
+.tab-btn{font-family:'DM Mono',monospace;font-size:11px;padding:12px 16px;color:var(--muted2);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;letter-spacing:.04em;text-transform:uppercase;}
+.tab-btn:hover{color:var(--accent2);}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent);}
+
+/* TOOLBAR */
+.toolbar{padding:10px 28px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.tlbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;}
+.toolbar select{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 10px;outline:none;cursor:pointer;}
+.toolbar select:focus{border-color:var(--accent);}
+.tdiv{width:1px;height:22px;background:var(--border2);margin:0 2px;}
+.count-pill{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:20px;margin-left:auto;}
+
+/* STUDENT LIST */
+.students-list{padding:14px 28px;display:flex;flex-direction:column;gap:6px;}
+.student-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .15s;}
+.student-row.mine{border-color:rgba(59,130,246,.35);}
+.student-row:hover{border-color:var(--border2);}
+.row-top{padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.student-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--border2);overflow:hidden;}
+.student-avatar img{width:100%;height:100%;object-fit:cover;}
+.student-avatar-initials{width:36px;height:36px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--accent2);flex-shrink:0;}
+.row-info{flex:1;min-width:0;}
+.row-name{font-weight:600;font-size:14px;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.row-level{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700;flex-shrink:0;}
+.lv-LL{background:rgba(59,130,246,.15);color:#93b4f8;border:1px solid rgba(59,130,246,.3);}
+.lv-L1{background:rgba(167,139,250,.15);color:#c084fc;border:1px solid rgba(167,139,250,.3);}
+.lv-L2{background:rgba(52,211,153,.15);color:#6ee7b7;border:1px solid rgba(52,211,153,.3);}
+.lv-MS{background:rgba(251,191,36,.15);color:#fcd34d;border:1px solid rgba(251,191,36,.3);}
+.row-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-top:2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.guide-tag{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:var(--accent2);padding:1px 6px;border-radius:3px;}
+.row-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.row-btn{font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.row-btn:hover{border-color:var(--accent);color:var(--accent2);}
+.patch-link{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-decoration:none;padding:3px 8px;border:1px solid var(--border);border-radius:4px;transition:all .15s;}
+.patch-link:hover{color:var(--accent2);border-color:var(--accent);}
+.row-body{display:none;}
+.row-body.open{display:block;}
+
+/* PROFILE SECTION */
+.profile-section{padding:12px 14px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:100px 1fr 1fr;gap:12px;}
+.profile-col{display:flex;flex-direction:column;gap:8px;}
+.field-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.field-textarea{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;resize:vertical;min-height:70px;outline:none;transition:border-color .2s;}
+.field-textarea:focus{border-color:var(--accent);}
+.photo-area{border:1px dashed var(--border2);border-radius:8px;padding:10px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2);width:80px;height:80px;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.photo-area:hover{border-color:var(--accent);}
+.photo-area.has-photo{padding:0;border-style:solid;}
+.photo-preview{width:80px;height:80px;object-fit:cover;border-radius:7px;display:block;}
+.photo-hint{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);line-height:1.4;}
+.photo-clear{font-family:'DM Mono',monospace;font-size:9px;color:var(--fail);background:transparent;border:none;cursor:pointer;margin-top:3px;display:block;}
+
+/* SCORES */
+.scores-section{padding:8px 14px 10px;}
+.score-line{display:flex;align-items:center;gap:10px;}
+.score-ws-name{font-size:12px;color:var(--muted2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.score-btns{display:flex;border:1px solid var(--border2);border-radius:5px;overflow:hidden;flex-shrink:0;}
+.score-btn{padding:5px 10px;font-size:10px;font-weight:600;font-family:'DM Mono',monospace;border:none;background:var(--surface2);color:var(--muted);cursor:pointer;transition:all .12s;border-left:1px solid var(--border);}
+.score-btn:first-child{border-left:none;}
+.score-btn:hover{background:var(--surface3);}
+.score-btn.active-pass{background:rgba(52,211,153,.15);color:var(--pass);}
+.score-btn.active-fail{background:rgba(248,113,113,.15);color:var(--fail);}
+.score-btn.active-absent{background:rgba(251,191,36,.15);color:var(--absent);}
+.score-btn.active-track{background:rgba(96,165,250,.15);color:var(--track);}
+.score-btn.active-ahead{background:rgba(167,139,250,.15);color:var(--ahead);}
+
+/* ── DASHBOARD TAB ── */
+.dash-grid{padding:16px 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+.dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;}
+.dash-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.dash-card-hdr{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.dash-avatar{width:38px;height:38px;border-radius:50%;flex-shrink:0;overflow:hidden;border:2px solid var(--border2);}
+.dash-avatar img{width:100%;height:100%;object-fit:cover;}
+.dash-avatar-ini{width:38px;height:38px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--accent2);flex-shrink:0;}
+.dash-info{flex:1;}
+.dash-name{font-weight:600;font-size:13px;color:var(--text);}
+.dash-meta{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);margin-top:2px;}
+.dash-s5-bar{padding:10px 14px;display:flex;flex-direction:column;gap:4px;}
+.dash-s5-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;}
+.dash-progress{display:flex;gap:3px;flex-wrap:wrap;margin-top:2px;}
+.dash-ws-dot{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;font-family:'DM Mono',monospace;}
+.dot-pass{background:rgba(52,211,153,.2);color:var(--pass);border:1px solid rgba(52,211,153,.4);}
+.dot-ahead{background:rgba(167,139,250,.2);color:var(--ahead);border:1px solid rgba(167,139,250,.4);}
+.dot-track{background:rgba(96,165,250,.2);color:var(--track);border:1px solid rgba(96,165,250,.4);}
+.dot-behind{background:rgba(248,113,113,.2);color:var(--fail);border:1px solid rgba(248,113,113,.4);}
+.dot-absent{background:rgba(251,191,36,.2);color:var(--absent);border:1px solid rgba(251,191,36,.4);}
+.dot-empty{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.dash-notes-preview{padding:8px 14px 12px;font-size:11px;color:var(--muted2);font-style:italic;border-top:1px solid var(--border);line-height:1.5;}
+
+/* ── STUDENT DETAIL MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,10,.85);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);}
+.overlay.open{opacity:1;pointer-events:all;}
+.detail-modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:640px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 0 0 1px rgba(59,130,246,.1),0 24px 60px rgba(0,0,0,.6);}
+.dm-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.dm-photo{width:48px;height:48px;border-radius:50%;overflow:hidden;border:2px solid var(--border2);flex-shrink:0;}
+.dm-photo img{width:100%;height:100%;object-fit:cover;}
+.dm-photo-ini{width:48px;height:48px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--accent2);flex-shrink:0;}
+.dm-name{font-size:17px;font-weight:600;}
+.dm-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-top:3px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.dm-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--muted2);margin-left:auto;transition:all .15s;flex-shrink:0;}
+.dm-close:hover{background:var(--border);color:var(--text);}
+.dm-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 20px;flex-shrink:0;}
+.dm-tab{font-family:'DM Mono',monospace;font-size:10px;padding:10px 12px;color:var(--muted2);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;text-transform:uppercase;letter-spacing:.05em;}
+.dm-tab.active{color:var(--accent2);border-bottom-color:var(--accent);}
+.dm-body{flex:1;overflow-y:auto;padding:16px 20px;}
+
+/* DATA STRUCTURES */
+.ds-section{margin-bottom:20px;}
+.ds-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.ds-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.ds-field{margin-bottom:10px;}
+.ds-field label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);display:block;margin-bottom:5px;}
+.ds-textarea{width:100%;padding:9px 11px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;resize:vertical;min-height:64px;outline:none;transition:border-color .2s;line-height:1.5;}
+.ds-textarea:focus{border-color:var(--accent);}
+.ds-input{width:100%;padding:8px 11px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.ds-input:focus{border-color:var(--accent);}
+.ds-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.meeting-entry{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;position:relative;}
+.meeting-del{position:absolute;top:8px;right:8px;background:transparent;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .15s;}
+.meeting-del:hover{color:var(--fail);}
+.add-meeting-btn{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);background:transparent;border:1px dashed var(--border2);border-radius:6px;padding:7px 14px;cursor:pointer;width:100%;transition:all .15s;margin-top:6px;}
+.add-meeting-btn:hover{border-color:var(--accent);background:rgba(59,130,246,.05);}
+.save-detail-btn{width:100%;padding:10px;background:var(--accent);color:white;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:12px;transition:all .15s;box-shadow:0 2px 8px rgba(59,130,246,.3);}
+.save-detail-btn:hover{background:var(--accent2);}
+
+/* WORKSHOP PROGRESS in modal */
+.ws-progress-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;margin-bottom:3px;transition:background .1s;}
+.ws-progress-row:hover{background:var(--surface2);}
+.ws-code-badge{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(59,130,246,.15);color:var(--accent2);flex-shrink:0;}
+.ws-prog-name{font-size:12px;font-weight:500;flex:1;color:var(--text);}
+.chk-pills{display:flex;gap:3px;flex-shrink:0;}
+.chk-mini{font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;border:1px solid var(--border);}
+.chk-p{background:rgba(52,211,153,.12);color:var(--pass);border-color:rgba(52,211,153,.3);}
+.chk-t{background:rgba(96,165,250,.12);color:var(--track);border-color:rgba(96,165,250,.3);}
+.chk-a-h{background:rgba(167,139,250,.12);color:var(--ahead);border-color:rgba(167,139,250,.3);}
+.chk-b{background:rgba(248,113,113,.12);color:var(--fail);border-color:rgba(248,113,113,.3);}
+.chk-ab{background:rgba(251,191,36,.12);color:var(--absent);border-color:rgba(251,191,36,.3);}
+.chk-e{background:var(--surface2);color:var(--muted);border-color:var(--border);}
+
+/* WORKSHOP DATA TAB (Zara only) */
+.ws-data-table{width:100%;border-collapse:collapse;font-size:12px;}
+.ws-data-table th{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted2);padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;}
+.ws-data-table td{padding:7px 10px;border-bottom:1px solid rgba(30,48,80,.5);vertical-align:top;}
+.ws-data-table tr:hover td{background:var(--surface2);}
+.ws-edit-input{background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 7px;width:100%;outline:none;}
+.ws-edit-input:focus{border-color:var(--accent);}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;}
+
+/* ASSIGN MODAL */
+.assign-overlay{position:fixed;inset:0;background:rgba(0,0,10,.8);z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);}
+.assign-overlay.open{opacity:1;pointer-events:all;}
+.assign-box{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:24px;max-width:340px;width:100%;transform:translateY(12px);transition:transform .2s;box-shadow:0 0 0 1px rgba(59,130,246,.1),0 24px 48px rgba(0,0,0,.5);}
+.assign-overlay.open .assign-box{transform:translateY(0);}
+.assign-box h3{font-size:14px;font-weight:600;margin-bottom:4px;}
+.assign-box p{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-bottom:14px;}
+.staff-grid{display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;}
+.staff-opt{padding:9px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;text-align:left;transition:all .15s;display:flex;align-items:center;justify-content:space-between;}
+.staff-opt:hover{border-color:var(--accent);background:rgba(59,130,246,.06);}
+.staff-opt.selected{background:rgba(59,130,246,.1);border-color:var(--accent);color:var(--accent2);}
+.staff-check{opacity:0;font-size:13px;}
+.staff-opt.selected .staff-check{opacity:1;}
+.assign-cancel{margin-top:8px;width:100%;padding:9px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;}
+.assign-cancel:hover{border-color:var(--muted2);color:var(--text);}
+
+/* AUDIT */
+.audit-overlay{position:fixed;inset:0;background:rgba(0,0,10,.8);z-index:400;display:flex;align-items:flex-end;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);}
+.audit-overlay.open{opacity:1;pointer-events:all;}
+.audit-panel{background:var(--surface);border-left:1px solid var(--border2);height:100%;width:100%;max-width:440px;display:flex;flex-direction:column;transform:translateX(40px);transition:transform .25s;overflow:hidden;}
+.audit-overlay.open .audit-panel{transform:translateX(0);}
+.audit-hdr{padding:14px 20px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;background:var(--surface2);flex-shrink:0;}
+.audit-hdr h2{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);text-transform:uppercase;letter-spacing:.06em;}
+.audit-close{width:26px;height:26px;border-radius:5px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--muted2);transition:all .15s;}
+.audit-close:hover{background:var(--border);color:var(--text);}
+.audit-body{flex:1;overflow-y:auto;padding:12px 20px;display:flex;flex-direction:column;gap:4px;}
+.audit-entry{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;display:flex;gap:10px;}
+.audit-entry.ep{border-left:2px solid var(--pass);}
+.audit-entry.ef{border-left:2px solid var(--fail);}
+.audit-entry.ea{border-left:2px solid var(--absent);}
+.audit-entry.eg{border-left:2px solid var(--admin);}
+.audit-who{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;color:var(--accent2);min-width:54px;flex-shrink:0;}
+.audit-detail{flex:1;}
+.audit-action{font-size:11px;color:var(--muted2);line-height:1.4;}
+.audit-action strong{color:var(--text);}
+.audit-time{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;}
+.audit-st{font-family:'DM Mono',monospace;font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px;flex-shrink:0;align-self:flex-start;}
+.as-p{background:rgba(52,211,153,.12);color:var(--pass);}
+.as-f{background:rgba(248,113,113,.12);color:var(--fail);}
+.as-a{background:rgba(251,191,36,.12);color:var(--absent);}
+.as-g{background:rgba(129,140,248,.12);color:var(--admin);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:white;padding:10px 18px;border-radius:7px;font-family:'DM Mono',monospace;font-weight:600;font-size:12px;letter-spacing:.04em;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999;box-shadow:0 4px 16px rgba(59,130,246,.4);}
+.toast.show{opacity:1;transform:translateY(0);}
+
+@media(max-width:640px){
+  .students-list,.dash-grid,header,.toolbar,.tab-bar{padding-left:14px;padding-right:14px;}
+  .audit-panel{max-width:100%;}
+  .profile-section{grid-template-columns:1fr;}
+  .ds-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <span class="login-logo">Alpha · Mission Control</span>
+    <div class="login-title">T2P Data Tracker</div>
+    <div class="login-divider"></div>
+    <div class="login-sub">Session 5 · Guide access only</div>
+    <label class="login-label">Guide</label>
+    <select id="login-name"></select>
+    <label class="login-label">Access code</label>
+    <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Initiate session →</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="header-left">
+      <span class="header-wordmark">Alpha · NYC</span>
+      <span class="header-title">T2P Data Tracker</span>
+      <span class="s5-badge">S5</span>
+    </div>
+    <div class="header-right">
+      <a href="index.html" class="hdr-btn">← Home</a>
+      <span class="user-pill" id="user-pill"></span>
+      <span class="superadmin-pill" id="superadmin-pill" style="display:none">★ Admin</span>
+      <button class="hdr-btn audit" id="audit-btn" style="display:none" onclick="openAudit()">Audit log</button>
+      <button class="hdr-btn primary" id="save-btn" onclick="saveAll()">↑ Save</button>
+    </div>
+  </header>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('tracker',this)">Tracker</button>
+    <button class="tab-btn" onclick="switchTab('dashboard',this)">Dashboard</button>
+    <button class="tab-btn" id="ws-data-tab" style="display:none" onclick="switchTab('wsdata',this)">Workshop Data</button>
+  </div>
+
+  <!-- TOOLBAR (tracker tab) -->
+  <div class="toolbar" id="tracker-toolbar">
+    <span class="tlbl">Filter</span>
+    <select id="assigneeFilter" onchange="renderList()">
+      <option value="">All students</option>
+      <option value="__mine__">My students only</option>
+    </select>
+    <div class="tdiv"></div>
+    <span class="tlbl">Level</span>
+    <select id="levelFilter" onchange="renderList()">
+      <option value="">All</option>
+      <option value="LL">LL</option>
+      <option value="L1">L1</option>
+      <option value="L2">L2</option>
+      <option value="MS">MS</option>
+    </select>
+    <span class="count-pill" id="count-pill"></span>
+  </div>
+
+  <!-- TRACKER TAB -->
+  <div id="tab-tracker">
+    <div class="students-list" id="students-list"></div>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div id="tab-dashboard" style="display:none">
+    <div class="toolbar" style="border-top:none;">
+      <span class="tlbl">Level</span>
+      <select id="dash-level" onchange="renderDashboard()">
+        <option value="">All</option>
+        <option value="LL">LL</option>
+        <option value="L1">L1</option>
+        <option value="L2">L2</option>
+        <option value="MS">MS</option>
+      </select>
+      <span class="count-pill" id="dash-count"></span>
+    </div>
+    <div class="dash-grid" id="dash-grid"></div>
+  </div>
+
+  <!-- WORKSHOP DATA TAB (Zara only) -->
+  <div id="tab-wsdata" style="display:none">
+    <div class="toolbar" style="border-top:none;">
+      <span class="tlbl">Level</span>
+      <select id="wd-level" onchange="renderWsData()">
+        <option value="LL">LL</option>
+        <option value="L1">L1</option>
+        <option value="L2">L2</option>
+        <option value="MS">MS</option>
+      </select>
+      <span class="tlbl" style="margin-left:8px">Workshop</span>
+      <select id="wd-workshop" onchange="renderWsData()"></select>
+      <button class="hdr-btn primary" style="margin-left:auto;font-size:11px" onclick="saveWsData()">↑ Save workshop data</button>
+    </div>
+    <div style="padding:14px 28px" id="wd-content"></div>
+  </div>
+</div>
+
+<!-- STUDENT DETAIL MODAL -->
+<div class="overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-modal">
+    <div class="dm-hdr">
+      <div id="dm-photo"></div>
+      <div>
+        <div class="dm-name" id="dm-name"></div>
+        <div class="dm-sub" id="dm-sub"></div>
+      </div>
+      <button class="dm-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="dm-tabs">
+      <button class="dm-tab active" onclick="switchDmTab('progress',this)">S5 Progress</button>
+      <button class="dm-tab" onclick="switchDmTab('3cs',this)">3Cs</button>
+      <button class="dm-tab" onclick="switchDmTab('meetings',this)">Meetings</button>
+      <button class="dm-tab" onclick="switchDmTab('notes',this)">Notes</button>
+      <button class="dm-tab" id="ws-tab" style="display:none" onclick="switchDmTab('wsdelivery',this)">Workshops</button>
+    </div>
+    <div class="dm-body" id="dm-body"></div>
+  </div>
+</div>
+
+<!-- GUIDE ASSIGN MODAL -->
+<div class="assign-overlay" id="assign-overlay">
+  <div class="assign-box">
+    <h3 id="assign-title">Assign guides</h3>
+    <p>Select all guides for this student</p>
+    <div class="staff-grid" id="staff-grid"></div>
+    <button class="assign-cancel" onclick="closeAssign()">Done</button>
+  </div>
+</div>
+
+<!-- AUDIT PANEL -->
+<div class="audit-overlay" id="audit-overlay" onclick="if(event.target===this)closeAudit()">
+  <div class="audit-panel">
+    <div class="audit-hdr">
+      <h2>Audit log</h2>
+      <button class="audit-close" onclick="closeAudit()">✕</button>
+    </div>
+    <div class="audit-body" id="audit-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+const CFG = (typeof T2P_CONFIG !== 'undefined') ? T2P_CONFIG : {
+  password:'nyc2025',superadmins:[],staff:[],levelGuides:{},checkpoints:[],students:[]
+};
+if(!CFG.superadmins)CFG.superadmins=[];
+if(!CFG.levelGuides)CFG.levelGuides={};
+
+// Users who see ALL students by default (no filter)
+const SEE_ALL = ['Zara','Tasha','Liam','Julianne'];
+// Only Zara can edit workshop data
+const WS_DATA_EDITOR = 'Zara';
+
+const STAFF_SORTED = [...(CFG.staff||[])].sort();
+const LEVEL_ORDER  = ['LL','L1','L2','MS'];
+const CHECKPOINTS  = CFG.checkpoints || [
+  {key:'w1',label:'Week 1 Baseline'},{key:'w3',label:'Week 3: Checkpoint 1'},
+  {key:'w5',label:'Week 5: Checkpoint 2'},{key:'w7',label:'Week 7: T2P'},
+];
+const STUDENTS = CFG.students || [];
+
+const S5_WORKSHOPS = {
+  LL:[{code:"SP-01",name:"Mission Laika — Storytelling",guide:"TBD",day:"Mon",skill:"Collaboration"},
+      {code:"SP-02",name:"Propulsion Lab",guide:"Jenna Klemm",day:"Tue/Thu",skill:"Critical Thinking"},
+      {code:"SP-03",name:"Mission Control",guide:"Jesse Moskowitz",day:"Tue/Thu",skill:"Leadership"},
+      {code:"SP-04",name:"Cadet Qualification Training",guide:"Jenna Klemm",day:"Wed",skill:"Grit"},
+      {code:"SP-05",name:"Junior Space Camp — Island Standard",guide:"Jenna Klemm",day:"Fri",skill:"Teamwork"}],
+  L1:[{code:"OP-01",name:"Mission Laika — Media + Outreach",guide:"TBD",day:"Mon",skill:"Public Speaking"},
+      {code:"OP-02",name:"Drone Wing",guide:"Parthvi Harde",day:"Tue/Thu",skill:"Teamwork"},
+      {code:"OP-03",name:"Stock Simulator",guide:"Nathan Witkin",day:"Tue/Thu",skill:"Financial Literacy"},
+      {code:"OP-04",name:"Recon Expedition",guide:"Jesse + Parthvi",day:"Wed",skill:"Grit"},
+      {code:"OP-05",name:"Junior Space Camp — Island Standard",guide:"Parthvi",day:"Fri",skill:"Teamwork"}],
+  L2:[{code:"FC-01",name:"Mission Laika — Product + Sales",guide:"TBD",day:"Mon",skill:"Entrepreneurship"},
+      {code:"FC-02",name:"Alpha Emporium Exchange",guide:"Jenna Petrungaro",day:"Tue/Thu",skill:"Entrepreneurship"},
+      {code:"FC-03",name:"Drone Wing",guide:"TBD",day:"Tue/Thu",skill:"Teamwork"},
+      {code:"FC-04",name:"Tri Hard (Row · Ride · Run)",guide:"Chauncey Nartey",day:"Wed",skill:"Grit"},
+      {code:"FC-05",name:"Junior Space Camp — Island Standard",guide:"Jenna P",day:"Fri",skill:"Teamwork"}],
+  MS:[{code:"MS-01",name:"Mission Laika — Strategy + Execution",guide:"TBD",day:"Mon",skill:"Leadership"},
+      {code:"MS-02",name:"Sail La Vie",guide:"Emily Lopez",day:"Tue/Thu",skill:"Teamwork"},
+      {code:"MS-03",name:"Rover Engineering Corps",guide:"Emily Lopez",day:"Tue/Thu",skill:"Independence"},
+      {code:"MS-04",name:"Tri Hard (Row · Ride · Run)",guide:"Chauncey Nartey",day:"Wed",skill:"Grit"},
+      {code:"MS-05",name:"Mission Command — Island Standard",guide:"Chauncey + Liam",day:"Fri",skill:"Leadership"}]
+};
+
+let currentUser='', isSuperAdmin=false;
+let s5data={__guides__:{},__profiles__:{},__photos__:{},__audit__:[],__workshops__:[]};
+let currentDetailStudent=null, currentDmTab='progress';
+
+// ── Helpers ──────────────────────────────────────────────────────
+function slug(n){return n.replace(/[^a-zA-Z0-9]/g,'_');}
+function initials(n){return n.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase();}
+function getGuides(s){
+  const ov=s5data.__guides__?.[s.n];
+  if(ov&&ov.length)return ov;
+  return CFG.levelGuides?.[s.l]||[];
+}
+function isMine(s){return getGuides(s).includes(currentUser);}
+function chkKey(ws,ck){return`__chk__${ws}__${ck}`;}
+function getChkOptions(ck){
+  if(ck==='w7')return[{val:'Passed',label:'Passed',cls:'active-pass'},{val:'Not Yet',label:'Not Yet',cls:'active-fail'},{val:'Absent',label:'Absent',cls:'active-absent'}];
+  return[{val:'Behind',label:'Behind',cls:'active-fail'},{val:'On Track',label:'On Track',cls:'active-track'},{val:'Ahead',label:'Ahead',cls:'active-ahead'},{val:'Absent',label:'Absent',cls:'active-absent'}];
+}
+function dotClass(val){
+  if(val==='Passed')return'dot-pass';if(val==='Ahead')return'dot-ahead';
+  if(val==='On Track')return'dot-track';if(val==='Behind')return'dot-behind';
+  if(val==='Absent'||val==='Not Yet')return'dot-absent';return'dot-empty';
+}
+function dotLabel(val){
+  if(val==='Passed')return'P';if(val==='Ahead')return'A';if(val==='On Track')return'T';
+  if(val==='Behind')return'B';if(val==='Absent'||val==='Not Yet')return'–';return'·';
+}
+function chkMiniClass(val){
+  if(!val)return'chk-e';if(val==='Passed')return'chk-p';if(val==='On Track')return'chk-t';
+  if(val==='Ahead')return'chk-a-h';if(val==='Behind')return'chk-b';return'chk-ab';
+}
+
+// ── Login ────────────────────────────────────────────────────────
+const ns=document.getElementById('login-name');
+const bo=document.createElement('option');bo.value='';bo.textContent='— Select your name —';bo.disabled=true;bo.selected=true;ns.appendChild(bo);
+STAFF_SORTED.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;ns.appendChild(o);});
+
+function doLogin(){
+  const name=document.getElementById('login-name').value;
+  const pass=document.getElementById('login-pass').value;
+  if(!name){document.getElementById('login-error').textContent='Please select your name.';return;}
+  if(pass!==CFG.password){document.getElementById('login-error').textContent='Incorrect access code.';return;}
+  currentUser=name;
+  isSuperAdmin=CFG.superadmins.includes(name);
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('user-pill').textContent='👤 '+name;
+  if(isSuperAdmin){
+    document.getElementById('superadmin-pill').style.display='inline-flex';
+    document.getElementById('audit-btn').style.display='inline-flex';
+  }
+  // Zara sees Workshop Data tab
+  if(name===WS_DATA_EDITOR){
+    document.getElementById('ws-data-tab').style.display='inline-block';
+  }
+  // SEE_ALL users default to All students, others to My students
+  document.getElementById("assigneeFilter").value = "";
+  loadData();
+}
+
+// ── Storage ──────────────────────────────────────────────────────
+async function loadData(){
+  try{
+    const r=await window.storage.get('s5data');
+    if(r?.value){
+      s5data=JSON.parse(r.value);
+      if(!s5data.__guides__)s5data.__guides__={};
+      if(!s5data.__profiles__)s5data.__profiles__={};
+      if(!s5data.__photos__)s5data.__photos__={};
+      if(!s5data.__audit__)s5data.__audit__=[];
+      if(!s5data.__meetings__)s5data.__meetings__={};
+      if(!s5data.__3cs__)s5data.__3cs__={};
+      if(!s5data.__wsdata__)s5data.__wsdata__={};
+      if(!s5data.__deliverables__)s5data.__deliverables__={};
+      if(!s5data.__wsmeetings__)s5data.__wsmeetings__={};
+      if(!s5data.__townhalls__)s5data.__townhalls__=[];
+    }
+  }catch(e){}
+  renderList();
+  renderDashboard();
+}
+
+async function saveAll(){
+  const btn=document.getElementById('save-btn');
+  btn.classList.add('saving');btn.textContent='Saving…';
+  try{await window.storage.set('s5data',JSON.stringify(s5data));showToast('✓ Saved');}
+  catch(e){showToast('⚠ Save failed');}
+  btn.classList.remove('saving');btn.innerHTML='↑ Save';
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+function logAudit(type,studentName,detail,value){
+  if(!s5data.__audit__)s5data.__audit__=[];
+  s5data.__audit__.unshift({who:currentUser,type,student:studentName,detail,value,ts:new Date().toISOString()});
+  if(s5data.__audit__.length>500)s5data.__audit__=s5data.__audit__.slice(0,500);
+}
+
+// ── Tab switching ─────────────────────────────────────────────────
+let currentTab='tracker';
+function switchTab(tab,btn){
+  currentTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['tracker','dashboard','wsdata'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el)el.style.display=t===tab?'block':'none';
+  });
+  document.getElementById('tracker-toolbar').style.display=tab==='tracker'?'flex':'none';
+  if(tab==='wsdata')renderWsData();
+  if(tab==='dashboard')renderDashboard();
+}
+
+// ── Score ─────────────────────────────────────────────────────────
+function setScore(sName,ws,val,btn){
+  if(!s5data[sName])s5data[sName]={};
+  if(s5data[sName][ws]===val){delete s5data[sName][ws];logAudit('score',sName,ws,null);btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');return;}
+  s5data[sName][ws]=val;logAudit('score',sName,ws,val);
+  btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>{b.className='score-btn';if(b.dataset.val===val)b.classList.add(val==='Passed'?'active-pass':val==='Not Yet'?'active-fail':val==='Absent'?'active-absent':'active-pass');});
+}
+function setCheckpoint(sName,ws,ck,val,btn){
+  if(!s5data[sName])s5data[sName]={};
+  const key=chkKey(ws,ck);const prev=s5data[sName][key];
+  if(prev===val){delete s5data[sName][key];btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');return;}
+  s5data[sName][key]=val;logAudit('score',sName,`${ws} [${ck}]`,val);
+  btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>{
+    b.className='score-btn';
+    const opt=getChkOptions(ck).find(o=>o.val===val);
+    if(b.dataset.val===val&&opt)b.classList.add(opt.cls);
+  });
+}
+
+// ── Guides ────────────────────────────────────────────────────────
+let assigningStudent=null;
+function openAssign(name){
+  assigningStudent=name;
+  document.getElementById('assign-title').textContent=name;
+  const stu=STUDENTS.find(s=>s.n===name);
+  const cur=getGuides({n:name,l:stu?.l||''});
+  document.getElementById('staff-grid').innerHTML=STAFF_SORTED.map(staff=>`
+    <button class="staff-opt ${cur.includes(staff)?'selected':''}" onclick="toggleGuide('${staff}')">
+      ${staff}<span class="staff-check">✓</span>
+    </button>`).join('');
+  document.getElementById('assign-overlay').classList.add('open');
+}
+function toggleGuide(staff){
+  const stu=STUDENTS.find(s=>s.n===assigningStudent);
+  if(!s5data.__guides__[assigningStudent])s5data.__guides__[assigningStudent]=[...(CFG.levelGuides[stu?.l]||[])];
+  const arr=s5data.__guides__[assigningStudent];
+  const idx=arr.indexOf(staff);if(idx===-1)arr.push(staff);else arr.splice(idx,1);
+  document.querySelectorAll('.staff-opt').forEach(btn=>{
+    const n=btn.textContent.replace('✓','').trim();
+    btn.classList.toggle('selected',arr.includes(n));
+  });
+  const metaEl=document.getElementById(`guides-${slug(assigningStudent)}`);
+  if(metaEl)metaEl.innerHTML=arr.map(g=>`<span class="guide-tag">${g}</span>`).join('');
+  logAudit('guide',assigningStudent,'guides',arr.join(', '));
+}
+function closeAssign(){document.getElementById('assign-overlay').classList.remove('open');assigningStudent=null;}
+
+// ── Photo ──────────────────────────────────────────────────────────
+function handlePhotoUpload(sName,input){
+  const file=input.files[0];if(!file)return;
+  if(file.size>500*1024){showToast('⚠ Photo too large (max 500KB)');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    if(!s5data.__photos__)s5data.__photos__={};
+    s5data.__photos__[sName]=e.target.result;
+    refreshAvatar(sName,e.target.result);
+    logAudit('profile',sName,'photo','updated');
+  };
+  reader.readAsDataURL(file);
+}
+function clearPhoto(sName,ev){ev.stopPropagation();if(s5data.__photos__)delete s5data.__photos__[sName];refreshAvatar(sName,null);}
+function refreshAvatar(sName,src){
+  ['.'+slug(sName)+'-avatar'].forEach(()=>{});
+  document.querySelectorAll(`[data-avatar="${slug(sName)}"]`).forEach(el=>{
+    if(src){el.innerHTML=`<img src="${src}" alt="${sName}">`;}
+    else{el.textContent=initials(sName);}
+  });
+}
+
+// ── Toggle row ────────────────────────────────────────────────────
+function toggleRow(sName){
+  const body=document.getElementById(`body-${slug(sName)}`);
+  const btn=document.getElementById(`toggle-${slug(sName)}`);
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  if(btn)btn.textContent=open?'▲ Collapse':'▼ Expand';
+}
+
+// ── Render tracker list ───────────────────────────────────────────
+function renderList(){
+  const af=document.getElementById('assigneeFilter').value;
+  const lf=document.getElementById('levelFilter').value;
+  let students=[...STUDENTS].sort((a,b)=>{const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l);return d||a.n.localeCompare(b.n);});
+  if(lf)students=students.filter(s=>s.l===lf);
+  if(af==='__mine__')students=students.filter(s=>isMine(s));
+  document.getElementById('count-pill').textContent=`${students.length} students`;
+
+  document.getElementById('students-list').innerHTML=students.map(s=>{
+    const guides=getGuides(s);const mine=guides.includes(currentUser);
+    const photo=s5data.__photos__?.[s.n];
+    const profile=s5data.__profiles__?.[s.n]||{};
+    const scores=s5data[s.n]||{};
+    const sl=slug(s.n);const safeN=s.n.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const levelWs=S5_WORKSHOPS[s.l]||[];
+
+    const avatarHtml=photo
+      ?`<div class="student-avatar" data-avatar="${sl}"><img src="${photo}" alt="${s.n}"></div>`
+      :`<div class="student-avatar-initials" data-avatar="${sl}">${initials(s.n)}</div>`;
+
+    const guideTagsHtml=guides.length
+      ?guides.map(g=>`<span class="guide-tag">${g}</span>`).join('')
+      :'<span style="color:var(--muted);font-size:10px">No guides</span>';
+
+    const photoAreaHtml=photo
+      ?`<div class="photo-area has-photo" onclick="document.getElementById('phi-${sl}').click()"><img class="photo-preview" src="${photo}"><button class="photo-clear" onclick="clearPhoto('${safeN}',event)">✕ Remove</button></div>`
+      :`<div class="photo-area" onclick="document.getElementById('phi-${sl}').click()"><div class="photo-hint"><div style="font-size:18px;margin-bottom:4px">📷</div><div>Upload</div><div style="color:var(--muted);font-size:8px">max 500KB</div></div></div>`;
+
+    const scoreLines=levelWs.map(ws=>{
+      const wsKey=ws.name;const cur=scores[wsKey];const safeW=wsKey.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const chkRows=CHECKPOINTS.map(chk=>{
+        const kv=scores[chkKey(wsKey,chk.key)];
+        const opts=getChkOptions(chk.key);
+        const btns=opts.map(opt=>`<button class="score-btn ${kv===opt.val?opt.cls:''}" data-val="${opt.val}" onclick="setCheckpoint('${safeN}','${safeW}','${chk.key}','${opt.val}',this)">${opt.label}</button>`).join('');
+        return`<div class="score-line" style="padding-left:12px;opacity:.85;"><span class="score-ws-name" style="color:var(--muted);font-size:11px">↳ ${chk.label}</span><div class="score-btns">${btns}</div></div>`;
+      }).join('');
+      const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
+      const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" onclick="setScore('${safeN}','${safeW}','${opt.val}',this)">${opt.label}</button>`).join('');
+      return`<div style="border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:4px;">
+        <div class="score-line" style="background:var(--surface2);padding:7px 12px;">
+          <div style="flex:1"><span style="font-weight:600;color:var(--text);font-size:12px">${ws.code} · ${ws.name}</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-left:8px">${ws.guide} · ${ws.day}</span></div>
+          <div class="score-btns">${finalBtns}</div>
+        </div>
+        <div style="padding:4px 0 2px">${chkRows}</div>
+      </div>`;
+    }).join('');
+
+    return`<div class="student-row ${mine?'mine':''}">
+      <div class="row-top">
+        ${avatarHtml}
+        <div class="row-info">
+          <div class="row-name"><span class="row-level lv-${s.l}">${s.l}</span>${s.n}</div>
+          <div class="row-meta"><span id="guides-${sl}">${guideTagsHtml}</span>${s.note?`<span style="color:var(--muted);font-style:italic">* ${s.note}</span>`:''}</div>
+        </div>
+        <div class="row-actions">
+          ${s.patchUrl?`<a href="${s.patchUrl}" target="_blank" class="patch-link">Patches ↗</a>`:''}
+          <button class="row-btn" onclick="openAssign('${safeN}')">Guides</button>
+          <button class="row-btn" id="toggle-${sl}" onclick="toggleRow('${safeN}')">▼ Expand</button>
+        </div>
+      </div>
+      <div class="row-body" id="body-${sl}">
+        <div class="profile-section">
+          <div>${photoAreaHtml}<input type="file" id="phi-${sl}" accept="image/*" style="display:none" onchange="handlePhotoUpload('${safeN}',this)"></div>
+          <div class="profile-col">
+            <div><div class="field-label">Motivational model</div><textarea class="field-textarea" id="mot-${sl}" onchange="saveProfile('${safeN}')" placeholder="What drives them, how they work best…">${profile.motivation||''}</textarea></div>
+          </div>
+          <div class="profile-col">
+            <div><div class="field-label">Guide notes</div><textarea class="field-textarea" id="note-${sl}" onchange="saveProfile('${safeN}')" placeholder="This week's observations, action plan…">${profile.notes||''}</textarea></div>
+          </div>
+        </div>
+        <div class="scores-section">${scoreLines}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveProfile(sName){
+  const sl=slug(sName);
+  if(!s5data.__profiles__[sName])s5data.__profiles__[sName]={};
+  const mot=document.getElementById(`mot-${sl}`);const note=document.getElementById(`note-${sl}`);
+  if(mot)s5data.__profiles__[sName].motivation=mot.value;
+  if(note)s5data.__profiles__[sName].notes=note.value;
+  logAudit('profile',sName,'notes','updated');
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────
+function renderDashboard(){
+  const lf=document.getElementById('dash-level').value;
+  let students=[...STUDENTS].sort((a,b)=>{const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l);return d||a.n.localeCompare(b.n);});
+  if(lf)students=students.filter(s=>s.l===lf);
+  document.getElementById('dash-count').textContent=`${students.length} students`;
+
+  document.getElementById('dash-grid').innerHTML=students.map(s=>{
+    const photo=s5data.__photos__?.[s.n];
+    const profile=s5data.__profiles__?.[s.n]||{};
+    const scores=s5data[s.n]||{};
+    const levelWs=S5_WORKSHOPS[s.l]||[];
+    const safeN=s.n.replace(/'/g,"\\'");
+    const guides=getGuides(s);
+
+    const avatarHtml=photo
+      ?`<div class="dash-avatar" data-avatar="${slug(s.n)}"><img src="${photo}" alt="${s.n}"></div>`
+      :`<div class="dash-avatar-ini" data-avatar="${slug(s.n)}">${initials(s.n)}</div>`;
+
+    const dots=levelWs.map(ws=>{
+      // Show latest checkpoint or final status
+      const final=scores[ws.name];
+      let bestVal=final;
+      if(!bestVal){
+        // Show latest checkpoint that has data
+        for(let i=CHECKPOINTS.length-1;i>=0;i--){const v=scores[chkKey(ws.name,CHECKPOINTS[i].key)];if(v){bestVal=v;break;}}
+      }
+      return`<div class="dash-ws-dot ${dotClass(bestVal)}" title="${ws.code}: ${ws.name} — ${bestVal||'No data'}">${dotLabel(bestVal)}</div>`;
+    }).join('');
+
+    const notesPreview=profile.notes?`<div class="dash-notes-preview">${profile.notes.substring(0,80)}${profile.notes.length>80?'…':''}</div>`:'';
+
+    return`<div class="dash-card" onclick="openDetail('${safeN}')">
+      <div class="dash-card-hdr">
+        ${avatarHtml}
+        <div class="dash-info">
+          <div class="dash-name">${s.n}</div>
+          <div class="dash-meta"><span class="row-level lv-${s.l}">${s.l}</span> ${guides.length?'· '+guides.join(', '):''}</div>
+        </div>
+      </div>
+      <div class="dash-s5-bar">
+        <div class="dash-s5-label">S5 Workshops</div>
+        <div class="dash-progress">${dots}</div>
+      </div>
+      ${notesPreview}
+    </div>`;
+  }).join('');
+}
+
+// ── Student detail modal ──────────────────────────────────────────
+function openDetail(name){
+  currentDetailStudent=name;
+  currentDmTab='progress';
+  const s=STUDENTS.find(s=>s.n===name);if(!s)return;
+  const photo=s5data.__photos__?.[name];
+  document.getElementById('dm-photo').innerHTML=photo
+    ?`<div class="dm-photo"><img src="${photo}" alt="${name}"></div>`
+    :`<div class="dm-photo-ini">${initials(name)}</div>`;
+  document.getElementById('dm-name').textContent=name;
+  document.getElementById('dm-sub').innerHTML=`<span class="row-level lv-${s.l}">${s.l}</span>${s.note?`<span>* ${s.note}</span>`:''}`;
+  // Show workshop tab for superadmins
+  document.getElementById('ws-tab').style.display=isSuperAdmin?'inline-block':'none';
+  document.querySelectorAll('.dm-tab').forEach((t,i)=>{t.classList.toggle('active',i===0);});
+  renderDmBody();
+  document.getElementById('detail-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDetail(){document.getElementById('detail-overlay').classList.remove('open');document.body.style.overflow='';}
+
+function switchDmTab(tab,btn){
+  currentDmTab=tab;
+  document.querySelectorAll('.dm-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderDmBody();
+}
+
+function renderDmBody(){
+  const name=currentDetailStudent;if(!name)return;
+  const s=STUDENTS.find(s=>s.n===name);
+  const scores=s5data[name]||{};
+  const profile=s5data.__profiles__?.[name]||{};
+  const threeCs=s5data.__3cs__?.[name]||{};
+  const meetings=s5data.__meetings__?.[name]||[];
+  const levelWs=S5_WORKSHOPS[s?.l]||[];
+  const safeN=name.replace(/'/g,"\\'");
+  const sl=slug(name);
+  let html='';
+
+  if(currentDmTab==='progress'){
+    // S5 workshops with checkpoint dots
+    html=`<div style="display:flex;flex-direction:column;gap:6px">`;
+    levelWs.forEach(ws=>{
+      const final=scores[ws.name];
+      const finalCls=final==='Passed'?'st-pass':final==='Not passed'?'st-fail':final==='Absent'?'st-absent':'st-na';
+      const finalLbl=final||'Pending';
+      const chkMinis=CHECKPOINTS.map(chk=>{
+        const v=scores[chkKey(ws.name,chk.key)];
+        return`<span class="chk-mini ${chkMiniClass(v)}" title="${chk.label}: ${v||'—'}">${v?v.slice(0,2):'·'}</span>`;
+      }).join('');
+      html+=`<div class="ws-progress-row">
+        <span class="ws-code-badge">${ws.code}</span>
+        <span class="ws-prog-name">${ws.name}</span>
+        <div class="chk-pills">${chkMinis}</div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:${final?'rgba(52,211,153,.12)':'var(--surface2)'};color:${final==='Passed'?'var(--pass)':final?'var(--fail)':'var(--muted)'};">${finalLbl}</span>
+      </div>`;
+    });
+    html+='</div>';
+
+    // Motivation + notes preview
+    if(profile.motivation||profile.notes){
+      html+=`<div style="margin-top:14px;background:var(--surface2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);">`;
+      if(profile.motivation)html+=`<div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.07em">Motivation</div><div style="font-size:12px;color:var(--text);margin-bottom:10px">${profile.motivation}</div>`;
+      if(profile.notes)html+=`<div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.07em">Notes</div><div style="font-size:12px;color:var(--text)">${profile.notes}</div>`;
+      html+='</div>';
+    }
+  }
+
+  else if(currentDmTab==='3cs'){
+    html=`<div class="ds-section">
+      <div class="ds-title">3Cs — Challenge · Connect · Create</div>
+      <div class="ds-field"><label>Challenge (what is being challenged?)</label>
+        <textarea class="ds-textarea" id="3c-challenge-${sl}" placeholder="What challenge are they working on or working through…">${threeCs.challenge||''}</textarea></div>
+      <div class="ds-field"><label>Connect (how are they connecting it to themselves?)</label>
+        <textarea class="ds-textarea" id="3c-connect-${sl}" placeholder="How is this connecting to their life, goals, identity…">${threeCs.connect||''}</textarea></div>
+      <div class="ds-field"><label>Create (what are they creating?)</label>
+        <textarea class="ds-textarea" id="3c-create-${sl}" placeholder="What are they building, making, delivering…">${threeCs.create||''}</textarea></div>
+      <div class="ds-field"><label>Delivery plan for next week</label>
+        <textarea class="ds-textarea" id="3c-plan-${sl}" placeholder="How will you deliver the 3Cs to this student next week…">${threeCs.plan||''}</textarea></div>
+    </div>
+    <button class="save-detail-btn" onclick="save3Cs('${safeN}')">Save 3Cs</button>`;
+  }
+
+  else if(currentDmTab==='meetings'){
+    const meetingForms=meetings.map((m,i)=>`
+      <div class="meeting-entry" id="meeting-${sl}-${i}">
+        <button class="meeting-del" onclick="deleteMeeting('${safeN}',${i})">✕</button>
+        <div class="ds-row">
+          <div class="ds-field"><label>Date</label><input class="ds-input" type="date" id="mdate-${sl}-${i}" value="${m.date||''}"></div>
+          <div class="ds-field"><label>Type</label>
+            <select class="ds-input" id="mtype-${sl}-${i}">
+              <option ${m.type==='1:1'?'selected':''}>1:1</option>
+              <option ${m.type==='Group'?'selected':''}>Group</option>
+              <option ${m.type==='Parent'?'selected':''}>Parent</option>
+              <option ${m.type==='Other'?'selected':''}>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="ds-field"><label>Notes</label><textarea class="ds-textarea" id="mnotes-${sl}-${i}" style="min-height:50px">${m.notes||''}</textarea></div>
+        <div class="ds-field"><label>Action items</label><textarea class="ds-textarea" id="mactions-${sl}-${i}" style="min-height:40px">${m.actions||''}</textarea></div>
+      </div>`).join('');
+    html=`<div>${meetingForms}</div>
+      <button class="add-meeting-btn" onclick="addMeeting('${safeN}')">+ Add meeting</button>
+      <button class="save-detail-btn" onclick="saveMeetings('${safeN}')">Save meetings</button>`;
+  }
+
+  else if(currentDmTab==='notes'){
+    const weeklyNotes=s5data.__weeknotes__?.[name]||{};
+    html=`<div class="ds-section">
+      <div class="ds-title">Weekly notes</div>
+      ${CHECKPOINTS.map(chk=>`
+        <div class="ds-field"><label>${chk.label}</label>
+          <textarea class="ds-textarea" id="wn-${slug(chk.key)}-${sl}" placeholder="Notes for ${chk.label}…">${weeklyNotes[chk.key]||''}</textarea>
+        </div>`).join('')}
+    </div>
+    <div class="ds-section">
+      <div class="ds-title">General notes</div>
+      <div class="ds-field"><label>Loves School — Yes / No + notes</label>
+        <textarea class="ds-textarea" id="loves-${sl}" placeholder="Does the student prefer school to vacation? What are they loving…">${profile.lovesSchool||''}</textarea></div>
+      <div class="ds-field"><label>2XP — on track?</label>
+        <textarea class="ds-textarea" id="xp-${sl}" placeholder="Hitting 120XP/day? Which subjects need support…">${profile.xp||''}</textarea></div>
+    </div>
+    <button class="save-detail-btn" onclick="saveNotes('${safeN}')">Save notes</button>`;
+  }
+
+  else if(currentDmTab==='wsdelivery'){
+    const s2=STUDENTS.find(s=>s.n===name);
+    const levelWs=S5_WORKSHOPS[s2?.l]||[];
+    const sl=slug(name);
+
+    // Town Halls section (global)
+    const townhalls=s5data.__townhalls__||[];
+    const thForms=townhalls.map((t,i)=>`
+      <div class="meeting-entry" id="th-${i}">
+        <button class="meeting-del" onclick="deleteTownhall(${i})">✕</button>
+        <div class="ds-row">
+          <div class="ds-field"><label>Date</label><input class="ds-input" type="date" id="thdate-${i}" value="${t.date||''}"></div>
+          <div class="ds-field"><label>Topic</label><input class="ds-input" type="text" id="thtopic-${i}" value="${t.topic||''}" placeholder="Town hall topic…"></div>
+        </div>
+        <div class="ds-field"><label>Notes</label><textarea class="ds-textarea" id="thnotes-${i}" style="min-height:40px">${t.notes||''}</textarea></div>
+      </div>`).join('');
+
+    const wsForms=levelWs.map(ws=>{
+      const deliverables=s5data.__deliverables__?.[ws.name]||[];
+      const wsMeetings=s5data.__wsmeetings__?.[ws.name]||[];
+      const safeWs=ws.name.replace(/'/g,"\\'");
+      const delForms=deliverables.map((d,i)=>`
+        <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;">
+          <input class="ds-input" style="width:90px" type="text" id="delweek-${slug(ws.name)}-${i}" value="${d.week||''}" placeholder="Wk 1">
+          <input class="ds-input" style="flex:1" type="text" id="deltext-${slug(ws.name)}-${i}" value="${d.text||''}" placeholder="Deliverable…">
+          <button style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px" onclick="deleteDeliverable('${safeWs}',${i})">✕</button>
+        </div>`).join('');
+      const meetForms=wsMeetings.map((m,i)=>`
+        <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;">
+          <input class="ds-input" style="width:110px" type="date" id="wsmdate-${slug(ws.name)}-${i}" value="${m.date||''}">
+          <input class="ds-input" style="flex:1" type="text" id="wsmnotes-${slug(ws.name)}-${i}" value="${m.notes||''}" placeholder="Meeting notes…">
+          <button style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px" onclick="deleteWsMeeting('${safeWs}',${i})">✕</button>
+        </div>`).join('');
+      return`<div style="margin-bottom:16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+        <div style="padding:8px 12px;background:var(--surface3);border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);font-weight:600">${ws.code} · ${ws.name}</div>
+        <div style="padding:10px 12px;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Weekly Deliverables</div>
+          ${delForms}
+          <button class="add-meeting-btn" style="margin-bottom:12px" onclick="addDeliverable('${safeWs}')">+ Add deliverable</button>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Workshop Meetings</div>
+          ${meetForms}
+          <button class="add-meeting-btn" onclick="addWsMeeting('${safeWs}')">+ Add meeting</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    html=`<div class="ds-section">
+      <div class="ds-title">Town Halls</div>
+      ${thForms}
+      <button class="add-meeting-btn" onclick="addTownhall()">+ Add town hall</button>
+      <button class="save-detail-btn" onclick="saveTownhalls()">Save town halls</button>
+    </div>
+    <div class="ds-section" style="margin-top:16px">
+      <div class="ds-title">Workshop Deliverables + Meetings</div>
+      ${wsForms}
+      <button class="save-detail-btn" onclick="saveWsDeliveries('${safeN}')">Save deliverables & meetings</button>
+    </div>`;
+  }
+
+  document.getElementById('dm-body').innerHTML=html;
+}
+
+function addTownhall(){if(!s5data.__townhalls__)s5data.__townhalls__=[];s5data.__townhalls__.push({date:'',topic:'',notes:''});renderDmBody();}
+function deleteTownhall(i){s5data.__townhalls__?.splice(i,1);renderDmBody();}
+function saveTownhalls(){
+  const ths=s5data.__townhalls__||[];
+  s5data.__townhalls__=ths.map((_,i)=>({date:document.getElementById(`thdate-${i}`)?.value||'',topic:document.getElementById(`thtopic-${i}`)?.value||'',notes:document.getElementById(`thnotes-${i}`)?.value||''}));
+  saveAll();showToast('✓ Town halls saved');
+}
+function addDeliverable(wsName){if(!s5data.__deliverables__)s5data.__deliverables__={};if(!s5data.__deliverables__[wsName])s5data.__deliverables__[wsName]=[];s5data.__deliverables__[wsName].push({week:'',text:''});renderDmBody();}
+function deleteDeliverable(wsName,i){s5data.__deliverables__?.[wsName]?.splice(i,1);renderDmBody();}
+function addWsMeeting(wsName){if(!s5data.__wsmeetings__)s5data.__wsmeetings__={};if(!s5data.__wsmeetings__[wsName])s5data.__wsmeetings__[wsName]=[];s5data.__wsmeetings__[wsName].push({date:'',notes:''});renderDmBody();}
+function deleteWsMeeting(wsName,i){s5data.__wsmeetings__?.[wsName]?.splice(i,1);renderDmBody();}
+function saveWsDeliveries(name){
+  const s2=STUDENTS.find(s=>s.n===name);
+  const levelWs=S5_WORKSHOPS[s2?.l]||[];
+  if(!s5data.__deliverables__)s5data.__deliverables__={};
+  if(!s5data.__wsmeetings__)s5data.__wsmeetings__={};
+  levelWs.forEach(ws=>{
+    const dels=s5data.__deliverables__[ws.name]||[];
+    s5data.__deliverables__[ws.name]=dels.map((_,i)=>({week:document.getElementById(`delweek-${slug(ws.name)}-${i}`)?.value||'',text:document.getElementById(`deltext-${slug(ws.name)}-${i}`)?.value||''}));
+    const meets=s5data.__wsmeetings__[ws.name]||[];
+    s5data.__wsmeetings__[ws.name]=meets.map((_,i)=>({date:document.getElementById(`wsmdate-${slug(ws.name)}-${i}`)?.value||'',notes:document.getElementById(`wsmnotes-${slug(ws.name)}-${i}`)?.value||''}));
+  });
+  logAudit('wsdata',name,'deliverables+meetings','updated');
+  saveAll();showToast('✓ Saved');
+}
+  const sl=slug(name);
+  if(!s5data.__3cs__)s5data.__3cs__={};
+  s5data.__3cs__[name]={
+    challenge:document.getElementById(`3c-challenge-${sl}`)?.value||'',
+    connect:document.getElementById(`3c-connect-${sl}`)?.value||'',
+    create:document.getElementById(`3c-create-${sl}`)?.value||'',
+    plan:document.getElementById(`3c-plan-${sl}`)?.value||'',
+  };
+  logAudit('profile',name,'3Cs','updated');
+  saveAll();showToast('✓ 3Cs saved');
+}
+
+function saveMeetings(name){
+  const sl=slug(name);
+  const meetings=s5data.__meetings__?.[name]||[];
+  if(!s5data.__meetings__)s5data.__meetings__={};
+  s5data.__meetings__[name]=meetings.map((_,i)=>({
+    date:document.getElementById(`mdate-${sl}-${i}`)?.value||'',
+    type:document.getElementById(`mtype-${sl}-${i}`)?.value||'1:1',
+    notes:document.getElementById(`mnotes-${sl}-${i}`)?.value||'',
+    actions:document.getElementById(`mactions-${sl}-${i}`)?.value||'',
+  }));
+  logAudit('profile',name,'meetings','updated');
+  saveAll();showToast('✓ Meetings saved');
+}
+
+function addMeeting(name){
+  if(!s5data.__meetings__)s5data.__meetings__={};
+  if(!s5data.__meetings__[name])s5data.__meetings__[name]=[];
+  s5data.__meetings__[name].push({date:'',type:'1:1',notes:'',actions:''});
+  renderDmBody();
+}
+
+function deleteMeeting(name,idx){
+  if(!s5data.__meetings__?.[name])return;
+  s5data.__meetings__[name].splice(idx,1);
+  renderDmBody();
+}
+
+function saveNotes(name){
+  const sl=slug(name);
+  if(!s5data.__profiles__)s5data.__profiles__={};
+  if(!s5data.__profiles__[name])s5data.__profiles__[name]={};
+  if(!s5data.__weeknotes__)s5data.__weeknotes__={};
+  if(!s5data.__weeknotes__[name])s5data.__weeknotes__[name]={};
+  CHECKPOINTS.forEach(chk=>{
+    const el=document.getElementById(`wn-${slug(chk.key)}-${sl}`);
+    if(el)s5data.__weeknotes__[name][chk.key]=el.value;
+  });
+  const loves=document.getElementById(`loves-${sl}`);const xp=document.getElementById(`xp-${sl}`);
+  if(loves)s5data.__profiles__[name].lovesSchool=loves.value;
+  if(xp)s5data.__profiles__[name].xp=xp.value;
+  logAudit('profile',name,'notes','updated');
+  saveAll();showToast('✓ Notes saved');
+}
+
+// ── Workshop Data tab (Zara only) ─────────────────────────────────
+function renderWsData(){
+  const lv=document.getElementById('wd-level').value;
+  const wsArr=S5_WORKSHOPS[lv]||[];
+  // Populate workshop dropdown
+  const wdSel=document.getElementById('wd-workshop');
+  const prevWs=wdSel.value;
+  wdSel.innerHTML=wsArr.map(ws=>`<option value="${ws.name}">${ws.code} — ${ws.name}</option>`).join('');
+  if(prevWs&&wsArr.find(w=>w.name===prevWs))wdSel.value=prevWs;
+  const wsName=wdSel.value;
+  if(!wsName){document.getElementById('wd-content').innerHTML='<div style="color:var(--muted2);padding:20px;font-size:13px">Select a workshop</div>';return;}
+
+  const students=[...STUDENTS].filter(s=>s.l===lv).sort((a,b)=>a.n.localeCompare(b.n));
+  const rows=students.map(s=>{
+    const scores=s5data[s.n]||{};
+    const final=scores[wsName]||'';
+    const chkCells=CHECKPOINTS.map(chk=>{
+      const v=scores[chkKey(wsName,chk.key)]||'';
+      const opts=getChkOptions(chk.key);
+      const optHtml=opts.map(o=>`<option ${v===o.val?'selected':''}>${o.val}</option>`).join('');
+      return`<td><select class="ws-edit-input" id="wdchk-${slug(s.n)}-${chk.key}"><option value=""></option>${optHtml}</select></td>`;
+    }).join('');
+    const finalOpts=['','Passed','Not passed','Absent'].map(o=>`<option ${final===o?'selected':''}>${o}</option>`).join('');
+    return`<tr>
+      <td style="font-weight:500;color:var(--text);white-space:nowrap">${s.n}</td>
+      ${chkCells}
+      <td><select class="ws-edit-input" id="wdfin-${slug(s.n)}"><option value=""></option>${finalOpts}</select></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('wd-content').innerHTML=`
+    <table class="ws-data-table">
+      <thead><tr>
+        <th>Student</th>
+        ${CHECKPOINTS.map(c=>`<th>${c.label}</th>`).join('')}
+        <th>Final (T2P)</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function saveWsData(){
+  const lv=document.getElementById('wd-level').value;
+  const wsName=document.getElementById('wd-workshop').value;
+  if(!wsName)return;
+  const students=[...STUDENTS].filter(s=>s.l===lv);
+  students.forEach(s=>{
+    if(!s5data[s.n])s5data[s.n]={};
+    CHECKPOINTS.forEach(chk=>{
+      const v=document.getElementById(`wdchk-${slug(s.n)}-${chk.key}`)?.value;
+      const key=chkKey(wsName,chk.key);
+      if(v)s5data[s.n][key]=v;else delete s5data[s.n][key];
+    });
+    const fin=document.getElementById(`wdfin-${slug(s.n)}`)?.value;
+    if(fin)s5data[s.n][wsName]=fin;else delete s5data[s.n][wsName];
+  });
+  logAudit('wsdata','(bulk)',wsName,'updated by '+currentUser);
+  saveAll();
+}
+
+// ── Audit ──────────────────────────────────────────────────────────
+function openAudit(){
+  const entries=s5data.__audit__||[];
+  document.getElementById('audit-body').innerHTML=entries.length
+    ?entries.map(e=>{
+        const d=new Date(e.ts);
+        const time=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        const ec=e.value==='Passed'?'ep':e.value==='Not passed'||e.value==='Behind'?'ef':e.value==='Absent'?'ea':'eg';
+        const sc=e.value==='Passed'?'as-p':e.value==='Not passed'||e.value==='Behind'?'as-f':e.value==='Absent'?'as-a':'as-g';
+        return`<div class="audit-entry ${ec}"><span class="audit-who">${e.who}</span><div class="audit-detail"><div class="audit-action"><strong>${e.student}</strong> · ${e.detail}</div><div class="audit-time">${time}</div></div><span class="audit-st ${sc}">${e.value||'—'}</span></div>`;
+      }).join('')
+    :'<div style="color:var(--muted2);font-size:13px;padding:40px 0;text-align:center;font-style:italic">No edits yet.</div>';
+  document.getElementById('audit-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeAudit(){document.getElementById('audit-overlay').classList.remove('open');document.body.style.overflow='';}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeAssign();closeAudit();closeDetail();}
+});
+</script>
+</body>
+</html>

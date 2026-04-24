@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T2P — Session 5 Progress</title>
+<script src="config.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f6f2;--card:#fff;--border:#e5e4e0;--text:#1a1a1a;--muted:#999;--radius:12px;
+  --ll:#1a56db;--ll-bg:#e8f0fe;--l1:#9333ea;--l1-bg:#fce8ff;
+  --l2:#0f766e;--l2-bg:#e8fdf4;--ms:#b45309;--ms-bg:#fff4e8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+header{background:#1a1a1a;color:white;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header-left{display:flex;align-items:center;gap:12px;}
+header h1{font-size:15px;font-weight:600;}
+.s5-live{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:#ef4444;background:#2a0a0a;border:1px solid #5a1a1a;padding:3px 9px;border-radius:20px;}
+.s5-live::before{content:'';width:5px;height:5px;border-radius:50%;background:#ef4444;flex-shrink:0;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-links{display:flex;gap:8px;}
+.nav-link{font-size:12px;color:#aaa;text-decoration:none;padding:5px 12px;border:1px solid #333;border-radius:20px;transition:all .15s;}
+.nav-link:hover{color:white;border-color:#666;}
+
+/* CONTROLS */
+.controls{padding:10px 28px;background:white;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.level-tabs{display:flex;gap:4px;}
+.lvl-btn{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:#f0f0ee;color:#bbb;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.lvl-btn.aLL{background:var(--ll-bg);color:var(--ll);border-color:var(--ll);}
+.lvl-btn.aL1{background:var(--l1-bg);color:var(--l1);border-color:var(--l1);}
+.lvl-btn.aL2{background:var(--l2-bg);color:var(--l2);border-color:var(--l2);}
+.lvl-btn.aMS{background:var(--ms-bg);color:var(--ms);border-color:var(--ms);}
+.vdiv{width:1px;height:24px;background:var(--border);}
+select,input{padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid var(--border);border-radius:7px;background:white;color:var(--text);outline:none;}
+.count-pill{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border);}
+
+/* WORKSHOP BLOCK */
+.page{padding:20px 28px;display:flex;flex-direction:column;gap:24px;}
+.ws-block{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
+.ws-block-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.ws-code-badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px;}
+.ws-info{flex:1;min-width:180px;}
+.ws-name{font-size:15px;font-weight:600;margin-bottom:2px;}
+.ws-guide-row{font-size:11px;color:var(--muted);}
+.ws-skill-pill{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;background:var(--bg);border:1px solid var(--border);color:var(--muted);flex-shrink:0;margin-top:3px;}
+.ws-pbar-wrap{display:flex;align-items:center;gap:8px;min-width:120px;}
+.ws-pbar{flex:1;height:5px;background:#eee;border-radius:3px;overflow:hidden;}
+.ws-pbar-fill{height:100%;border-radius:3px;background:#16a34a;transition:width .4s;}
+.ws-pbar-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;}
+
+/* I-CAN STATEMENT */
+.ican-row{padding:10px 18px;background:#fafaf8;border-bottom:1px solid var(--border);font-size:12px;color:#444;display:flex;align-items:flex-start;gap:8px;}
+.ican-tag{font-size:10px;font-weight:700;color:#16a34a;background:#ecfdf5;border:1px solid #86efac;padding:2px 7px;border-radius:5px;flex-shrink:0;margin-top:1px;}
+
+/* DELIVERABLES & MEETINGS */
+.ws-extras{padding:0 18px 16px;display:flex;flex-direction:column;gap:12px;}
+.extras-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:640px){.extras-row{grid-template-columns:1fr;}}
+.extras-block{background:#fafaf8;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.extras-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);background:#f5f4f0;}
+.extras-list{padding:8px 0;}
+.extras-empty{padding:8px 12px;font-size:12px;color:#ccc;font-style:italic;}
+.deliverable-row{display:flex;align-items:flex-start;gap:8px;padding:5px 12px;}
+.del-week{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);min-width:50px;flex-shrink:0;margin-top:1px;}
+.del-text{font-size:12px;color:var(--text);flex:1;line-height:1.4;}
+.meeting-row{display:flex;align-items:flex-start;gap:8px;padding:5px 12px;border-bottom:1px solid var(--border);}
+.meeting-row:last-child{border-bottom:none;}
+.meeting-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);min-width:80px;flex-shrink:0;margin-top:1px;}
+.meeting-text{font-size:12px;color:var(--text);flex:1;line-height:1.4;}
+.meeting-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.townhall-row{display:flex;align-items:center;gap:10px;padding:6px 12px;border-bottom:1px solid var(--border);}
+.townhall-row:last-child{border-bottom:none;}
+.townhall-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);min-width:80px;flex-shrink:0;}
+.townhall-topic{font-size:12px;color:var(--text);flex:1;}
+.ws-section-divider{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:10px 18px 4px;}
+.ws-table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:7px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.chk-th{text-align:center;min-width:90px;}
+td{padding:9px 12px;border-bottom:1px solid #f4f3ef;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafaf8;}
+.s-name{font-weight:500;}
+.s-note{font-size:10px;color:var(--muted);font-style:italic;display:block;}
+.chk-td{text-align:center;}
+
+/* CHECKPOINT STATUS */
+.chk-dot{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:12px;border:1.5px solid;}
+.chk-dot.st-pass{background:#ecfdf5;border-color:#86efac;color:#16a34a;}
+.chk-dot.st-fail{background:#fef2f2;border-color:#fca5a5;color:#dc2626;}
+.chk-dot.st-absent{background:#fffbeb;border-color:#fde68a;color:#d97706;}
+.chk-dot.st-empty{background:#f7f6f2;border-color:#e0dedd;color:#ddd;}
+
+/* FINAL STATUS */
+.st-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.st-pill.pass{background:#ecfdf5;color:#16a34a;border:1px solid #86efac;}
+.st-pill.fail{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;}
+.st-pill.absent{background:#fffbeb;color:#d97706;border:1px solid #fde68a;}
+.st-pill.pending{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+
+.loading{padding:60px;text-align:center;color:var(--muted);}
+.empty-msg{padding:40px;text-align:center;color:var(--muted);font-size:13px;font-style:italic;}
+
+@media(max-width:640px){
+  .page,.controls,header{padding-left:14px;padding-right:14px;}
+  .ws-name{font-size:13px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Session 5 Progress</h1>
+    <span class="s5-live">Live</span>
+  </div>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">← Home</a>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="level-tabs" id="level-tabs">
+    <button class="lvl-btn aLL" data-l="LL" onclick="setLevel('LL',this)">LL</button>
+    <button class="lvl-btn" data-l="L1" onclick="setLevel('L1',this)">L1</button>
+    <button class="lvl-btn" data-l="L2" onclick="setLevel('L2',this)">L2</button>
+    <button class="lvl-btn" data-l="MS" onclick="setLevel('MS',this)">MS</button>
+  </div>
+  <div class="vdiv"></div>
+  <select id="wsFilter" onchange="render()">
+    <option value="">All workshops</option>
+  </select>
+  <select id="sortSel" onchange="render()">
+    <option value="name">Sort: A–Z</option>
+    <option value="progress">Sort: Most progress</option>
+  </select>
+  <span class="count-pill" id="count-pill"></span>
+</div>
+
+<div class="page" id="page"><div class="loading">Loading…</div></div>
+
+<script>
+// ── Full workshop data with I-Can statements ──────────────────────────────
+const WORKSHOPS = {
+  LL:[
+    {code:"SP-01",name:"Mission Laika — Storytelling",skill:"Collaboration",guide:"TBD",day:"Monday",
+     ican:"I can author and illustrate a real printed picture book about an adoptable shelter dog, and read it aloud at Family Field Day.",
+     ttp:"Author and illustrate a real printed picture book about an adoptable shelter dog. Book is stocked at the partner shelter, sold at the adoption event, and read aloud by the author at Family Field Day."},
+    {code:"SP-02",name:"Propulsion Lab",skill:"Critical Thinking",guide:"Jenna Klemm",day:"Tue/Thu",
+     ican:"I can diagnose a failed rocket launch, make a targeted fix, successfully relaunch, and recover usable payload footage from the high-altitude balloon.",
+     ttp:"Diagnose a failed rocket launch, make a targeted fix, successfully relaunch, and recover usable payload footage from the high-altitude balloon."},
+    {code:"SP-03",name:"Mission Control",skill:"Leadership",guide:"Jesse Moskowitz",day:"Tue/Thu",
+     ican:"I can lead a team through a live hackathon with zero adult intervention and earn a 90%+ leadership rating from participants.",
+     ttp:"Lead a team through a live hackathon with zero adult intervention and earn a 90%+ leadership rating from participants."},
+    {code:"SP-04",name:"Cadet Qualification Training",skill:"Grit",guide:"Jenna Klemm",day:"Wednesday",
+     ican:"I can complete all five qualifications and earn Cadet Wings through the final combined course.",
+     ttp:"Complete all five qualifications and earn Cadet Wings through the final combined course."},
+    {code:"SP-05",name:"Junior Space Camp — Island Standard",skill:"Teamwork",guide:"Jenna Klemm",day:"Friday",
+     ican:"I can coordinate and complete team challenges while maintaining responsibility for a defined role.",
+     ttp:"Coordinate and complete team challenges while maintaining responsibility for a defined role."},
+  ],
+  L1:[
+    {code:"OP-01",name:"Mission Laika — Media + Outreach",skill:"Public Speaking",guide:"TBD",day:"Monday",
+     ican:"I can drive measurable foot traffic to the adoption event and secure a minimum number of verifiable press hits from local NYC outlets.",
+     ttp:"Drive measurable foot traffic to the adoption event (target attendance threshold) AND secure a minimum number of verifiable press hits from local NYC outlets."},
+    {code:"OP-02",name:"Drone Wing",skill:"Teamwork",guide:"Parthvi Harde",day:"Tue/Thu",
+     ican:"I can pass the FAA TRUST exam and complete a full rescue mission with defined roles and successful execution.",
+     ttp:"Pass the FAA TRUST exam and complete a full rescue mission with defined roles and successful execution."},
+    {code:"OP-03",name:"Stock Simulator",skill:"Financial Literacy",guide:"Nathan Witkin",day:"Tue/Thu",
+     ican:"I can outperform the starting portfolio and defend at least three trading decisions using market reasoning.",
+     ttp:"Outperform the starting portfolio and defend at least three trading decisions using market reasoning."},
+    {code:"OP-04",name:"Recon Expedition",skill:"Grit",guide:"Jesse + Parthvi",day:"Wednesday",
+     ican:"I can complete the full recon course and 5K within the mission window.",
+     ttp:"Complete the full recon course and 5K within the mission window."},
+    {code:"OP-05",name:"Junior Space Camp — Island Standard",skill:"Teamwork",guide:"Parthvi",day:"Friday",
+     ican:"I can coordinate and complete team challenges while maintaining responsibility for a defined role.",
+     ttp:"Coordinate and complete team challenges while maintaining responsibility for a defined role."},
+  ],
+  L2:[
+    {code:"FC-01",name:"Mission Laika — Product + Sales",skill:"Entrepreneurship",guide:"TBD",day:"Monday",
+     ican:"I can ship a branded adopter starter-kit line that sells out at the adoption event and gets retained as a permanent SKU by the partner shelter.",
+     ttp:"A branded adopter starter-kit line ships, sells out at the adoption event, and gets retained as a permanent SKU line by the partner shelter for ongoing use."},
+    {code:"FC-02",name:"Alpha Emporium Exchange",skill:"Entrepreneurship",guide:"Jenna Petrungaro",day:"Tue/Thu",
+     ican:"I can run a live marketplace exchange and hit my profit targets.",
+     ttp:"Run a live marketplace exchange and hit profit targets."},
+    {code:"FC-03",name:"Drone Wing",skill:"Teamwork",guide:"TBD",day:"Tue/Thu",
+     ican:"I can pass the FAA TRUST exam and complete a full rescue mission with defined roles and successful execution.",
+     ttp:"Pass the FAA TRUST exam and complete a full rescue mission with defined roles and successful execution."},
+    {code:"FC-04",name:"Tri Hard (Row · Ride · Run)",skill:"Grit",guide:"Chauncey Nartey",day:"Wednesday",
+     ican:"I can complete the full Row · Ride · Run event and demonstrate measurable improvement from baseline across all three disciplines.",
+     ttp:"Complete the full Row · Ride · Run event and demonstrate measurable improvement from baseline across all three disciplines."},
+    {code:"FC-05",name:"Junior Space Camp — Island Standard",skill:"Teamwork",guide:"Jenna P",day:"Friday",
+     ican:"I can coordinate and complete team challenges while maintaining responsibility for a defined role.",
+     ttp:"Coordinate and complete team challenges while maintaining responsibility for a defined role."},
+  ],
+  MS:[
+    {code:"MS-01",name:"Mission Laika — Strategy + Execution",skill:"Leadership",guide:"TBD",day:"Monday",
+     ican:"I can formally pitch a sustainable program to shelter leadership that gets accepted, piloted, and permanently adopted — with handoff documentation delivered.",
+     ttp:"Formally pitch a sustainable program to shelter leadership; program is accepted, piloted, and permanently adopted by the shelter — with handoff documentation delivered."},
+    {code:"MS-02",name:"Sail La Vie",skill:"Teamwork",guide:"Emily Lopez",day:"Tue/Thu",
+     ican:"I can navigate a celestial course and complete the sailing challenge.",
+     ttp:"Navigate a celestial course and complete the sailing challenge."},
+    {code:"MS-03",name:"Rover Engineering Corps",skill:"Independence",guide:"Emily Lopez",day:"Tue/Thu",
+     ican:"I can build a fully functional street-legal Class 2 e-rover that passes a licensed NYC mechanic's Flight Readiness Review and completes a multi-mile ride in Central Park with zero mechanical or electrical failure.",
+     ttp:"Build a fully functional street-legal Class 2 e-rover that passes a licensed NYC mechanic's Flight Readiness Review and completes a multi-mile ride in Central Park with zero mechanical or electrical failure."},
+    {code:"MS-04",name:"Tri Hard (Row · Ride · Run)",skill:"Grit",guide:"Chauncey Nartey",day:"Wednesday",
+     ican:"I can complete the full Row · Ride · Run event and demonstrate measurable improvement from baseline across all three disciplines.",
+     ttp:"Complete the full Row · Ride · Run event and demonstrate measurable improvement from baseline across all three disciplines."},
+    {code:"MS-05",name:"Mission Command — Island Standard",skill:"Leadership",guide:"Chauncey + Liam",day:"Friday",
+     ican:"I can design, coach, and run the full Governors Island experience for younger students with zero adult intervention.",
+     ttp:"Design, coach, and run the full Governors Island experience for younger students with zero adult intervention."},
+  ]
+};
+
+const LEVEL_COLORS = {LL:'var(--ll)',L1:'var(--l1)',L2:'var(--l2)',MS:'var(--ms)'};
+const LEVEL_BGS   = {LL:'var(--ll-bg)',L1:'var(--l1-bg)',L2:'var(--l2-bg)',MS:'var(--ms-bg)'};
+
+const CFG = (typeof T2P_CONFIG !== 'undefined') ? T2P_CONFIG : {students:[]};
+// Default checkpoints if not in config
+const CHECKPOINTS = CFG.checkpoints || [
+  {key:'w1', label:'Week 1 Baseline'},
+  {key:'w3', label:'Week 3: Checkpoint 1'},
+  {key:'w5', label:'Week 5: Checkpoint 2'},
+  {key:'w7', label:'Week 7: T2P'},
+];
+
+let currentLevel = 'LL';
+let s5data = {};
+
+async function loadData(){
+  try{
+    const r = await window.storage.get('s5data');
+    if(r?.value) s5data = JSON.parse(r.value);
+  }catch(e){}
+  populateWsFilter();
+  render();
+}
+
+function populateWsFilter(){
+  const sel = document.getElementById('wsFilter');
+  sel.innerHTML = '<option value="">All workshops</option>';
+  (WORKSHOPS[currentLevel]||[]).forEach(ws=>{
+    const o=document.createElement('option');
+    o.value=ws.name; o.textContent=`${ws.code} — ${ws.name}`;
+    sel.appendChild(o);
+  });
+}
+
+function setLevel(l,btn){
+  currentLevel=l;
+  document.querySelectorAll('.lvl-btn').forEach(b=>{
+    b.className='lvl-btn';
+  });
+  btn.classList.add('a'+l);
+  populateWsFilter();
+  render();
+}
+
+function getChk(studentName,wsName,chkKey){
+  return s5data[studentName]?.[`__chk__${wsName}__${chkKey}`]||null;
+}
+function getFinal(studentName,wsName){
+  return s5data[studentName]?.[wsName]||null;
+}
+
+function dotHtml(val){
+  const cls = val==='Passed'?'st-pass':val==='Not passed'?'st-fail':val==='Absent'?'st-absent':'st-empty';
+  const icon = val==='Passed'?'✓':val==='Not passed'?'✗':val==='Absent'?'–':'';
+  return `<span class="chk-dot ${cls}">${icon}</span>`;
+}
+
+function finalPill(val){
+  if(val==='Passed')     return '<span class="st-pill pass">✓ Passed</span>';
+  if(val==='Not passed') return '<span class="st-pill fail">✗ Not passed</span>';
+  if(val==='Absent')     return '<span class="st-pill absent">– Absent</span>';
+  return '<span class="st-pill pending">— Pending</span>';
+}
+
+function getDeliverables(wsName) {
+  return s5data.__deliverables__?.[wsName] || [];
+}
+function getMeetings(wsName) {
+  return s5data.__wsmeetings__?.[wsName] || [];
+}
+function getTownhalls() {
+  return s5data.__townhalls__ || [];
+}
+
+function render(){
+  const wsFilter = document.getElementById('wsFilter').value;
+  const sort     = document.getElementById('sortSel').value;
+  let workshops  = WORKSHOPS[currentLevel]||[];
+  if(wsFilter) workshops = workshops.filter(w=>w.name===wsFilter);
+
+  let students = (CFG.students||[]).filter(s=>s.l===currentLevel);
+  if(sort==='progress'){
+    students = students.sort((a,b)=>{
+      const pa=workshops.filter(w=>getFinal(a.n,w.name)==='Passed').length;
+      const pb=workshops.filter(w=>getFinal(b.n,w.name)==='Passed').length;
+      return pb-pa;
+    });
+  } else {
+    students = students.sort((a,b)=>a.n.localeCompare(b.n));
+  }
+
+  document.getElementById('count-pill').textContent=`${students.length} students · ${workshops.length} workshops`;
+
+  if(!students.length){
+    document.getElementById('page').innerHTML='<div class="empty-msg">No students found for this level.</div>';
+    return;
+  }
+
+  const color = LEVEL_COLORS[currentLevel];
+  const bg    = LEVEL_BGS[currentLevel];
+
+  // Town halls section (global, not per workshop)
+  const townhalls = getTownhalls();
+  const townhallHtml = townhalls.length
+    ? townhalls.map(t=>`<div class="townhall-row"><span class="townhall-date">${t.date||''}</span><span class="townhall-topic">${t.topic||''}</span></div>`).join('')
+    : '<div class="extras-empty">No town halls recorded yet</div>';
+
+  const townhallBlock = `<div class="ws-block" style="margin-bottom:0;">
+    <div class="ws-block-header" style="padding:12px 18px;">
+      <div class="ws-info"><div class="ws-name" style="font-size:14px;">📢 Weekly Town Halls</div><div class="ws-guide-row">All levels · Full school</div></div>
+    </div>
+    <div class="extras-list">${townhallHtml}</div>
+  </div>`;
+
+  document.getElementById('page').innerHTML = townhallBlock + workshops.map(ws=>{
+    const passCount = students.filter(s=>getFinal(s.n,ws.name)==='Passed').length;
+    const pct = Math.round(passCount/students.length*100);
+
+    const headerRow = `<th style="min-width:160px">Student</th>
+      ${CHECKPOINTS.map(c=>`<th class="chk-th">${c.label}</th>`).join('')}
+      <th>Status</th>`;
+
+    const bodyRows = students.map(s=>{
+      const chkCells = CHECKPOINTS.map(c=>`<td class="chk-td">${dotHtml(getChk(s.n,ws.name,c.key))}</td>`).join('');
+      return `<tr>
+        <td><span class="s-name">${s.n}</span>${s.note?`<span class="s-note">* ${s.note}</span>`:''}</td>
+        ${chkCells}
+        <td>${finalPill(getFinal(s.n,ws.name))}</td>
+      </tr>`;
+    }).join('');
+
+    // Deliverables
+    const deliverables = getDeliverables(ws.name);
+    const delHtml = deliverables.length
+      ? deliverables.map(d=>`<div class="deliverable-row"><span class="del-week">${d.week||''}</span><span class="del-text">${d.text||''}</span></div>`).join('')
+      : '<div class="extras-empty">No deliverables recorded yet</div>';
+
+    // Meetings
+    const meetings = getMeetings(ws.name);
+    const meetHtml = meetings.length
+      ? meetings.map(m=>`<div class="meeting-row"><span class="meeting-date">${m.date||''}</span><div class="meeting-text">${m.notes||''}<div class="meeting-sub">${m.type||''}</div></div></div>`).join('')
+      : '<div class="extras-empty">No meetings recorded yet</div>';
+
+    return `<div class="ws-block">
+      <div class="ws-block-header">
+        <span class="ws-code-badge" style="background:${bg};color:${color}">${ws.code}</span>
+        <div class="ws-info">
+          <div class="ws-name">${ws.name}</div>
+          <div class="ws-guide-row">${ws.guide} · ${ws.day}</div>
+        </div>
+        <span class="ws-skill-pill">${ws.skill}</span>
+        <div class="ws-pbar-wrap">
+          <div class="ws-pbar"><div class="ws-pbar-fill" style="width:${pct}%"></div></div>
+          <span class="ws-pbar-label">${passCount}/${students.length} passed</span>
+        </div>
+      </div>
+      <div class="ican-row">
+        <span class="ican-tag">I can</span>
+        <span>${ws.ican}</span>
+      </div>
+      <div class="ws-table-wrap">
+        <table><thead><tr>${headerRow}</tr></thead><tbody>${bodyRows}</tbody></table>
+      </div>
+      <div class="ws-extras">
+        <div class="extras-row">
+          <div class="extras-block">
+            <div class="extras-title">Weekly Deliverables</div>
+            <div class="extras-list">${delHtml}</div>
+          </div>
+          <div class="extras-block">
+            <div class="extras-title">Meetings</div>
+            <div class="extras-list">${meetHtml}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+loadData();
+</script>
+</body>
+</html>

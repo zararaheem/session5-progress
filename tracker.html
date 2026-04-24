@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T2P Patch Tracker — Alpha NYC</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --s1:#3b82f6;--s1-bg:#eff6ff;--s1-text:#1d4ed8;
+  --s2:#8b5cf6;--s2-bg:#f5f3ff;--s2-text:#6d28d9;
+  --s3:#10b981;--s3-bg:#ecfdf5;--s3-text:#065f46;
+  --s4:#f59e0b;--s4-bg:#fffbeb;--s4-text:#92400e;
+  --s5:#ef4444;--s5-bg:#fef2f2;--s5-text:#991b1b;
+  --bg:#f7f6f2;--card:#fff;--border:#e5e4e0;
+  --text:#1a1a1a;--muted:#999;--radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* HEADER */
+header{background:var(--text);color:white;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.hdr-title{font-size:15px;font-weight:600;}
+.hdr-right{display:flex;align-items:center;gap:8px;}
+.hdr-link{font-family:'DM Mono',monospace;font-size:11px;color:#666;text-decoration:none;border:1px solid #333;padding:5px 12px;border-radius:20px;transition:all .15s;}
+.hdr-link:hover{color:#ccc;border-color:#666;}
+.s5-dot{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#ef4444;background:#2a0a0a;border:1px solid #5a1a1a;padding:3px 9px;border-radius:20px;}
+.s5-dot::before{content:'';width:5px;height:5px;border-radius:50%;background:#ef4444;flex-shrink:0;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.edit-btn{font-family:'DM Mono',monospace;font-size:11px;background:transparent;border:1px solid #444;color:#888;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .15s;}
+.edit-btn:hover{border-color:#888;color:#ccc;}
+.edit-btn.active{border-color:#3b82f6;color:#60a5fa;background:rgba(59,130,246,.1);}
+
+/* CONTROLS */
+.controls{padding:10px 28px;background:white;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.sess-toggles{display:flex;gap:4px;flex-wrap:wrap;}
+.sess-btn{padding:4px 13px;border-radius:20px;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;border:1.5px solid var(--border);background:#f0f0ee;color:#bbb;cursor:pointer;transition:all .15s;}
+.sess-btn.active[data-s="S1"]{background:var(--s1-bg);color:var(--s1-text);border-color:var(--s1);}
+.sess-btn.active[data-s="S2"]{background:var(--s2-bg);color:var(--s2-text);border-color:var(--s2);}
+.sess-btn.active[data-s="S3"]{background:var(--s3-bg);color:var(--s3-text);border-color:var(--s3);}
+.sess-btn.active[data-s="S4"]{background:var(--s4-bg);color:var(--s4-text);border-color:var(--s4);}
+.sess-btn.active[data-s="S5"]{background:var(--s5-bg);color:var(--s5-text);border-color:var(--s5);}
+.sess-btn:hover{opacity:.85;transform:translateY(-1px);}
+.vdiv{width:1px;height:24px;background:var(--border);}
+select{padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid var(--border);border-radius:7px;background:white;color:var(--text);outline:none;}
+select:focus{border-color:#3b82f6;}
+.count-pill{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border);}
+
+/* GRID */
+.grid{padding:20px 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
+
+/* CARDS */
+.student-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all .2s;}
+.student-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.07);border-color:#ccc;}
+.student-card:hover .card-arrow{opacity:1;transform:translateX(0);}
+.card-header{padding:12px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;border-bottom:1px solid var(--bg);}
+.card-header-left{flex:1;}
+.card-name{font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.card-note{font-size:10px;color:var(--muted);margin-top:2px;font-style:italic;}
+.card-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.card-arrow{font-size:12px;color:var(--muted);opacity:0;transform:translateX(-4px);transition:all .2s;}
+.level-tag{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 6px;border-radius:4px;flex-shrink:0;}
+.tag-LL{background:#e8f0fe;color:#1a56db;}
+.tag-L1{background:#fce8ff;color:#9333ea;}
+.tag-L2{background:#e8fdf4;color:#0f766e;}
+.tag-MS{background:#fff4e8;color:#b45309;}
+.s5-pin{width:6px;height:6px;border-radius:50%;background:#ef4444;animation:pulse 1.5s infinite;flex-shrink:0;}
+.patch-list{padding:6px 0;}
+.patch-row{display:flex;align-items:center;gap:8px;padding:4px 14px;transition:background .1s;}
+.patch-row:hover{background:var(--bg);}
+.patch-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.patch-sess{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);min-width:18px;}
+.patch-name{font-size:11px;color:#333;flex:1;}
+.card-footer{padding:6px 14px 10px;border-top:1px solid var(--bg);display:flex;gap:4px;flex-wrap:wrap;}
+.footer-pill{font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;border-radius:5px;background:var(--bg);color:var(--muted);}
+.no-patches{padding:9px 14px 12px;font-size:11px;color:#bbb;font-style:italic;}
+
+/* DETAIL MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px);}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:white;border-radius:18px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;transform:translateY(14px) scale(.98);transition:transform .2s;box-shadow:0 20px 60px rgba(0,0,0,.16);}
+.modal-overlay.open .modal{transform:none;}
+.modal-hdr{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;background:white;border-radius:18px 18px 0 0;z-index:1;}
+.modal-title{font-size:17px;font-weight:600;}
+.modal-sub{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.modal-close{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .15s;flex-shrink:0;}
+.modal-close:hover{background:var(--border);}
+.modal-note-box{margin:12px 22px 0;padding:8px 12px;background:#f9f9f7;border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted);}
+.modal-stats{padding:12px 22px;border-top:1px solid var(--bg);display:flex;gap:8px;flex-wrap:wrap;}
+.modal-stat{flex:1;min-width:64px;background:var(--bg);border-radius:8px;padding:8px 12px;text-align:center;}
+.modal-stat-val{font-size:20px;font-weight:600;}
+.modal-stat-lbl{font-size:10px;color:var(--muted);margin-top:1px;}
+.modal-body{padding:12px 22px;}
+.modal-sess-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;margin-top:3px;}
+.modal-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;font-size:12px;transition:background .1s;}
+.modal-row:hover{background:var(--bg);}
+.modal-row-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.modal-row-name{flex:1;font-weight:500;}
+.modal-row-status{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;}
+.st-pass{background:#ecfdf5;color:#065f46;}
+.st-fail{background:#fef2f2;color:#991b1b;}
+.st-absent{background:#fffbeb;color:#92400e;}
+.st-na{background:var(--bg);color:var(--muted);}
+
+/* EDITOR PANEL */
+#editor-panel{display:none;background:#0d1829;border-top:2px solid #3b82f6;}
+#editor-panel.open{display:block;}
+
+/* Password area */
+.pw-area{padding:18px 28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.pw-label{font-family:'DM Mono',monospace;font-size:11px;color:#7090b0;}
+.pw-input{padding:7px 12px;background:#111f36;border:1px solid #1e3050;border-radius:6px;color:#e8f0fc;font-family:'DM Mono',monospace;font-size:12px;outline:none;letter-spacing:.05em;width:160px;transition:border-color .2s;}
+.pw-input:focus{border-color:#3b82f6;}
+.pw-submit{padding:7px 16px;background:#3b82f6;color:white;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
+.pw-submit:hover{background:#60a5fa;}
+.pw-err{font-family:'DM Mono',monospace;font-size:11px;color:#f87171;}
+
+/* Editor content */
+#ep-content{display:none;padding:0 28px 24px;}
+.ep-header{font-family:'DM Mono',monospace;font-size:11px;color:#60a5fa;text-transform:uppercase;letter-spacing:.1em;padding:16px 0 14px;border-bottom:1px solid #1e3050;margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.ep-header span{color:#4a6080;font-size:10px;}
+.ep-grid{display:grid;grid-template-columns:240px 1fr;gap:20px;max-width:900px;}
+@media(max-width:640px){.ep-grid{grid-template-columns:1fr;}}
+.ep-col{display:flex;flex-direction:column;gap:12px;}
+.ep-label{font-family:'DM Mono',monospace;font-size:10px;color:#7090b0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.ep-select,.ep-input{width:100%;padding:9px 12px;background:#111f36;border:1px solid #1e3050;border-radius:7px;color:#e8f0fc;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.ep-select:focus,.ep-input:focus{border-color:#3b82f6;}
+.ep-select option{background:#111f36;}
+.ep-ws-list{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto;padding-right:2px;}
+.ep-ws-row{display:flex;align-items:center;gap:8px;}
+.ep-ws-name{font-size:12px;color:#ccc;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ep-ws-sess{font-family:'DM Mono',monospace;font-size:9px;color:#4a6080;min-width:18px;}
+.ep-btns{display:flex;border:1px solid #1e3050;border-radius:5px;overflow:hidden;flex-shrink:0;}
+.ep-btn{padding:5px 10px;font-size:10px;font-weight:600;font-family:'DM Mono',monospace;border:none;background:#111f36;color:#4a6080;cursor:pointer;transition:all .12s;border-left:1px solid #1e3050;}
+.ep-btn:first-child{border-left:none;}
+.ep-btn:hover{background:#162440;}
+.ep-btn.p{background:rgba(52,211,153,.15);color:#34d399;}
+.ep-btn.f{background:rgba(248,113,113,.15);color:#f87171;}
+.ep-btn.ab{background:rgba(251,191,36,.15);color:#fbbf24;}
+.ep-btn.na{background:rgba(96,165,250,.1);color:#60a5fa;}
+.ep-actions{display:flex;gap:8px;margin-top:4px;align-items:center;flex-wrap:wrap;}
+.ep-save{padding:8px 20px;background:#3b82f6;color:white;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(59,130,246,.3);}
+.ep-save:hover{background:#60a5fa;}
+.ep-add-ws{padding:8px 14px;background:transparent;color:#60a5fa;border:1px solid #264070;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s;}
+.ep-add-ws:hover{background:rgba(59,130,246,.1);}
+.ep-add-stu{padding:8px 14px;background:transparent;color:#a78bfa;border:1px solid #3b2a5a;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s;}
+.ep-add-stu:hover{background:rgba(167,139,250,.1);}
+.ep-toast{font-family:'DM Mono',monospace;font-size:11px;color:#34d399;display:none;}
+.ep-toast.show{display:inline;}
+.ep-empty{font-family:'DM Mono',monospace;font-size:11px;color:#4a6080;padding:8px 0;}
+
+@media(max-width:640px){
+  .grid{padding:12px;grid-template-columns:1fr;}
+  .controls,.pw-area{padding-left:14px;padding-right:14px;}
+  #ep-content{padding:0 14px 20px;}
+  header{padding:12px 14px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="hdr-title">T2P Patch Tracker</span>
+  <div class="hdr-right">
+    <span class="s5-dot">S5 Live</span>
+    <span id="hdr-date" style="font-family:'DM Mono',monospace;font-size:11px;color:#666;"></span>
+    <a href="index.html" class="hdr-link">← Home</a>
+    <button class="edit-btn" id="edit-btn" onclick="toggleEdit()">✏ Edit</button>
+  </div>
+</header>
+
+<!-- EDITOR PANEL -->
+<div id="editor-panel">
+  <div class="pw-area" id="pw-area">
+    <span class="pw-label">Access code:</span>
+    <input class="pw-input" id="pw-input" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')unlockEditor()">
+    <button class="pw-submit" onclick="unlockEditor()">Unlock →</button>
+    <span class="pw-err" id="pw-err"></span>
+  </div>
+  <div id="ep-content">
+    <div class="ep-header">
+      T2P Editor — S1 through S5
+      <span>· select a student, toggle workshop results, save</span>
+    </div>
+    <div class="ep-grid">
+      <div class="ep-col">
+        <div>
+          <div class="ep-label">Student</div>
+          <select class="ep-select" id="ep-stu" onchange="loadEpStudent()">
+            <option value="">— Select student —</option>
+          </select>
+        </div>
+        <div>
+          <div class="ep-label">Level</div>
+          <select class="ep-select" id="ep-level" disabled>
+            <option value="LL">LL</option><option value="L1">L1</option>
+            <option value="L2">L2</option><option value="MS">MS</option>
+          </select>
+        </div>
+        <div class="ep-actions">
+          <button class="ep-add-stu" onclick="addNewStudent()">+ Add student</button>
+        </div>
+      </div>
+      <div class="ep-col">
+        <div>
+          <div class="ep-label">Workshops</div>
+          <div class="ep-ws-list" id="ep-ws-list">
+            <div class="ep-empty">Select a student to edit</div>
+          </div>
+        </div>
+        <div class="ep-actions">
+          <button class="ep-add-ws" onclick="addNewWorkshop()">+ Add workshop</button>
+          <button class="ep-save" onclick="saveEdits()">↑ Save</button>
+          <span class="ep-toast" id="ep-toast">✓ Saved</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="sess-toggles">
+    <button class="sess-btn active" data-s="S1" onclick="toggleSess('S1',this)">S1</button>
+    <button class="sess-btn active" data-s="S2" onclick="toggleSess('S2',this)">S2</button>
+    <button class="sess-btn active" data-s="S3" onclick="toggleSess('S3',this)">S3</button>
+    <button class="sess-btn active" data-s="S4" onclick="toggleSess('S4',this)">S4</button>
+    <button class="sess-btn" data-s="S5" onclick="toggleSess('S5',this)">S5 · Live</button>
+  </div>
+  <div class="vdiv"></div>
+  <select id="lvlFilter" onchange="render()">
+    <option value="">All levels</option>
+    <option value="LL">LL</option><option value="L1">L1</option>
+    <option value="L2">L2</option><option value="MS">MS</option>
+  </select>
+  <select id="sortFilter" onchange="render()">
+    <option value="level">Sort: Level</option>
+    <option value="name">Sort: A–Z</option>
+    <option value="patches">Sort: Most patches</option>
+  </select>
+  <span class="count-pill" id="count-pill"></span>
+</div>
+
+<div id="grid-wrap"><div style="padding:60px;text-align:center;color:var(--muted)">Loading…</div></div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="m-name"></div>
+        <div class="modal-sub" id="m-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="m-note"></div>
+    <div class="modal-stats" id="m-stats"></div>
+    <div class="modal-body" id="m-body"></div>
+  </div>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────
+const EDIT_PASSWORD = 't2p2025';
+const SC = {S1:'#3b82f6',S2:'#8b5cf6',S3:'#10b981',S4:'#f59e0b',S5:'#ef4444'};
+const LEVEL_ORDER = ['LL','L1','L2','MS'];
+
+document.getElementById('hdr-date').textContent =
+  new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+// ── Base data (S1-S4) ───────────────────────────────────────────
+// This is the canonical hardcoded dataset. Edits via the panel
+// are stored in localStorage as overrides layered on top.
+const BASE = [
+  {n:"Colm Bowen",l:"LL",note:"",scores:{"S1: Social Social Club":"Not passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Not passed","S2: Articulate Artists":"Not passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Ultimate Agent":"Not passed","S3: Storybook Studio":"Passed","S4: Rock Stars":"Absent"}},
+  {n:"Harper Lembo",l:"LL",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Ultimate Agent":"Passed","S3: Storybook Studio":"Passed","S4: Rock Stars":"Not passed"}},
+  {n:"Hildy (Alice) Grimm",l:"LL",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Not passed","S2: Articulate Artists":"Not passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Ultimate Agent":"Not passed","S3: Storybook Studio":"Passed","S4: Rock Stars":"Not passed"}},
+  {n:"Oliver McLeod",l:"LL",note:"Joined S4",scores:{"S4: Rock Stars":"Passed"}},
+  {n:"Ada Cone",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"N/A","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Not passed","S4: Rock Stars":"Not passed"}},
+  {n:"Blake Richheimer",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"N/A","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"N/A","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed"}},
+  {n:"Conan Hogan",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Harvey Caulin",l:"L1",note:"Joined S4",scores:{"S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
+  {n:"Lola Propp",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Not passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
+  {n:"London Politi",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Not passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Not passed","S3: Speak like a Scientist":"Not passed","S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
+  {n:"Max Rzepecki",l:"L1",note:"Moved to PR after S4",scores:{}},
+  {n:"Oleander Poulson",l:"L1",note:"Joined S4",scores:{"S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Raika Ackman",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Van McDavid",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Vasilios Giannopoulos",l:"L1",note:"Joined S2",scores:{"S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Annabelle Lembo",l:"L2",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Casper White",l:"L2",note:"Joined S4",scores:{"S4: Rock Stars":"Passed"}},
+  {n:"Catherine Henry",l:"L2",note:"Joined S3",scores:{"S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Not passed"}},
+  {n:"Hunter Taback",l:"L2",note:"Joined S3",scores:{"S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Not passed"}},
+  {n:"Jaya Vora",l:"L2",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Liv Brodsky",l:"L2",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Lucian McDavid",l:"L2",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"N/A","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Nicholas Sidea",l:"L2",note:"Joined S4",scores:{"S3: Social Networking":"Passed"}},
+  {n:"Pax Ovitz",l:"L2",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Money Machines":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Ayla White",l:"MS",note:"Joined S4",scores:{"S4: Rock Stars":"Passed"}},
+  {n:"Eli Slifka",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Museum Masters":"Not passed","S2: Articulate Artists":"Not passed","S2: President's AI Challenge":"N/A","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed"}},
+  {n:"Emma Slifka",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Museum Masters":"Passed","S2: Articulate Artists":"Passed","S2: President's AI Challenge":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Not passed","S4: Rock Stars":"Not passed"}},
+  {n:"Georgia Flaherty",l:"MS",note:"Joined S4",scores:{"S4: Rock Stars":"Not passed"}},
+  {n:"Glen-Eric Ostrander",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Museum Masters":"Passed","S2: Articulate Artists":"Passed","S2: President's AI Challenge":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Absent","S4: Rock Stars":"Passed"}},
+  {n:"Grace Lefkowitz",l:"MS",note:"Joined S5",newS5:true,scores:{}},
+  {n:"Leah Abramovich",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Articulate Artists":"Passed","S2: President's AI Challenge":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Not passed","S3: Social Networking":"Passed"}},
+  {n:"Leonie Weernink",l:"MS",note:"",scores:{}},
+  {n:"Max Brodsky",l:"MS",note:"Joined S3",scores:{"S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed"}},
+  {n:"Mireille (Mimi) Prospere",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Museum Masters":"Absent","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"N/A","S2: Community Garden":"N/A","S2: Budget Battles: NYC Edition":"N/A","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Absent","S3: Social Networking":"Passed"}},
+  {n:"Penelope Carrington",l:"MS",note:"",scores:{"S1: 10x-ers":"Passed","S1: Artful Insights":"Passed","S1: Community Garden":"Passed","S2: Museum Masters":"Passed","S2: Articulate Artists":"Passed","S2: President's AI Challenge":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Passed","S3: Goalgetters":"Passed","S3: Money Machines":"Passed","S3: Master Carpenters":"Passed","S3: Social Networking":"Passed","S4: Rock Stars":"Passed"}},
+  {n:"Yorgos Weernink",l:"MS",note:"Joined S4",scores:{"S4: Rock Stars":"Passed"}},
+];
+
+// ── State ────────────────────────────────────────────────────────
+let activeSess = new Set(['S1','S2','S3','S4']);
+let s5data = {};        // from storage
+let overrides = {};     // from localStorage (editor S1-S4 edits)
+let pendingEdits = {};  // unsaved in current session
+let students = [];      // merged final list
+
+// ── Init ─────────────────────────────────────────────────────────
+async function init() {
+  // Load localStorage overrides
+  try { overrides = JSON.parse(localStorage.getItem('t2p_overrides')||'{}'); } catch(e) {}
+  // Load S5 from storage
+  try {
+    const r = await window.storage.get('s5data');
+    if (r?.value) s5data = JSON.parse(r.value);
+  } catch(e) {}
+  buildStudents();
+  render();
+  populateEditorDropdown();
+}
+
+function buildStudents() {
+  // Start from BASE, apply overrides
+  const map = {};
+  BASE.forEach(s => { map[s.n] = {...s, scores: {...s.scores}}; });
+
+  // Apply overrides (new students or edits)
+  Object.entries(overrides).forEach(([name, ov]) => {
+    if (!map[name]) {
+      // New student added via editor
+      map[name] = {n:name, l:ov.level||'L1', note:ov.note||'', scores:{}, newS5:false};
+    }
+    if (ov.scores) Object.assign(map[name].scores, ov.scores);
+    if (ov.level)  map[name].l = ov.level;
+    if (ov.note !== undefined) map[name].note = ov.note;
+  });
+
+  students = Object.values(map);
+}
+
+function getS5Workshops() { return s5data.__workshops__ || []; }
+
+function fullScores(name) {
+  const s = students.find(s=>s.n===name);
+  const base = s ? {...s.scores} : {};
+  const s5ws = getS5Workshops();
+  const s5scores = s5data[name] || {};
+  s5ws.forEach(ws => { if (s5scores[ws]) base[`S5: ${ws}`] = s5scores[ws]; });
+  return base;
+}
+
+function getSess(k) { return k.match(/^(S\d):/)?.[1] || ''; }
+function col(s) { return SC[s]||'#aaa'; }
+
+// ── Render grid ──────────────────────────────────────────────────
+function render() {
+  const lf = document.getElementById('lvlFilter').value;
+  const sf = document.getElementById('sortFilter').value;
+  let list = [...students];
+  if (lf) list = list.filter(s=>s.l===lf);
+  if (sf==='level') list.sort((a,b)=>{const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l);return d||a.n.localeCompare(b.n);});
+  else if (sf==='name') list.sort((a,b)=>a.n.localeCompare(b.n));
+  else list.sort((a,b)=>{
+    const pa=Object.entries(fullScores(a.n)).filter(([k,v])=>v==='Passed'&&activeSess.has(getSess(k))).length;
+    const pb=Object.entries(fullScores(b.n)).filter(([k,v])=>v==='Passed'&&activeSess.has(getSess(k))).length;
+    return pb-pa;
+  });
+
+  document.getElementById('count-pill').textContent = `${list.length} student${list.length!==1?'s':''}`;
+
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  grid.innerHTML = list.map(s => {
+    const scores = fullScores(s.n);
+    const patches = Object.entries(scores)
+      .filter(([k,v])=>v==='Passed'&&activeSess.has(getSess(k)))
+      .map(([k])=>({sess:getSess(k),name:k.replace(/^S\d: /,'')}));
+    const counts = {};
+    patches.forEach(p=>counts[p.sess]=(counts[p.sess]||0)+1);
+    const hasS5 = Object.keys(s5data[s.n]||{}).filter(k=>!k.startsWith('__')).length > 0;
+    const isNew = s.newS5;
+    const rows = patches.map(p=>`<div class="patch-row"><span class="patch-dot" style="background:${col(p.sess)}"></span><span class="patch-sess">${p.sess}</span><span class="patch-name">${p.name}</span></div>`).join('');
+    const pills = Object.entries(counts).map(([s,c])=>`<span class="footer-pill">${s}: ${c}</span>`).join('');
+    const safeN = s.n.replace(/'/g,"\\'");
+    return `<div class="student-card" onclick="openModal('${safeN}')">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-name">
+            <span class="level-tag tag-${s.l}">${s.l}</span>
+            ${s.n}
+            ${hasS5?'<span class="s5-pin"></span>':''}
+          </div>
+          ${s.note?`<div class="card-note">* ${s.note}</div>`:''}
+        </div>
+        <span class="card-arrow">→</span>
+      </div>
+      ${patches.length>0
+        ?`<div class="patch-list">${rows}</div><div class="card-footer">${pills}</div>`
+        : isNew ? ''
+        : `<div class="no-patches">No patches earned yet</div>`}
+    </div>`;
+  }).join('');
+
+  const wrap = document.getElementById('grid-wrap');
+  wrap.innerHTML = '';
+  wrap.appendChild(grid);
+}
+
+// ── Session toggles ──────────────────────────────────────────────
+function toggleSess(s, btn) {
+  if (activeSess.has(s)) { if (activeSess.size===1) return; activeSess.delete(s); }
+  else activeSess.add(s);
+  btn.classList.toggle('active');
+  render();
+}
+
+// ── Detail modal ─────────────────────────────────────────────────
+function openModal(name) {
+  const s = students.find(s=>s.n===name); if (!s) return;
+  const scores = fullScores(name);
+  const passed = Object.values(scores).filter(v=>v==='Passed').length;
+  const failed = Object.values(scores).filter(v=>v==='Not passed').length;
+  const absent = Object.values(scores).filter(v=>v==='Absent').length;
+  const total  = Object.values(scores).filter(v=>v!=='N/A').length;
+  const rate   = total>0 ? Math.round(passed/total*100) : 0;
+
+  document.getElementById('m-name').textContent = name;
+  document.getElementById('m-sub').innerHTML = `<span class="level-tag tag-${s.l}">${s.l}</span> ${passed} patches earned`;
+  document.getElementById('m-note').innerHTML = s.note ? `<div class="modal-note-box">* ${s.note}</div>` : '';
+  document.getElementById('m-stats').innerHTML = `
+    <div class="modal-stat"><div class="modal-stat-val" style="color:#10b981">${passed}</div><div class="modal-stat-lbl">Passed</div></div>
+    <div class="modal-stat"><div class="modal-stat-val" style="color:#ef4444">${failed}</div><div class="modal-stat-lbl">Not passed</div></div>
+    <div class="modal-stat"><div class="modal-stat-val" style="color:#f59e0b">${absent}</div><div class="modal-stat-lbl">Absent</div></div>
+    <div class="modal-stat"><div class="modal-stat-val">${rate}%</div><div class="modal-stat-lbl">Pass rate</div></div>`;
+
+  const bySess = {};
+  Object.entries(scores).forEach(([k,v])=>{
+    const s = getSess(k); if (!s) return;
+    if (!bySess[s]) bySess[s] = [];
+    bySess[s].push({name:k.replace(/^S\d: /,''),status:v});
+  });
+
+  let body = '';
+  Object.entries(bySess).sort().forEach(([sess,items])=>{
+    body += `<div class="modal-sess-title" style="color:${col(sess)}">${sess} — Session ${sess.slice(1)}</div>`;
+    items.forEach(item=>{
+      const sc = item.status==='Passed'?'st-pass':item.status==='Not passed'?'st-fail':item.status==='Absent'?'st-absent':'st-na';
+      const label = item.status==='Passed'?'Passed':item.status==='Not passed'?'Not yet':item.status==='Absent'?'Absent':item.status==='N/A'?'N/A':item.status;
+      body += `<div class="modal-row"><div class="modal-row-dot" style="background:${col(sess)}"></div><span class="modal-row-name">${item.name}</span><span class="modal-row-status ${sc}">${label}</span></div>`;
+    });
+  });
+  if (!body) body = '<div style="color:#bbb;font-size:12px;padding:8px 0;font-style:italic">No workshop data yet.</div>';
+  document.getElementById('m-body').innerHTML = body;
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+// ── Editor ───────────────────────────────────────────────────────
+let editorOpen = false, editorUnlocked = false;
+
+function toggleEdit() {
+  const panel = document.getElementById('editor-panel');
+  const btn   = document.getElementById('edit-btn');
+  editorOpen  = !editorOpen;
+  panel.classList.toggle('open', editorOpen);
+  btn.classList.toggle('active', editorOpen);
+  btn.textContent = editorOpen ? '✕ Close' : '✏ Edit';
+  if (!editorOpen) { editorUnlocked = false; document.getElementById('pw-area').style.display='flex'; document.getElementById('ep-content').style.display='none'; }
+}
+
+function unlockEditor() {
+  const val = document.getElementById('pw-input').value;
+  if (val !== EDIT_PASSWORD) {
+    document.getElementById('pw-err').textContent = 'Incorrect code.';
+    setTimeout(()=>document.getElementById('pw-err').textContent='', 2000);
+    return;
+  }
+  editorUnlocked = true;
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-area').style.display = 'none';
+  document.getElementById('ep-content').style.display = 'block';
+}
+
+function populateEditorDropdown() {
+  const sel = document.getElementById('ep-stu');
+  sel.innerHTML = '<option value="">— Select student —</option>';
+  const byLevel = {};
+  students.forEach(s=>{ if (!byLevel[s.l]) byLevel[s.l]=[]; byLevel[s.l].push(s.n); });
+  LEVEL_ORDER.forEach(lv=>{
+    if (!byLevel[lv]) return;
+    const og = document.createElement('optgroup');
+    og.label = lv;
+    byLevel[lv].sort().forEach(n=>{ const o=document.createElement('option');o.value=n;o.textContent=n;og.appendChild(o); });
+    sel.appendChild(og);
+  });
+}
+
+function loadEpStudent() {
+  const name = document.getElementById('ep-stu').value;
+  if (!name) { document.getElementById('ep-ws-list').innerHTML='<div class="ep-empty">Select a student to edit</div>'; return; }
+  const s = students.find(s=>s.n===name);
+  if (s) document.getElementById('ep-level').value = s.l;
+
+  // Show ALL workshops this student has any entry for
+  const scores = fullScores(name);
+  const all = Object.entries(scores).filter(([k])=>!k.startsWith('__')).sort(([a],[b])=>a.localeCompare(b));
+
+  if (!all.length) {
+    document.getElementById('ep-ws-list').innerHTML='<div class="ep-empty">No workshops yet — add one below</div>';
+    return;
+  }
+
+  document.getElementById('ep-ws-list').innerHTML = all.map(([ws, val])=>{
+    const safeWs = ws.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const sess = getSess(ws)||'';
+    // pending edit takes priority
+    const cur = pendingEdits[name]?.[ws] ?? val;
+    return `<div class="ep-ws-row">
+      <span class="ep-ws-sess">${sess}</span>
+      <span class="ep-ws-name" title="${ws}">${ws.replace(/^S\d: /,'')}</span>
+      <div class="ep-btns">
+        <button class="ep-btn p ${cur==='Passed'?'p':''}" onclick="setEp('${safeWs}','Passed',this)" style="${cur==='Passed'?'background:rgba(52,211,153,.15);color:#34d399':''}">✓</button>
+        <button class="ep-btn f" onclick="setEp('${safeWs}','Not passed',this)" style="${cur==='Not passed'?'background:rgba(248,113,113,.15);color:#f87171':''}">✗</button>
+        <button class="ep-btn ab" onclick="setEp('${safeWs}','Absent',this)" style="${cur==='Absent'?'background:rgba(251,191,36,.15);color:#fbbf24':''}">–</button>
+        <button class="ep-btn na" onclick="setEp('${safeWs}','N/A',this)" style="${cur==='N/A'?'background:rgba(96,165,250,.1);color:#60a5fa':''}">N/A</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setEp(ws, val, btn) {
+  const name = document.getElementById('ep-stu').value; if (!name) return;
+  if (!pendingEdits[name]) pendingEdits[name] = {};
+  pendingEdits[name][ws] = val;
+  // Update button styles immediately
+  btn.closest('.ep-btns').querySelectorAll('.ep-btn').forEach(b=>{
+    b.style.background=''; b.style.color='';
+  });
+  const styles = {Passed:'rgba(52,211,153,.15)',Not_passed:'rgba(248,113,113,.15)',Absent:'rgba(251,191,36,.15)','N/A':'rgba(96,165,250,.1)'};
+  const colors = {Passed:'#34d399',Not_passed:'#f87171',Absent:'#fbbf24','N/A':'#60a5fa'};
+  const k = val.replace(' ','_');
+  btn.style.background = styles[k]||'';
+  btn.style.color = colors[k]||'';
+}
+
+function addNewWorkshop() {
+  const name = document.getElementById('ep-stu').value;
+  if (!name) { alert('Select a student first.'); return; }
+  const ws = prompt('Workshop name (e.g. "S5: Rock Stars Finale" or "S1: New Workshop"):');
+  if (!ws?.trim()) return;
+  const s = students.find(s=>s.n===name);
+  if (s) s.scores[ws.trim()] = '';
+  if (!pendingEdits[name]) pendingEdits[name] = {};
+  pendingEdits[name][ws.trim()] = '';
+  loadEpStudent();
+}
+
+function addNewStudent() {
+  const name = prompt('Full student name:');
+  if (!name?.trim()) return;
+  if (students.find(s=>s.n===name.trim())) { alert('Student already exists.'); return; }
+  const level = prompt('Level (LL, L1, L2, MS):')?.trim().toUpperCase();
+  if (!['LL','L1','L2','MS'].includes(level)) { alert('Invalid level.'); return; }
+  const note = prompt('Note (optional, e.g. "Joined S5"):') || '';
+  const newS = {n:name.trim(), l:level, note, scores:{}, newS5:false};
+  students.push(newS);
+  // Save to overrides
+  overrides[name.trim()] = {level, note, scores:{}, isNew:true};
+  localStorage.setItem('t2p_overrides', JSON.stringify(overrides));
+  populateEditorDropdown();
+  document.getElementById('ep-stu').value = name.trim();
+  loadEpStudent();
+  render();
+}
+
+function saveEdits() {
+  const name = document.getElementById('ep-stu').value; if (!name) return;
+  const s = students.find(s=>s.n===name); if (!s) return;
+  const edits = pendingEdits[name] || {};
+  if (!Object.keys(edits).length) { showEpToast(); return; }
+
+  // Apply edits to student object
+  Object.assign(s.scores, edits);
+
+  // Persist to overrides
+  if (!overrides[name]) overrides[name] = {level:s.l, note:s.note, scores:{}};
+  Object.assign(overrides[name].scores, edits);
+  localStorage.setItem('t2p_overrides', JSON.stringify(overrides));
+
+  pendingEdits[name] = {};
+  render();
+  showEpToast();
+}
+
+function showEpToast() {
+  const t = document.getElementById('ep-toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+init();
+</script>
+</body>
+</html>
