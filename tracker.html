@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>T2P Tracker — Alpha NYC</title>
+<title>T2P Patch Tracker — Alpha NYC</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -278,17 +278,17 @@ select:focus{border-color:#3b82f6;}
 </head>
 <body>
 <div class="site-nav dark">
-  <a href="https://t2p-dashboard.vercel.app/index.html" target="_blank" class="sn-link home">Home</a>
-  <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" class="sn-link active">T2P Tracker</a>
-  <a href="https://t2p-dashboard.vercel.app/workshops.html" target="_blank" class="sn-link">Workshop Directory</a>
-  <a href="https://t2p-dashboard.vercel.app/gallery.html" target="_blank" class="sn-link">Gallery</a>
-  <a href="https://t2p-dashboard.vercel.app/session5.html" target="_blank" class="sn-link">Session 5</a>
-  <a href="https://t2p-dashboard.vercel.app/editor.html" target="_blank" class="sn-link">Staff Login</a>
+  <a href="https://t2p-dashboard.vercel.app/index.html" class="sn-link home">Home</a>
+  <a href="https://t2p-dashboard.vercel.app/tracker.html" class="sn-link active">T2P Tracker</a>
+  <a href="https://t2p-dashboard.vercel.app/workshops.html" class="sn-link">Workshop Directory</a>
+  <a href="https://t2p-dashboard.vercel.app/gallery.html" class="sn-link">Gallery</a>
+  <a href="https://t2p-dashboard.vercel.app/session5.html" class="sn-link">Session 5</a>
+  <a href="https://t2p-dashboard.vercel.app/editor.html" class="sn-link">Staff Login</a>
 </div>
 <header>
   <span class="hdr-title">T2P Tracker</span>
   <div class="hdr-right">
-    <a href="index.html" target="_blank" class="hdr-link">← Home</a>
+    <a href="index.html" class="hdr-link">← Home</a>
     <span class="s5-dot">S5 Live</span>
     <span id="hdr-date" style="font-family:'DM Mono',monospace;font-size:11px;color:#666;"></span>
     <button class="edit-btn" id="edit-btn" onclick="toggleEdit()">✏ Edit</button>
@@ -344,7 +344,7 @@ select:focus{border-color:#3b82f6;}
     </div>
     <div style="margin-top:14px;padding-top:14px;border-top:1px solid #333;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <button class="ep-save" onclick="exportCSV()" style="background:#1a3a1a;color:#4ade80;border:1px solid #2a5a2a;">↓ Export all as CSV</button>
-      <a href="workshops.html" target="_blank" style="padding:8px 16px;background:transparent;color:#60a5fa;border:1px solid #1e3a5f;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;text-decoration:none;transition:all .15s;" onmouseover="this.style.background='rgba(59,130,246,.1)'" onmouseout="this.style.background='transparent'">Workshop Directory ↗</a>
+      <a target="_blank" href="workshops.html" style="padding:8px 16px;background:transparent;color:#60a5fa;border:1px solid #1e3a5f;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;text-decoration:none;transition:all .15s;" onmouseover="this.style.background='rgba(59,130,246,.1)'" onmouseout="this.style.background='transparent'">Workshop Directory ↗</a>
       <span style="font-size:11px;color:#555;font-family:'DM Mono',monospace;">Exports full patch record for all students across all sessions</span>
     </div>
     <!-- Workshop meta editor -->
@@ -414,7 +414,7 @@ select:focus{border-color:#3b82f6;}
       <span class="accordion-sub" id="ws-acc-sub"></span>
     </div>
     <div class="accordion-hdr-right" id="ws-acc-right">
-      <a href="workshops.html" target="_blank" onclick="event.stopPropagation()"
+      <a target="_blank" href="workshops.html" onclick="event.stopPropagation()"
          style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:20px;white-space:nowrap;transition:all .15s;"
          onmouseover="this.style.color=getComputedStyle(document.documentElement).getPropertyValue('--text');this.style.borderColor='#aaa'"
          onmouseout="this.style.color='';this.style.borderColor=''">
@@ -787,11 +787,15 @@ function render() {
   // Hide S5-only students when S5 not active
   if (!activeSess.has('S5')) list = list.filter(s => !s.newS5);
   // Hide students who joined after all active sessions (e.g. joinedS:4 but only S1-S3 active)
-  // Hide students who left before all active sessions (e.g. leftAfterS:2 but only S3-S5 active)
+  // Session-aware filtering
   list = list.filter(s => {
-    const activeSessNums = [...activeSess].map(s => parseInt(s.slice(1)));
-    if (s.joinedS && Math.max(...activeSessNums) < s.joinedS) return false;
-    if (s.leftAfterS && Math.min(...activeSessNums) > s.leftAfterS) return false;
+    const activeSessNums = [...activeSess].map(n => parseInt(n.slice(1)));
+    const maxActive = Math.max(...activeSessNums);
+    const minActive = Math.min(...activeSessNums);
+    // Student joined after the latest active session → hide
+    if (s.joinedS && maxActive < s.joinedS) return false;
+    // Student left before the earliest active session → hide
+    if (s.leftAfterS && minActive > s.leftAfterS) return false;
     return true;
   });
   if (lf) list = list.filter(s=>s.l===lf);
@@ -985,7 +989,7 @@ function loadEpStudent() {
 function deleteStudent() {
   const name = document.getElementById('ep-stu').value;
   if (!name) return;
-  if (!confirm(`Delete "${name}" from the tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
+  if (!confirm(`Delete "${name}" from the patch tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
   // Remove from students array
   const idx = students.findIndex(s=>s.n===name);
   if (idx > -1) students.splice(idx, 1);
