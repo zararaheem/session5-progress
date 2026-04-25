@@ -109,7 +109,7 @@ header{position:sticky;top:37px;z-index:50;padding:0 28px;display:flex;align-ite
   display:block;
 }
   
-/* PHOTO MASONRY */
+/* MEDIA MASONRY */
 .photo-masonry{columns:3 200px;column-gap:8px;}
 @media(max-width:600px){.photo-masonry{columns:2 140px;}}
 .photo-item{break-inside:avoid;margin-bottom:8px;border-radius:10px;overflow:hidden;cursor:pointer;position:relative;display:block;background:var(--surface2);}
@@ -121,22 +121,6 @@ header{position:sticky;top:37px;z-index:50;padding:0 28px;display:flex;align-ite
 .photo-item:hover .photo-cap-bar{opacity:1;}
 .photo-del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.75);color:#f87171;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;opacity:0;transition:opacity .15s;}
 .photo-item:hover .photo-del{opacity:1;}
-
-/* VIDEO GRID */
-.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;}
-.video-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.video-card iframe,.video-card video{width:100%;display:block;aspect-ratio:16/9;background:#000;border:none;}
-.video-card-foot{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
-.video-card-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);}
-
-/* NOTES */
-.notes-list{display:flex;flex-direction:column;gap:10px;}
-.note-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;}
-.note-title{font-size:15px;font-weight:600;margin-bottom:6px;padding-right:28px;}
-.note-body{font-size:13px;color:var(--muted2);line-height:1.65;white-space:pre-wrap;}
-.note-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:10px;}
-.note-del{position:absolute;top:12px;right:14px;background:transparent;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px 6px;border-radius:4px;}
-.note-del:hover{color:#f87171;}
 
 /* EMPTY / LOCKED */
 .empty-state,.locked-state{padding:60px 20px;text-align:center;color:var(--muted2);}
@@ -203,12 +187,6 @@ footer a{color:var(--muted2);text-decoration:none;}
   </div>
 </div>
 
-<div class="inner-tabs" id="inner-tabs">
-  <button class="itab active" data-tab="photos" onclick="switchTab('photos',this)">Photos</button>
-  <button class="itab" data-tab="video" onclick="switchTab('video',this)">Video</button>
-  <button class="itab" data-tab="notes" onclick="switchTab('notes',this)">Notes</button>
-</div>
-
 <div class="page" id="page-content"></div>
 
 <div class="lightbox" id="lightbox">
@@ -267,11 +245,11 @@ const S4_EMBED  = 'https://drive.google.com/file/d/1twf7lfopcLu7iWt-A08jGsLQ6BKB
   
 // Metadata stored in window.storage (just URLs + captions — files live in Supabase)
 let gdata = {
-  S1:{photos:[],videos:[],notes:[],embed:'',unlocked:false},
-  S2:{photos:[],videos:[],notes:[],embed:'',unlocked:false},
-  S3:{photos:[],videos:[],notes:[],embed:'',unlocked:false},
-  S4:{photos:[],videos:[],notes:[],embed:S4_EMBED},
-  S5:{photos:[],videos:[],notes:[],embed:'',slackUrl:''},
+  S1:{photos:[],videos:[],embed:'',unlocked:false},
+  S2:{photos:[],videos:[],embed:'',unlocked:false},
+  S3:{photos:[],videos:[],embed:'',unlocked:false},
+  S4:{photos:[],videos:[],embed:S4_EMBED},
+  S5:{photos:[],videos:[],embed:'',slackUrl:''},
 };
 
 // ── Persistence (metadata only) ───────────────────────────────────
