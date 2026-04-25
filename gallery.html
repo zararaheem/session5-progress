@@ -89,7 +89,7 @@ header{position:sticky;top:37px;z-index:50;padding:0 28px;display:flex;align-ite
 .upload-errors{margin-top:8px;font-family:'DM Mono',monospace;font-size:10px;color:#f87171;max-height:60px;overflow-y:auto;}
 
 /* HERO VIDEO */
-.hero-video{position:relative;width:100%;border-radius:14px;overflow:hidden;background:#000;margin-bottom:24px;box-shadow:0 8px 40px rgba(0,0,0,.5);}
+.hero-video{position:relative;width:60%;border-radius:14px;overflow:hidden;background:#000;margin-bottom:24px;box-shadow:0 8px 40px rgba(0,0,0,.5);}
 .hero-video iframe,.hero-video video{width:100%;display:block;aspect-ratio:16/9;border:none;}
 .hero-video-label{position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,.7));font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.7);}
 
@@ -216,69 +216,7 @@ const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIs
 const BUCKET    = 'gallery';
 const SUPA_STOR = `${SUPA_URL}/storage/v1`;
 
-// ── STAGING HANDLERS ─────────────────────────────────
 
-function addToStaging(files) {
-  const media = Array.from(files).filter(f =>
-    f.type.startsWith('image/') || f.type.startsWith('video/')
-  );
-
-  for (const file of media) {
-    stagingUploads.push({
-      id: crypto.randomUUID(),
-      file,
-      type: file.type.startsWith('video/') ? 'video' : 'image',
-      previewUrl: URL.createObjectURL(file),
-      removed: false
-    });
-  }
-
-  renderStaging();
-}
-
-function removeStaged(id) {
-  stagingUploads = stagingUploads.filter(x => x.id !== id);
-  renderStaging();
-}
-
-function renderStaging() {
-  let el = document.getElementById('staging');
-  if (!el) return;
-
-  el.innerHTML = stagingUploads.map(item => `
-    <div style="position:relative;width:120px;">
-      ${item.type === 'image'
-        ? `<img src="${item.previewUrl}" style="width:120px;border-radius:8px;">`
-        : `<video src="${item.previewUrl}" style="width:120px;border-radius:8px;" controls></video>`
-      }
-      <button onclick="removeStaged('${item.id}')"
-        style="position:absolute;top:4px;right:4px;background:red;color:white;border:none;border-radius:50%;width:22px;height:22px;">
-        ×
-      </button>
-    </div>
-  `).join('');
-}
-
-async function saveStaging(sess) {
-  for (const item of stagingUploads) {
-    try {
-      const url = await supaUpload(item.file, sess);
-
-      const isVideo = item.type === 'video';
-      const cap = item.file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g,' ');
-
-      if (isVideo) gdata[sess].videos.push({ url, cap, ts: Date.now() });
-      else gdata[sess].photos.push({ url, cap, ts: Date.now() });
-
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  stagingUploads = [];
-  saveMeta();
-  render();
-} 
 // Upload a file to Supabase, return public URL
 async function supaUpload(file, sess) {
   const ext  = file.name.split('.').pop().toLowerCase();
@@ -310,9 +248,6 @@ let activeTab  = 'photos';
 let lbIndex    = 0;
 
 const S4_EMBED  = 'https://drive.google.com/file/d/1twf7lfopcLu7iWt-A08jGsLQ6BKBalvK/preview';
-
-// ── STAGING UPLOAD QUEUE ─────────────────────────────
-let stagingUploads = [];
   
 // Metadata stored in window.storage (just URLs + captions — files live in Supabase)
 let gdata = {
@@ -585,15 +520,6 @@ function render() {
   const sess  = gdata[activeSess];
   const admin = adminUnlocked;
   let html = '';
-
-  <div class="adm-section">
-  <div class="adm-label">Staging (review before upload)</div>
-  <div id="staging" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
-
-  <button class="adm-btn" onclick="saveStaging(activeSess)">
-    Save All →
-  </button>
-</div>
   
   if (admin) {
     html += `<div class="admin-panel">
@@ -620,7 +546,7 @@ function render() {
           <div class="bulk-drop-sub">All images &amp; videos · uploaded directly to Supabase · no limit</div>
         </div>
         <input type="file" id="bulk-file" accept="image/*,video/*" multiple style="display:none"
-          onchange="addToStaging(this.files);this.value=''">
+          onchange="processFiles(Array.from(this.files));this.value=''">
         <div id="progress-wrap" class="progress-wrap">
           <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar"></div></div>
           <div class="progress-status" id="progress-status"></div>
