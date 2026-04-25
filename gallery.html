@@ -424,33 +424,28 @@ async function processFiles(files) {
   try {
     if (status) status.textContent = `Uploading ${file.name}… (${done+1}/${media.length})`;
 
-    const url = await supaUpload(file, activeSess);
-    const isVideo = file.type.startsWith('video/');
-    const cap = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g,' ');
+   const url = await supaUpload(file, activeSess);
+const isVideo = file.type.startsWith('video/');
+const cap = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g,' ');
 
-    // ✅ NEW: push into staging queue instead of gallery
-    stagedUploads.push({
-      session: activeSess,
-      type: isVideo ? 'video' : 'photo',
-      url,
-      caption: cap,
-      ts: Date.now()
-    });
-
-  } catch(e) {
-    errors.push(`${file.name}: ${e.message}`);
+await fetch(`${SUPA_URL}/rest/v1/gallery_media`, {
+  method: 'POST',
+  headers: {
+    apikey: SUPA_KEY,
+    Authorization: `Bearer ${SUPA_KEY}`,
+    'Content-Type': 'application/json',
+    Prefer: 'return=minimal'
+  },
+  body: JSON.stringify({
+    session: activeSess,
+    type: isVideo ? 'video' : 'photo',
+    url,
+    caption: cap
+  })
+}); 
+    await loadFromDB();
+    render();
   }
-
-  done++;
-  if (bar) bar.style.width = Math.round(done/media.length*100) + '%';
-}
-
-  await saveMeta();
-  if (status) status.textContent = `✓ ${done - errors.length} uploaded${errors.length ? `, ${errors.length} failed` : ''}`;
-  if (errBox) errBox.textContent = errors.join('\n');
-  setTimeout(() => { if (progressWrap) progressWrap.style.display = 'none'; }, 4000);
-  render();
-}
 
 // ── Single URL add ────────────────────────────────────────────────
 function addMediaUrl() {
@@ -721,7 +716,7 @@ function render() {
   document.getElementById('page-content').innerHTML = html;
 }
 
-loadMeta();
+loadfromDB().then(render);
 </script>
 </body>
 </html>
