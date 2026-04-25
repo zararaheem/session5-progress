@@ -61,7 +61,7 @@ header{position:sticky;top:37px;z-index:50;padding:0 28px;display:flex;align-ite
 .pw-submit{font-family:'DM Mono',monospace;font-size:11px;background:var(--accent);color:white;border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-weight:600;}
 .pw-err{font-family:'DM Mono',monospace;font-size:11px;color:#f87171;}
 .admin-panel{background:var(--surface2);border:1px dashed var(--border2);border-radius:12px;padding:18px 20px;margin-bottom:24px;}
-.admin-panel-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.admin-panel-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;}
 .admin-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
 .adm-inp{font-family:'DM Mono',monospace;font-size:12px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:7px 11px;border-radius:6px;outline:none;flex:1;min-width:200px;}
 .adm-inp:focus{border-color:var(--accent);}
@@ -72,44 +72,44 @@ header{position:sticky;top:37px;z-index:50;padding:0 28px;display:flex;align-ite
 .adm-btn.sec{background:var(--surface);color:var(--accent2);border:1px solid var(--border2);}
 .adm-btn.sec:hover{border-color:var(--accent);}
 .adm-btn.danger{background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b;}
+.adm-section{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.adm-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.adm-hint{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;}
 
 /* BULK UPLOAD */
-.bulk-drop{border:2px dashed var(--border2);border-radius:10px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px;}
+.bulk-drop{border:2px dashed var(--border2);border-radius:10px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;}
 .bulk-drop:hover,.bulk-drop.dragover{border-color:var(--accent);background:rgba(26,86,219,.05);}
-.bulk-drop-icon{font-size:32px;margin-bottom:8px;opacity:.4;}
-.bulk-drop-text{font-size:13px;color:var(--muted2);line-height:1.5;}
-.bulk-drop-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;}
-.bulk-progress{margin-top:10px;}
-.bulk-bar-wrap{background:var(--surface3);border-radius:20px;height:6px;overflow:hidden;margin-bottom:6px;}
-.bulk-bar{height:100%;background:var(--accent);border-radius:20px;transition:width .3s;width:0%;}
-.bulk-status{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);}
+.bulk-drop-icon{font-size:36px;margin-bottom:8px;opacity:.5;}
+.bulk-drop-text{font-size:14px;color:var(--text);font-weight:500;margin-bottom:4px;}
+.bulk-drop-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.progress-wrap{margin-top:12px;display:none;}
+.progress-bar-bg{background:var(--surface3);border-radius:20px;height:6px;overflow:hidden;margin-bottom:6px;}
+.progress-bar{height:100%;background:var(--accent);border-radius:20px;width:0%;transition:width .2s;}
+.progress-status{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent2);}
+.upload-errors{margin-top:8px;font-family:'DM Mono',monospace;font-size:10px;color:#f87171;max-height:60px;overflow-y:auto;}
 
-/* EMBED SECTION */
-.embed-section{margin-bottom:16px;}
-.embed-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
-
-/* HERO VIDEO — cinematic at top */
+/* HERO VIDEO */
 .hero-video{position:relative;width:100%;border-radius:14px;overflow:hidden;background:#000;margin-bottom:24px;box-shadow:0 8px 40px rgba(0,0,0,.5);}
-.hero-video iframe,.hero-video video{width:100%;display:block;border:none;aspect-ratio:16/9;}
+.hero-video iframe,.hero-video video{width:100%;display:block;aspect-ratio:16/9;border:none;}
 .hero-video-label{position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,.7));font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.7);}
 
-/* PHOTOS — cinematic masonry */
-.photo-masonry{columns:3 220px;column-gap:8px;margin-bottom:20px;}
-@media(max-width:600px){.photo-masonry{columns:2 160px;}}
-.photo-item{break-inside:avoid;margin-bottom:8px;border-radius:10px;overflow:hidden;cursor:pointer;position:relative;display:block;}
-.photo-item img{width:100%;display:block;transition:transform .3s;background:#0d1829;}
-.photo-item:hover img{transform:scale(1.03);}
+/* PHOTO MASONRY */
+.photo-masonry{columns:3 200px;column-gap:8px;}
+@media(max-width:600px){.photo-masonry{columns:2 140px;}}
+.photo-item{break-inside:avoid;margin-bottom:8px;border-radius:10px;overflow:hidden;cursor:pointer;position:relative;display:block;background:var(--surface2);}
+.photo-item img{width:100%;display:block;transition:transform .35s;}
+.photo-item:hover img{transform:scale(1.04);}
 .photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .2s;display:flex;align-items:flex-end;}
-.photo-item:hover .photo-overlay{background:rgba(0,0,0,.25);}
-.photo-caption-bar{padding:8px 10px;color:white;font-size:11px;opacity:0;transition:opacity .2s;width:100%;background:linear-gradient(transparent,rgba(0,0,0,.6));}
-.photo-item:hover .photo-caption-bar{opacity:1;}
-.photo-del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);color:#f87171;border:1px solid rgba(248,113,113,.4);border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;opacity:0;transition:opacity .2s;}
+.photo-item:hover .photo-overlay{background:rgba(0,0,0,.2);}
+.photo-cap-bar{padding:8px 10px;color:white;font-size:11px;opacity:0;transition:opacity .2s;width:100%;background:linear-gradient(transparent,rgba(0,0,0,.65));}
+.photo-item:hover .photo-cap-bar{opacity:1;}
+.photo-del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.75);color:#f87171;border:none;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;opacity:0;transition:opacity .15s;}
 .photo-item:hover .photo-del{opacity:1;}
 
 /* VIDEO GRID */
-.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-bottom:20px;}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;}
 .video-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.video-card iframe,.video-card video{width:100%;display:block;aspect-ratio:16/9;background:#000;}
+.video-card iframe,.video-card video{width:100%;display:block;aspect-ratio:16/9;background:#000;border:none;}
 .video-card-foot{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
 .video-card-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);}
 
@@ -123,39 +123,32 @@ header{position:sticky;top:37px;z-index:50;padding:0 28px;display:flex;align-ite
 .note-del:hover{color:#f87171;}
 
 /* EMPTY / LOCKED */
-.empty-state{padding:60px 20px;text-align:center;color:var(--muted2);}
-.empty-icon{font-size:36px;margin-bottom:14px;opacity:.25;display:block;}
-.locked-state{padding:60px 20px;text-align:center;}
-.locked-icon{font-size:40px;margin-bottom:16px;display:block;opacity:.3;}
-.locked-text{font-size:14px;color:var(--muted2);margin-bottom:4px;}
-.locked-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.empty-state,.locked-state{padding:60px 20px;text-align:center;color:var(--muted2);}
+.empty-icon,.locked-icon{font-size:40px;margin-bottom:14px;opacity:.25;display:block;}
 
 /* LIGHTBOX */
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
 .lightbox.open{opacity:1;pointer-events:all;}
-.lb-img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:6px;}
-.lb-close{position:fixed;top:18px;right:20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;width:36px;height:36px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.lb-close:hover{background:rgba(255,255,255,.2);}
-.lb-caption{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:12px;color:rgba(255,255,255,.6);font-family:'DM Mono',monospace;}
-.lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:none;color:white;width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.lb-img{max-width:90vw;max-height:86vh;object-fit:contain;border-radius:6px;}
+.lb-close{position:fixed;top:16px;right:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;width:36px;height:36px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.lb-close:hover{background:rgba(255,255,255,.25);}
+.lb-caption{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);font-size:12px;color:rgba(255,255,255,.55);font-family:'DM Mono',monospace;white-space:nowrap;}
+.lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:white;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
 .lb-nav:hover{background:rgba(255,255,255,.2);}
-.lb-prev{left:16px;}
-.lb-next{right:16px;}
+.lb-prev{left:14px;}.lb-next{right:14px;}
+.lb-counter{position:fixed;top:18px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);}
 
 footer{position:relative;z-index:1;padding:20px 28px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
 footer a{color:var(--muted2);text-decoration:none;}
-
 @media(max-width:640px){
-  .page,.inner-tabs{padding-left:16px;padding-right:16px;}
-  header{padding:0 16px;}
+  .page,.inner-tabs{padding-left:14px;padding-right:14px;}
+  header{padding:0 14px;}
   .video-grid{grid-template-columns:1fr;}
-  footer{padding:16px;}
 }
 </style>
 </head>
 <body>
 
-<!-- SITE NAV -->
 <div class="site-nav">
   <a href="https://t2p-dashboard.vercel.app/index.html" target="_blank" class="sn-link home">Home</a>
   <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" class="sn-link">T2P Tracker</a>
@@ -177,12 +170,12 @@ footer a{color:var(--muted2);text-decoration:none;}
   </div>
 </header>
 
-<div class="session-rail" id="session-rail">
+<div class="session-rail">
   <button class="srail-btn active" data-sess="S5" onclick="switchSession('S5',this)"><span class="s5-live-dot"></span>Session 5</button>
   <button class="srail-btn" data-sess="S4" onclick="switchSession('S4',this)">Session 4</button>
-  <button class="srail-btn locked" data-sess="S3" onclick="showLocked(this)">Session 3</button>
-  <button class="srail-btn locked" data-sess="S2" onclick="showLocked(this)">Session 2</button>
-  <button class="srail-btn locked" data-sess="S1" onclick="showLocked(this)">Session 1</button>
+  <button class="srail-btn locked" data-sess="S3" onclick="showLocked('S3',this)">Session 3</button>
+  <button class="srail-btn locked" data-sess="S2" onclick="showLocked('S2',this)">Session 2</button>
+  <button class="srail-btn locked" data-sess="S1" onclick="showLocked('S1',this)">Session 1</button>
 </div>
 
 <div id="pw-bar" style="display:none;padding:12px 28px;background:var(--surface);border-bottom:1px solid var(--border);">
@@ -202,43 +195,72 @@ footer a{color:var(--muted2);text-decoration:none;}
 
 <div class="page" id="page-content"></div>
 
-<!-- Lightbox -->
 <div class="lightbox" id="lightbox">
   <button class="lb-close" onclick="closeLightbox()">✕</button>
   <button class="lb-nav lb-prev" onclick="lbNav(-1)">‹</button>
   <img class="lb-img" id="lb-img" src="" alt="">
   <button class="lb-nav lb-next" onclick="lbNav(1)">›</button>
   <div class="lb-caption" id="lb-caption"></div>
+  <div class="lb-counter" id="lb-counter"></div>
 </div>
 
 <footer>
-  <span>Alpha Space Agency · NYC · Session 05</span>
+  <span>Alpha Space Agency · NYC · S5</span>
   <a href="https://t2p-dashboard.vercel.app/index.html" target="_blank">← Home</a>
 </footer>
 
 <script>
+// ── Supabase config ───────────────────────────────────────────────
+const SUPA_URL  = 'https://dmthvfwrgcolqhfldxgk.supabase.co';
+const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtdGh2ZndyZ2NvbHFoZmxkeGdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNzEyMTUsImV4cCI6MjA5MjY0NzIxNX0.2ThHY2M387ymq4dlNerFAZC03mOxGrwqTfUvezcWiz0';
+const BUCKET    = 'gallery';
+const SUPA_STOR = `${SUPA_URL}/storage/v1`;
+
+// Upload a file to Supabase, return public URL
+async function supaUpload(file, sess) {
+  const ext  = file.name.split('.').pop().toLowerCase();
+  const name = `${sess}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+  const res  = await fetch(`${SUPA_STOR}/object/${BUCKET}/${name}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${SUPA_KEY}`, 'Content-Type': file.type, 'x-upsert': 'true' },
+    body: file
+  });
+  if (!res.ok) { const e = await res.text(); throw new Error(e); }
+  return `${SUPA_STOR}/object/public/${BUCKET}/${name}`;
+}
+
+async function supaDelete(path) {
+  // path is the full URL — extract object path after /object/public/gallery/
+  const rel = path.split(`/object/public/${BUCKET}/`)[1];
+  if (!rel) return;
+  await fetch(`${SUPA_STOR}/object/${BUCKET}/${rel}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${SUPA_KEY}` }
+  });
+}
+
+// ── App state ─────────────────────────────────────────────────────
 const PW = 'nyc2025';
 let adminUnlocked = false;
 let activeSess = 'S5';
 let activeTab  = 'photos';
-let lbIndex = 0;
+let lbIndex    = 0;
 
-// S4 highlight video (Google Drive)
-const S4_HIGHLIGHT = 'https://drive.google.com/file/d/1twf7lfopcLu7iWt-A08jGsLQ6BKBalvK/preview';
-const S4_HIGHLIGHT_LABEL = 'S4 Space Race Highlight';
+const S4_EMBED  = 'https://drive.google.com/file/d/1twf7lfopcLu7iWt-A08jGsLQ6BKBalvK/preview';
 
+// Metadata stored in window.storage (just URLs + captions — files live in Supabase)
 let gdata = {
-  S1:{photos:[],videos:[],notes:[],embed:'',locked:true},
-  S2:{photos:[],videos:[],notes:[],embed:'',locked:true},
-  S3:{photos:[],videos:[],notes:[],embed:'',locked:true},
-  S4:{photos:[],videos:[],notes:[],embed:S4_HIGHLIGHT},
+  S1:{photos:[],videos:[],notes:[],embed:'',unlocked:false},
+  S2:{photos:[],videos:[],notes:[],embed:'',unlocked:false},
+  S3:{photos:[],videos:[],notes:[],embed:'',unlocked:false},
+  S4:{photos:[],videos:[],notes:[],embed:S4_EMBED},
   S5:{photos:[],videos:[],notes:[],embed:'',slackUrl:''},
 };
 
-// ── Storage ────────────────────────────────────────────────────────
-async function load() {
+// ── Persistence (metadata only) ───────────────────────────────────
+async function loadMeta() {
   try {
-    const r = await window.storage.get('gallery_v3');
+    const r = await window.storage.get('gallery_meta_v1');
     if (r?.value) {
       const saved = JSON.parse(r.value);
       Object.keys(gdata).forEach(s => {
@@ -246,40 +268,41 @@ async function load() {
       });
     }
   } catch(e) {}
+  // Ensure S4 always has its embed
+  if (!gdata.S4.embed) gdata.S4.embed = S4_EMBED;
   render();
 }
 
-async function save() {
-  try { await window.storage.set('gallery_v3', JSON.stringify(gdata)); }
-  catch(e) { alert('Save failed — storage may be full. Try removing some uploaded photos.'); }
+async function saveMeta() {
+  try { await window.storage.set('gallery_meta_v1', JSON.stringify(gdata)); }
+  catch(e) { console.error('Meta save failed', e); }
 }
 
-// ── Navigation ─────────────────────────────────────────────────────
+// ── Navigation ────────────────────────────────────────────────────
 function switchSession(sess, btn) {
-  if (gdata[sess]?.locked && !adminUnlocked) return;
   activeSess = sess;
-  activeTab = 'photos';
+  activeTab  = 'photos';
   document.querySelectorAll('.srail-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.querySelectorAll('.itab').forEach(b => b.classList.toggle('active', b.dataset.tab==='photos'));
   render();
 }
 
-function showLocked(btn) {
-  if (!adminUnlocked) {
-    const s = btn.dataset.sess;
-    document.getElementById('page-content').innerHTML = `<div class="locked-state">
-      <span class="locked-icon">🔒</span>
-      <div class="locked-text">${s} photos coming soon</div>
-      <div class="locked-sub">This session will be unlocked once photos are available</div>
-    </div>`;
-  } else {
-    // Admin can access locked sessions
-    activeSess = btn.dataset.sess;
+function showLocked(sess, btn) {
+  if (adminUnlocked) {
+    activeSess = sess;
     document.querySelectorAll('.srail-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    activeTab = 'photos';
     render();
+    return;
   }
+  document.getElementById('page-content').innerHTML = `
+    <div class="locked-state">
+      <span class="locked-icon">🔒</span>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">${sess} — Coming soon</div>
+      <div style="font-size:13px;color:var(--muted);">This session will be unlocked once photos are available.</div>
+    </div>`;
 }
 
 function switchTab(tab, btn) {
@@ -289,12 +312,13 @@ function switchTab(tab, btn) {
   render();
 }
 
-// ── Admin ──────────────────────────────────────────────────────────
+// ── Admin ─────────────────────────────────────────────────────────
 function toggleAdminMode() {
   if (adminUnlocked) {
     adminUnlocked = false;
     document.getElementById('admin-toggle').textContent = '+ Manage';
     document.getElementById('pw-bar').style.display = 'none';
+    document.querySelectorAll('.srail-btn.locked').forEach(b => b.style.opacity = '');
     render(); return;
   }
   const bar = document.getElementById('pw-bar');
@@ -307,8 +331,7 @@ function unlock() {
     document.getElementById('pw-bar').style.display = 'none';
     document.getElementById('pw-input').value = '';
     document.getElementById('admin-toggle').textContent = '✕ Exit manage';
-    // Unlock locked session buttons visually for admin
-    document.querySelectorAll('.srail-btn.locked').forEach(b => b.style.opacity = '0.7');
+    document.querySelectorAll('.srail-btn.locked').forEach(b => b.style.opacity = '0.75');
     render();
   } else {
     document.getElementById('pw-err').textContent = 'Incorrect.';
@@ -316,113 +339,116 @@ function unlock() {
   }
 }
 
-// ── Bulk photo upload ──────────────────────────────────────────────
-function setupBulkDrop() {
+// ── Bulk upload to Supabase ───────────────────────────────────────
+function setupDrop() {
   const drop = document.getElementById('bulk-drop');
   if (!drop) return;
   drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
   drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
-  drop.addEventListener('drop', e => {
-    e.preventDefault(); drop.classList.remove('dragover');
-    handleBulkFiles(Array.from(e.dataTransfer.files));
-  });
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('dragover'); processFiles(Array.from(e.dataTransfer.files)); });
 }
 
-async function handleBulkFiles(files) {
-  const mediaFiles = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
-  if (!mediaFiles.length) return;
-  const bar = document.getElementById('bulk-bar');
-  const status = document.getElementById('bulk-status');
-  const progressWrap = document.getElementById('bulk-progress');
+async function processFiles(files) {
+  const media = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+  if (!media.length) return;
+
+  const progressWrap = document.getElementById('progress-wrap');
+  const bar          = document.getElementById('progress-bar');
+  const status       = document.getElementById('progress-status');
+  const errBox       = document.getElementById('upload-errors');
   if (progressWrap) progressWrap.style.display = 'block';
+  const errors = [];
   let done = 0;
-  for (const file of mediaFiles) {
-    if (file.size > 4 * 1024 * 1024) {
-      status && (status.textContent = `Skipped ${file.name} (>4MB — use URL instead)`);
-      done++;
-      continue;
+
+  for (const file of media) {
+    try {
+      if (status) status.textContent = `Uploading ${file.name}… (${done+1}/${media.length})`;
+      const url = await supaUpload(file, activeSess);
+      const isVideo = file.type.startsWith('video/');
+      const cap = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g,' ');
+      if (isVideo) gdata[activeSess].videos.push({ url, cap, ts: Date.now() });
+      else         gdata[activeSess].photos.push({ url, cap, ts: Date.now() });
+    } catch(e) {
+      errors.push(`${file.name}: ${e.message}`);
     }
-    await new Promise(res => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const isVideo = file.type.startsWith('video/');
-        if (isVideo) {
-          gdata[activeSess].videos.push({ url: e.target.result, cap: file.name.replace(/\.[^.]+$/, ''), ts: Date.now() });
-        } else {
-          gdata[activeSess].photos.push({ url: e.target.result, cap: '', ts: Date.now() });
-        }
-        done++;
-        const pct = Math.round(done / mediaFiles.length * 100);
-        if (bar) bar.style.width = pct + '%';
-        if (status) status.textContent = `${done}/${mediaFiles.length} uploaded…`;
-        res();
-      };
-      reader.readAsDataURL(file);
-    });
+    done++;
+    if (bar) bar.style.width = Math.round(done/media.length*100) + '%';
   }
-  await save();
-  if (status) status.textContent = `✓ ${done} files added`;
-  setTimeout(() => { if (progressWrap) progressWrap.style.display = 'none'; }, 3000);
+
+  await saveMeta();
+  if (status) status.textContent = `✓ ${done - errors.length} uploaded${errors.length ? `, ${errors.length} failed` : ''}`;
+  if (errBox) errBox.textContent = errors.join('\n');
+  setTimeout(() => { if (progressWrap) progressWrap.style.display = 'none'; }, 4000);
   render();
 }
 
-// ── Add single URL ─────────────────────────────────────────────────
+// ── Single URL add ────────────────────────────────────────────────
 function addMediaUrl() {
-  const url = document.getElementById('m-url')?.value.trim();
-  const cap = document.getElementById('m-cap')?.value.trim() || '';
+  const url  = document.getElementById('m-url')?.value.trim();
+  const cap  = document.getElementById('m-cap')?.value.trim() || '';
   const type = document.getElementById('m-type')?.value;
   if (!url) return;
-  if (type === 'video') {
-    gdata[activeSess].videos.push({ url, cap, ts: Date.now() });
-  } else {
-    gdata[activeSess].photos.push({ url, cap, ts: Date.now() });
-  }
+  if (type === 'video') gdata[activeSess].videos.push({ url, cap, ts: Date.now() });
+  else                  gdata[activeSess].photos.push({ url, cap, ts: Date.now() });
   document.getElementById('m-url').value = '';
   document.getElementById('m-cap').value = '';
-  save(); render();
+  saveMeta(); render();
 }
 
 function saveEmbed() {
-  const url = document.getElementById('embed-url')?.value.trim();
-  gdata[activeSess].embed = url || '';
-  save(); render();
+  gdata[activeSess].embed = document.getElementById('embed-url')?.value.trim() || '';
+  saveMeta(); render();
 }
 
-// ── S5 Slack pull ──────────────────────────────────────────────────
+// ── Slack/sheet pull ──────────────────────────────────────────────
 async function pullSlack() {
   const url = document.getElementById('slack-url')?.value.trim();
   if (!url) return;
   gdata.S5.slackUrl = url;
-  const status = document.getElementById('slack-status');
-  if (status) status.textContent = 'Pulling…';
+  const st = document.getElementById('slack-status');
+  if (st) st.textContent = 'Pulling…';
   try {
     const r = await fetch(url);
-    if (!r.ok) throw new Error();
+    if (!r.ok) throw new Error('fetch failed');
     const csv = await r.text();
     const lines = csv.split('\n').map(l => l.split(',').map(c => c.replace(/^"|"$/g,'').trim()));
-    const headers = lines[0].map(h => h.toLowerCase());
-    const urlIdx = headers.indexOf('url'), capIdx = headers.indexOf('caption');
-    if (urlIdx === -1) { if (status) status.textContent = '⚠ No "url" column'; return; }
+    const hdrs  = lines[0].map(h => h.toLowerCase());
+    const ui = hdrs.indexOf('url'), ci = hdrs.indexOf('caption');
+    if (ui === -1) { if (st) st.textContent = '⚠ No "url" column'; return; }
     const existing = new Set(gdata.S5.photos.map(p => p.url));
     let added = 0;
     for (let i = 1; i < lines.length; i++) {
-      const imgUrl = lines[i][urlIdx]?.trim();
+      const imgUrl = lines[i][ui]?.trim();
       if (!imgUrl || existing.has(imgUrl)) continue;
-      gdata.S5.photos.unshift({ url: imgUrl, cap: capIdx >= 0 ? lines[i][capIdx]||'' : '', ts: Date.now(), fromSlack: true });
+      gdata.S5.photos.unshift({ url: imgUrl, cap: ci >= 0 ? lines[i][ci]||'' : '', ts: Date.now(), fromSlack: true });
       added++;
     }
-    await save();
-    if (status) status.textContent = added > 0 ? `✓ ${added} new photos from Slack` : '✓ Up to date';
+    await saveMeta();
+    if (st) st.textContent = added > 0 ? `✓ ${added} new photos pulled` : '✓ Already up to date';
     render();
   } catch(e) {
-    if (status) status.textContent = '⚠ Could not fetch — publish sheet as CSV first';
+    if (st) st.textContent = '⚠ Could not fetch — ensure sheet is published as CSV';
   }
 }
 
-// ── Delete ─────────────────────────────────────────────────────────
-function deletePhoto(idx) { if (!confirm('Remove?')) return; gdata[activeSess].photos.splice(idx,1); save(); render(); }
-function deleteVideo(idx) { if (!confirm('Remove?')) return; gdata[activeSess].videos.splice(idx,1); save(); render(); }
-function deleteNote(idx)  { if (!confirm('Delete?')) return; gdata[activeSess].notes.splice(idx,1); save(); render(); }
+// ── Delete ────────────────────────────────────────────────────────
+async function deletePhoto(idx) {
+  if (!confirm('Remove this photo?')) return;
+  const [p] = gdata[activeSess].photos.splice(idx, 1);
+  if (p?.url?.includes(SUPA_URL)) await supaDelete(p.url).catch(()=>{});
+  saveMeta(); render();
+}
+async function deleteVideo(idx) {
+  if (!confirm('Remove this video?')) return;
+  const [v] = gdata[activeSess].videos.splice(idx, 1);
+  if (v?.url?.includes(SUPA_URL)) await supaDelete(v.url).catch(()=>{});
+  saveMeta(); render();
+}
+function deleteNote(idx) {
+  if (!confirm('Delete note?')) return;
+  gdata[activeSess].notes.splice(idx, 1);
+  saveMeta(); render();
+}
 function addNote() {
   const t = document.getElementById('n-title')?.value.trim();
   const b = document.getElementById('n-body')?.value.trim();
@@ -430,49 +456,49 @@ function addNote() {
   gdata[activeSess].notes.unshift({ title:t, body:b, ts:Date.now() });
   document.getElementById('n-title').value = '';
   document.getElementById('n-body').value = '';
-  save(); render();
+  saveMeta(); render();
 }
 
-// ── Video embed helper ─────────────────────────────────────────────
+// ── Video embed helper ────────────────────────────────────────────
 function videoEmbed(url, autoplay) {
   if (!url) return null;
-  const ap = autoplay ? '&autoplay=1&mute=1' : '';
+  const ap = autoplay ? '1' : '0';
   if (url.match(/youtube\.com|youtu\.be/)) {
     const id = url.match(/(?:v=|youtu\.be\/|embed\/)([^&?/]+)/)?.[1];
-    if (id) return `<iframe src="https://www.youtube.com/embed/${id}?rel=0&loop=1${ap}" allow="autoplay;fullscreen;accelerometer;gyroscope" allowfullscreen></iframe>`;
+    if (id) return `<iframe src="https://www.youtube.com/embed/${id}?autoplay=${ap}&mute=1&loop=1&rel=0&playlist=${id}" allow="autoplay;fullscreen" allowfullscreen></iframe>`;
   }
   if (url.match(/vimeo\.com/)) {
     const id = url.match(/vimeo\.com\/(\d+)/)?.[1];
-    if (id) return `<iframe src="https://player.vimeo.com/video/${id}?loop=1${ap.replace('&','&amp;')}" allow="autoplay;fullscreen" allowfullscreen></iframe>`;
+    if (id) return `<iframe src="https://player.vimeo.com/video/${id}?autoplay=${ap}&muted=1&loop=1" allow="autoplay;fullscreen" allowfullscreen></iframe>`;
   }
-  if (url.match(/drive\.google\.com/)) {
+  if (url.match(/drive\.google\.com/) || url.match(/\/preview$/)) {
     const id = url.match(/\/d\/([^/]+)/)?.[1];
-    if (id) return `<iframe src="https://drive.google.com/file/d/${id}/preview" allow="autoplay;fullscreen"></iframe>`;
+    const src = id ? `https://drive.google.com/file/d/${id}/preview` : url;
+    return `<iframe src="${src}" allow="autoplay;fullscreen"></iframe>`;
   }
   if (url.match(/frame\.io|f\.io/)) return `<iframe src="${url}" allow="fullscreen"></iframe>`;
-  if (url.match(/\.(mp4|webm|mov)(\?|$)/i)) return `<video controls${autoplay?' autoplay muted loop':''} playsinline><source src="${url}">Your browser does not support video.</video>`;
-  if (url.match(/\/preview$/)) return `<iframe src="${url}" allow="autoplay;fullscreen"></iframe>`;
+  if (url.match(/\.(mp4|webm|mov)(\?|$)/i)) return `<video controls${autoplay?' autoplay muted loop':''} playsinline style="width:100%;display:block;"><source src="${url}"></video>`;
   return `<iframe src="${url}" allow="autoplay;fullscreen" allowfullscreen></iframe>`;
 }
 
-// ── Lightbox ───────────────────────────────────────────────────────
+// ── Lightbox ──────────────────────────────────────────────────────
 function openLightbox(idx) {
-  lbIndex = idx;
-  showLbPhoto();
+  lbIndex = idx; showLb();
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-function showLbPhoto() {
+function showLb() {
   const photos = gdata[activeSess].photos;
   const p = photos[lbIndex];
   if (!p) return;
   document.getElementById('lb-img').src = p.url;
   document.getElementById('lb-caption').textContent = p.cap || '';
+  document.getElementById('lb-counter').textContent = `${lbIndex+1} / ${photos.length}`;
 }
-function lbNav(dir) {
-  const photos = gdata[activeSess].photos;
-  lbIndex = (lbIndex + dir + photos.length) % photos.length;
-  showLbPhoto();
+function lbNav(d) {
+  const n = gdata[activeSess].photos.length;
+  lbIndex = (lbIndex + d + n) % n;
+  showLb();
 }
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
@@ -485,132 +511,119 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeLightbox();
 });
 document.getElementById('lightbox').addEventListener('click', e => {
-  if (e.target === document.getElementById('lightbox')) closeLightbox();
+  if (e.target.id === 'lightbox') closeLightbox();
 });
 
-// ── Render ─────────────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────────
 function render() {
-  const sess = gdata[activeSess];
-  const isAdmin = adminUnlocked;
+  const sess  = gdata[activeSess];
+  const admin = adminUnlocked;
   let html = '';
 
-  // Admin panel
-  if (isAdmin) {
+  if (admin) {
     html += `<div class="admin-panel">
-      <div class="admin-panel-title">✦ Manage — ${activeSess}</div>
+      <div class="admin-panel-title">✦ Managing ${activeSess}</div>
 
-      <!-- Embed / pinned video -->
-      <div class="embed-section">
-        <div class="embed-label">Pinned video (embed URL)</div>
-        <div class="admin-row">
-          <input class="adm-inp" id="embed-url" placeholder="YouTube, Google Drive /preview, Vimeo, Frame.io…" value="${sess.embed||''}">
-          <button class="adm-btn" onclick="saveEmbed()">Save embed</button>
-          ${sess.embed ? `<button class="adm-btn danger" onclick="gdata[activeSess].embed='';save();render()">✕ Remove</button>` : ''}
-        </div>
+      <div class="adm-label">Pinned embed (shown at top of Photos + Video tabs)</div>
+      <div class="admin-row">
+        <input class="adm-inp" id="embed-url" placeholder="YouTube, Google Drive /preview, Vimeo, Frame.io URL…" value="${sess.embed||''}">
+        <button class="adm-btn" onclick="saveEmbed()">Save</button>
+        ${sess.embed?`<button class="adm-btn danger" onclick="gdata[activeSess].embed='';saveMeta();render()">✕</button>`:''}
       </div>
 
-      <!-- Bulk upload -->
-      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-        <div class="embed-label">Bulk upload photos + videos</div>
+      <div class="adm-section">
+        <div class="adm-label">Bulk upload — photos &amp; videos → Supabase (no size limit)</div>
         <div class="bulk-drop" id="bulk-drop" onclick="document.getElementById('bulk-file').click()">
-          <div class="bulk-drop-icon">📁</div>
-          <div class="bulk-drop-text">Drop files here or click to browse</div>
-          <div class="bulk-drop-sub">Images and videos · max 4MB each · use URL for larger files</div>
+          <div class="bulk-drop-icon">☁️</div>
+          <div class="bulk-drop-text">Drop files here or click to select</div>
+          <div class="bulk-drop-sub">All images &amp; videos · uploaded directly to Supabase · no limit</div>
         </div>
-        <input type="file" id="bulk-file" accept="image/*,video/*" multiple style="display:none" onchange="handleBulkFiles(Array.from(this.files));this.value=''">
-        <div id="bulk-progress" style="display:none;" class="bulk-progress">
-          <div class="bulk-bar-wrap"><div class="bulk-bar" id="bulk-bar"></div></div>
-          <div class="bulk-status" id="bulk-status"></div>
+        <input type="file" id="bulk-file" accept="image/*,video/*" multiple style="display:none"
+          onchange="processFiles(Array.from(this.files));this.value=''">
+        <div id="progress-wrap" class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar"></div></div>
+          <div class="progress-status" id="progress-status"></div>
+          <div class="upload-errors" id="upload-errors"></div>
         </div>
       </div>
 
-      <!-- Single URL add -->
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-        <div class="embed-label">Add single URL</div>
+      <div class="adm-section">
+        <div class="adm-label">Add single URL</div>
         <div class="admin-row">
-          <select class="adm-inp" id="m-type" style="flex:0 0 90px;min-width:90px;">
+          <select class="adm-inp" id="m-type" style="flex:0 0 100px;min-width:100px;">
             <option value="photo">Photo</option>
             <option value="video">Video</option>
           </select>
-          <input class="adm-inp" id="m-url" placeholder="https://…">
+          <input class="adm-inp" id="m-url" placeholder="https://…" onkeydown="if(event.key==='Enter')addMediaUrl()">
           <input class="adm-inp" id="m-cap" placeholder="Caption (optional)" style="max-width:200px">
           <button class="adm-btn" onclick="addMediaUrl()">+ Add</button>
         </div>
       </div>
 
-      ${activeSess === 'S5' ? `
-      <!-- Slack / sheet pull for S5 -->
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-        <div class="embed-label">Pull photos from Slack → Google Sheet (S5 only)</div>
+      ${activeSess==='S5'?`
+      <div class="adm-section">
+        <div class="adm-label">Pull from Slack → Google Sheet (S5)</div>
         <div class="admin-row">
-          <input class="adm-inp" id="slack-url" placeholder="Published Google Sheet CSV URL" value="${gdata.S5.slackUrl||''}">
-          <button class="adm-btn" onclick="pullSlack()">↓ Pull now</button>
+          <input class="adm-inp" id="slack-url" placeholder="Published CSV URL from Google Sheet" value="${gdata.S5.slackUrl||''}">
+          <button class="adm-btn" onclick="pullSlack()">↓ Pull</button>
         </div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;">
-          Sheet needs columns: <strong style="color:var(--muted2)">url</strong> (and optionally <strong style="color:var(--muted2)">caption</strong>) · File → Share → Publish to web → CSV
-        </div>
+        <div class="adm-hint">Sheet needs a <strong style="color:var(--muted2)">url</strong> column · File → Share → Publish to web → CSV</div>
         <div id="slack-status" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);margin-top:4px;"></div>
-      </div>` : ''}
+      </div>`:''}
 
-      ${activeSess === 'S1' || activeSess === 'S2' || activeSess === 'S3' ? `
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-        <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <input type="checkbox" ${sess.locked===false?'checked':''} onchange="gdata[activeSess].locked=!this.checked;save();render()">
-          Unlocked for public (photos visible to all)
+      ${'S1 S2 S3'.includes(activeSess)?`
+      <div class="adm-section">
+        <label style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" ${sess.unlocked?'checked':''} onchange="gdata[activeSess].unlocked=this.checked;saveMeta();render()">
+          Unlock ${activeSess} for public view
         </label>
-      </div>` : ''}
+      </div>`:''}
     </div>`;
-    setTimeout(setupBulkDrop, 50);
+    setTimeout(setupDrop, 50);
   }
 
   if (activeTab === 'photos') {
-    // Pinned video hero
+    // Hero embed
     if (sess.embed) {
       const emb = videoEmbed(sess.embed, true);
-      if (emb) html += `<div class="hero-video">${emb}<div class="hero-video-label">${activeSess === 'S4' ? S4_HIGHLIGHT_LABEL : activeSess + ' · Featured'}</div></div>`;
+      if (emb) html += `<div class="hero-video">${emb}<div class="hero-video-label">${activeSess==='S4'?'Space Race Highlight · S4':'Featured · '+activeSess}</div></div>`;
     }
-
     if (!sess.photos.length) {
-      html += `<div class="empty-state"><span class="empty-icon">📷</span><div>No photos yet for ${activeSess}.</div>${isAdmin?'<div style="margin-top:8px;font-size:12px;color:var(--muted)">Use the panel above to upload.</div>':''}</div>`;
+      html += `<div class="empty-state"><span class="empty-icon">📷</span><div>No photos yet${admin?' — upload above':''}</div></div>`;
     } else {
-      html += `<div class="photo-masonry">`;
-      sess.photos.forEach((p, i) => {
-        html += `<div class="photo-item" onclick="openLightbox(${i})">
+      html += `<div class="photo-masonry">` + sess.photos.map((p,i) => `
+        <div class="photo-item" onclick="openLightbox(${i})">
           <img src="${p.url}" alt="${p.cap||''}" loading="lazy" onerror="this.parentElement.style.display='none'">
-          <div class="photo-overlay">
-            <div class="photo-caption-bar">${p.cap||''}</div>
-          </div>
-          ${isAdmin ? `<button class="photo-del" onclick="event.stopPropagation();deletePhoto(${i})">✕</button>` : ''}
-        </div>`;
-      });
-      html += `</div>`;
+          <div class="photo-overlay"><div class="photo-cap-bar">${p.cap||''}</div></div>
+          ${admin?`<button class="photo-del" onclick="event.stopPropagation();deletePhoto(${i})">✕</button>`:''}
+        </div>`).join('') + `</div>`;
     }
   }
 
   else if (activeTab === 'video') {
-    if (!sess.embed && !sess.videos.length) {
-      html += `<div class="empty-state"><span class="empty-icon">🎬</span><div>No videos yet for ${activeSess}.</div>${isAdmin?'<div style="margin-top:8px;font-size:12px;color:var(--muted)">Add an embed URL or upload videos above.</div>':''}</div>`;
+    const hasContent = sess.embed || sess.videos.length;
+    if (!hasContent) {
+      html += `<div class="empty-state"><span class="empty-icon">🎬</span><div>No videos yet${admin?' — add an embed URL or upload above':''}</div></div>`;
     } else {
       html += `<div class="video-grid">`;
-      // Pinned embed first
       if (sess.embed) {
         const emb = videoEmbed(sess.embed, true);
-        if (emb) html += `<div class="video-card" style="grid-column:1/-1">${emb}<div class="video-card-foot"><span class="video-card-label">${activeSess === 'S4' ? S4_HIGHLIGHT_LABEL : 'Featured · ' + activeSess}</span></div></div>`;
+        if (emb) html += `<div class="video-card" style="grid-column:1/-1">${emb}<div class="video-card-foot"><span class="video-card-label">${activeSess==='S4'?'Space Race Highlight · S4':'Featured · '+activeSess}</span></div></div>`;
       }
-      sess.videos.forEach((v, i) => {
+      sess.videos.forEach((v,i) => {
         const emb = videoEmbed(v.url, true);
-        if (emb) html += `<div class="video-card">${emb}<div class="video-card-foot"><span class="video-card-label">${v.cap||v.url.split('/').pop()}</span>${isAdmin?`<button style="background:transparent;border:none;color:#f87171;cursor:pointer;font-size:12px;" onclick="deleteVideo(${i})">✕</button>`:''}</div></div>`;
+        if (emb) html += `<div class="video-card">${emb}<div class="video-card-foot"><span class="video-card-label">${v.cap||''}</span>${admin?`<button style="background:transparent;border:none;color:#f87171;cursor:pointer;font-size:12px;font-family:'DM Mono',monospace;" onclick="deleteVideo(${i})">✕ Remove</button>`:''}</div></div>`;
       });
       html += `</div>`;
     }
   }
 
   else if (activeTab === 'notes') {
-    if (isAdmin) {
+    if (admin) {
       html += `<div class="admin-panel" style="margin-bottom:20px;">
         <div class="admin-panel-title">Add note</div>
         <input class="adm-inp" id="n-title" placeholder="Title (optional)" style="width:100%;margin-bottom:8px">
-        <textarea class="adm-textarea" id="n-body" placeholder="Write a note, recap, or field trip description…"></textarea>
+        <textarea class="adm-textarea" id="n-body" placeholder="Recap, field trip notes, observations…"></textarea>
         <button class="adm-btn" onclick="addNote()">+ Add note</button>
       </div>`;
     }
@@ -619,8 +632,8 @@ function render() {
     } else {
       html += `<div class="notes-list">` + sess.notes.map((n,i) => `
         <div class="note-card">
-          ${isAdmin ? `<button class="note-del" onclick="deleteNote(${i})">✕</button>` : ''}
-          ${n.title ? `<div class="note-title">${n.title}</div>` : ''}
+          ${admin?`<button class="note-del" onclick="deleteNote(${i})">✕</button>`:''}
+          ${n.title?`<div class="note-title">${n.title}</div>`:''}
           <div class="note-body">${n.body}</div>
           <div class="note-date">${new Date(n.ts).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
         </div>`).join('') + `</div>`;
@@ -630,7 +643,7 @@ function render() {
   document.getElementById('page-content').innerHTML = html;
 }
 
-load();
+loadMeta();
 </script>
 </body>
 </html>
