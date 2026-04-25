@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>T2P Patch Tracker — Alpha NYC</title>
+<title>T2P Tracker — Alpha NYC</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -830,7 +830,11 @@ function render() {
             ${s.n}
             ${hasS5?'<span class="s5-pin"></span>':''}
           </div>
-          ${s.note?`<div class="card-note">* ${s.note}</div>`:''}
+          ${s.note?`<div class="card-note">${
+            s.leftAfterS ? `<span style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:1px 6px;border-radius:4px;font-style:normal;">Left after S${s.leftAfterS}</span>` :
+            s.joinedS    ? `<span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:1px 6px;border-radius:4px;font-style:normal;">Joined S${s.joinedS}</span>` :
+            `* ${s.note}`
+          }</div>`:''}
         </div>
         <span class="card-arrow">→</span>
       </div>
@@ -866,7 +870,11 @@ function openModal(name) {
 
   document.getElementById('m-name').textContent = name;
   document.getElementById('m-sub').innerHTML = `<span class="level-tag tag-${s.l}">${s.l}</span> ${passed} patches earned`;
-  document.getElementById('m-note').innerHTML = s.note ? `<div class="modal-note-box">* ${s.note}</div>` : '';
+  document.getElementById('m-note').innerHTML = s.note ? `<div class="modal-note-box">${
+    s.leftAfterS ? `🟡 Left after Session ${s.leftAfterS} — showing S1–S${s.leftAfterS} patches only` :
+    s.joinedS    ? `🔵 Joined Session ${s.joinedS} — patches from S${s.joinedS} onwards` :
+    '* ' + s.note
+  }</div>` : '';
   document.getElementById('m-stats').innerHTML = `
     <div class="modal-stat"><div class="modal-stat-val" style="color:#10b981">${passed}</div><div class="modal-stat-lbl">Passed</div></div>
     <div class="modal-stat"><div class="modal-stat-val" style="color:#ef4444">${failed}</div><div class="modal-stat-lbl">Not passed</div></div>
@@ -977,7 +985,7 @@ function loadEpStudent() {
 function deleteStudent() {
   const name = document.getElementById('ep-stu').value;
   if (!name) return;
-  if (!confirm(`Delete "${name}" from the patch tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
+  if (!confirm(`Delete "${name}" from the tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
   // Remove from students array
   const idx = students.findIndex(s=>s.n===name);
   if (idx > -1) students.splice(idx, 1);
