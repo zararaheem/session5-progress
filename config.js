@@ -6,6 +6,18 @@ const T2P_CONFIG = {
 
   // ── Access ────────────────────────────────────────────────────
   password: "nyc2025",
+  
+  // Admins — see everything, audit log, all students
+  superadmins: ["Zara", "Tasha", "Liam"],
+
+  // Staff list (auto-sorted alphabetically)
+  staff: [
+    "Chauncey", "Emily", "Jenna K.", "Jenna P.",
+    "Jesse", "Liam", "Nathan",
+    "Parthvi"
+  ].sort(),
+
+ 
  // ── Level → Guide assignments ─────────────────────────────────
   // Students in each level are pre-assigned these guides by default.
   // Individual overrides can still be made in the editor.
