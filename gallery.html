@@ -234,6 +234,70 @@ async function supaDelete(path) {
   });
 }
 
+async function commitUploads() {
+  if (!stagedUploads.length) return;
+
+  for (const item of stagedUploads) {
+    const res = await fetch(`${SUPA_URL}/rest/v1/gallery_media`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${SUPA_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        session: item.session,
+        type: item.type,
+        url: item.url,
+        caption: item.caption
+      })
+    });
+
+    if (!res.ok) {
+      console.error(await res.text());
+    }
+  }
+
+  stagedUploads = [];
+  await loadFromDB();
+}
+
+
+async function loadFromDB() {
+  const res = await fetch(
+    `${SUPA_URL}/rest/v1/gallery_media?select=*`,
+    {
+      headers: {
+        apikey: SUPA_KEY,
+        Authorization: `Bearer ${SUPA_KEY}`
+      }
+    }
+  );
+
+  const data = await res.json();
+
+  const grouped = { S1:{photos:[],videos:[]},S2:{photos:[],videos:[]},S3:{photos:[],videos:[]},S4:{photos:[],videos:[]},S5:{photos:[],videos:[]} };
+
+  data.forEach(item => {
+    if (!grouped[item.session]) return;
+    if (item.type === 'photo') grouped[item.session].photos.push(item);
+    else grouped[item.session].videos.push(item);
+  });
+
+  galleryData = grouped;
+  render();
+} 
+
+function renderStaged() {
+  return stagedUploads.map((f,i)=>`
+    <div>
+      ${f.type} — ${f.caption}
+      <button onclick="stagedUploads.splice(${i},1);render()">remove</button>
+    </div>
+  `).join('');
+}  
+  
 // ── App state ─────────────────────────────────────────────────────
 const PW = 'nyc2025';
 let adminUnlocked = false;
@@ -244,6 +308,7 @@ let lbIndex    = 0;
 const S4_EMBED  = 'https://drive.google.com/file/d/1twf7lfopcLu7iWt-A08jGsLQ6BKBalvK/preview';
   
 // Metadata stored in window.storage (just URLs + captions — files live in Supabase)
+let stagedUploads = [];
 let gdata = {
   S1:{photos:[],videos:[],embed:'',unlocked:false},
   S2:{photos:[],videos:[],embed:'',unlocked:false},
@@ -356,19 +421,29 @@ async function processFiles(files) {
   let done = 0;
 
   for (const file of media) {
-    try {
-      if (status) status.textContent = `Uploading ${file.name}… (${done+1}/${media.length})`;
-      const url = await supaUpload(file, activeSess);
-      const isVideo = file.type.startsWith('video/');
-      const cap = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g,' ');
-      if (isVideo) gdata[activeSess].videos.push({ url, cap, ts: Date.now() });
-      else         gdata[activeSess].photos.push({ url, cap, ts: Date.now() });
-    } catch(e) {
-      errors.push(`${file.name}: ${e.message}`);
-    }
-    done++;
-    if (bar) bar.style.width = Math.round(done/media.length*100) + '%';
+  try {
+    if (status) status.textContent = `Uploading ${file.name}… (${done+1}/${media.length})`;
+
+    const url = await supaUpload(file, activeSess);
+    const isVideo = file.type.startsWith('video/');
+    const cap = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g,' ');
+
+    // ✅ NEW: push into staging queue instead of gallery
+    stagedUploads.push({
+      session: activeSess,
+      type: isVideo ? 'video' : 'photo',
+      url,
+      caption: cap,
+      ts: Date.now()
+    });
+
+  } catch(e) {
+    errors.push(`${file.name}: ${e.message}`);
   }
+
+  done++;
+  if (bar) bar.style.width = Math.round(done/media.length*100) + '%';
+}
 
   await saveMeta();
   if (status) status.textContent = `✓ ${done - errors.length} uploaded${errors.length ? `, ${errors.length} failed` : ''}`;
@@ -545,6 +620,8 @@ function render() {
           <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar"></div></div>
           <div class="progress-status" id="progress-status"></div>
           <div class="upload-errors" id="upload-errors"></div>
+        <button class="adm-btn" onclick="commitUploads()">Save Uploads</button>
+        <button class="adm-btn sec" onclick="clearStaged()">Clear</button>
         </div>
       </div>
 
