@@ -11,12 +11,13 @@
   --bg:#f8f7f4;--text:#111;--muted:#888;--border:#e2e0db;--card:#fff;
   --s1:#2563eb;--s2:#7c3aed;--s3:#059669;--s4:#d97706;--s5:#dc2626;
   --ll:#e8a020;--l1:#e8522a;--l2:#2ab5a0;--ms:#e03d7c;
+  --alpha:#1a56db;
 }
 html{scroll-behavior:smooth;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
 /* ── NAV ── */
-nav{position:sticky;top:0;z-index:50;background:rgba(248,247,244,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:stretch;justify-content:space-between;}
+nav{position:sticky;top:37px;z-index:50;background:rgba(248,247,244,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:stretch;justify-content:space-between;}
 .nav-left{display:flex;align-items:center;gap:0;}
 .nav-brand{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--s5);padding:16px 16px 16px 0;display:flex;align-items:center;}
 .nav-sep{width:1px;height:18px;background:var(--border);margin-right:14px;}
@@ -24,8 +25,12 @@ nav{position:sticky;top:0;z-index:50;background:rgba(248,247,244,.97);backdrop-f
 .nav-right{display:flex;align-items:center;gap:6px;}
 .nav-link{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:6px;transition:all .15s;}
 .nav-link:hover{color:var(--text);border-color:#aaa;}
-.nav-link.hot{color:var(--s5);border-color:rgba(220,38,38,.3);background:rgba(220,38,38,.04);}
-.nav-link.hot:hover{background:rgba(220,38,38,.09);}
+/* nav-brand and kicker use alpha blue not s5 red */
+.nav-brand{color:var(--alpha) !important;}
+.nav-link.hot{color:var(--alpha) !important;border-color:rgba(26,86,219,.3) !important;background:rgba(26,86,219,.04) !important;}
+.nav-link.hot:hover{background:rgba(26,86,219,.09) !important;}
+.kicker{color:var(--alpha) !important;}
+h1 em{color:var(--alpha) !important;}
 
 /* ── HERO ── */
 .hero{padding:52px 40px 36px;max-width:820px;margin:0 auto;text-align:center;}
@@ -148,24 +153,45 @@ footer a:hover{color:var(--text);}
   .ws-grid{grid-template-columns:1fr 1fr;}
 }
 @media(max-width:420px){.ws-grid{grid-template-columns:1fr;}}
+
+/* ── SITE NAV ── */
+.site-nav{display:flex;align-items:center;gap:3px;padding:7px 20px;flex-wrap:wrap;position:sticky;top:0;z-index:1000;}
+.site-nav.dark{background:#060c18;border-bottom:1px solid #1e3050;}
+.site-nav.light{background:rgba(248,247,244,.97);border-bottom:1px solid #e2e0db;backdrop-filter:blur(8px);}
+.sn-link{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.04em;text-decoration:none;padding:5px 12px;border-radius:20px;border:1px solid transparent;transition:all .15s;white-space:nowrap;}
+.site-nav.dark .sn-link{color:#4a6080;}
+.site-nav.dark .sn-link:hover{color:#e8f0fc;border-color:#264070;}
+.site-nav.dark .sn-link.active{background:#1a56db;color:white;border-color:#1a56db;}
+.site-nav.dark .sn-link.home{color:#7090b0;border-color:#1e3050;}
+.site-nav.light .sn-link{color:#888;}
+.site-nav.light .sn-link:hover{color:#111;border-color:#aaa;}
+.site-nav.light .sn-link.active{background:#1a56db;color:white;border-color:#1a56db;}
+.site-nav.light .sn-link.home{color:#444;border-color:#e2e0db;}
 </style>
 </head>
 <body>
-
+<div class="site-nav light">
+  <a href="index.html" target="_blank" class="sn-link home">Home</a>
+  <a href="tracker.html" target="_blank" class="sn-link">T2P Tracker</a>
+  <a href="workshops.html" target="_blank" class="sn-link active">Workshop Directory</a>
+  <a href="gallery.html" target="_blank" class="sn-link">Gallery</a>
+  <a href="session5.html" target="_blank" class="sn-link">Session 5</a>
+  <a href="editor.html" target="_blank" class="sn-link">Staff Login</a>
+</div>
 <nav>
   <div class="nav-left">
-    <span class="nav-brand">Alpha · NYC</span>
+    <span class="nav-brand" style="color:var(--alpha)">Alpha · NYC</span>
     <div class="nav-sep"></div>
     <span class="nav-title">Workshop Directory</span>
   </div>
   <div class="nav-right">
-    <a href="index.html" class="nav-link">← Home</a>
-    <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" class="nav-link hot">Patch Tracker ↗</a>
+    <a href="index.html" target="_blank" class="nav-link">← Home</a>
+    <a href="tracker.html" target="_blank" class="nav-link hot">T2P Tracker ↗</a>
   </div>
 </nav>
 
 <div class="hero">
-  <div class="kicker">S1 — S5 · All Sessions</div>
+  <div class="kicker">Alpha NYC · S1 — S5 · All Sessions</div>
   <h1>Workshop <em>Directory</em></h1>
   <p class="hero-sub">Every workshop across all five sessions. Click any card to see the lifeskill, I-can statement, and patch count.</p>
 </div>
@@ -218,12 +244,6 @@ footer a:hover{color:var(--text);}
   <span>Alpha Space Agency · NYC</span>
   <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank">T2P Patch Tracker ↗</a>
 </footer>
-
-<div class="page-toggle">
-  <button class="tog" onclick="window.location.href='https://t2p-dashboard.vercel.app/tracker.html'">Patch Tracker</button>
-  <button class="tog on">Workshop Directory</button>
-</div>
-
 <script>
 const MC = 'https://alpha-mission-control.vercel.app/workshops/';
 const SESS_COLORS = {S1:'#2563eb',S2:'#7c3aed',S3:'#059669',S4:'#d97706',S5:'#dc2626'};
@@ -322,23 +342,22 @@ const W = [
   // ── S4 ─────────────────────────────────────────────────────────
   {sess:'S4',code:'S4-01',name:'Community Builders',level:'ALL',lifeskill:'Entrepreneurship — Value Creation',
    ican:'',
-   desc:'Students partner with NYC animal shelters to build durable products that improve adoption outcomes. The T2P culminates in a public demonstration of installed builds and measurable impact.'},
+   desc:'Students partner with NYC animal shelters to build durable products that improve adoption outcomes. Continues in Session 5.',
+   note:'Continues in S5'},
   {sess:'S4',code:'S4-02',name:'Alpha Emporium Exchange',level:'ALL',lifeskill:'Entrepreneurship — Value Creation',
    ican:'',
    desc:'An inter-campus, student-run marketplace across the Alpha ecosystem. Students learn to price, market, and ship products to other campuses using Alphas, applying real financial literacy in action.'},
   {sess:'S4',code:'S4-03',name:'Polite Society',level:'LL',lifeskill:'Socialization — Public Confidence',
    ican:'',
-   desc:'Learning Lab students build the confidence to independently manage real-world social interactions — greeting unfamiliar adults, ordering, adapting to changes, and closing conversations without prompting.'},
+   desc:'Learning Lab students build the confidence to independently manage real-world social interactions. Continues in Session 5.',
+   note:'Continues in S5'},
   {sess:'S4',code:'S4-04',name:'Space Race',level:'L1',lifeskill:'Critical Thinking — Problem Solving',
    ican:'',
    desc:'Students design, build, and refine robotic systems to navigate increasingly complex terrain courses. Through iteration, testing, and adjustment, they develop structured problem-solving skills under real constraints.'},
   {sess:'S4',code:'S4-05',name:'Money Machines',level:'L2',lifeskill:'Financial Fluency',
    ican:'',
    desc:'Continuing from Session 3, students refine and scale a real revenue-generating venture. They analyze performance data, adjust pricing and strategy, optimize operations, and improve margins through disciplined iteration.'},
-  {sess:'S4',code:'S4-06',name:'The Coachability Combine',level:'MS',lifeskill:'Receiving Feedback — Feedback Implementation',
-   ican:'',
-   desc:'A live admissions-style interview event where students complete two MAX project interviews back-to-back, receive direct critique, and return 10 minutes later to demonstrate measurable improvement in real time.'},
-  {sess:'S4',code:'S4-07',name:'Rock Stars',level:'ALL',lifeskill:'Grit — Growth Mindset',
+  {sess:'S4',code:'S4-06',name:'Rock Stars',level:'ALL',lifeskill:'Grit — Growth Mindset',
    ican:'',
    desc:'A bouldering challenge at Brooklyn Bouldering where students attempt a climbing route one class above their recorded baseline, demonstrating a full grit cycle: attempt, setback, adjustment, and renewed effort.'},
 
@@ -458,8 +477,11 @@ function render() {
         <div class="ws-name">${w.name}</div>
         <div class="ws-card-foot">
           ${w.lifeskill ? `<span class="ws-ls">${w.lifeskill}</span>` : '<span></span>'}
-          ${pr?.pass ? `<span class="ws-pass">${pr.pass} passed</span>` : ''}
-          ${w.link ? `<span class="ws-ext"></span>` : ''}
+          <div style="display:flex;gap:4px;align-items:center;">
+            ${w.note ? `<span style="font-family:'DM Mono',monospace;font-size:8px;padding:1px 6px;border-radius:10px;background:#fff4e0;color:#d97706;border:1px solid #fde68a;white-space:nowrap;">${w.note}</span>` : ''}
+            ${pr?.pass ? `<span class="ws-pass">${pr.pass} passed</span>` : ''}
+            ${w.link ? `<span class="ws-ext"></span>` : ''}
+          </div>
         </div>
       </button>`;
     });
@@ -477,6 +499,9 @@ function openModal(idx) {
   document.getElementById('modal-badges').innerHTML = lvBadgesLg(w.level);
   document.getElementById('modal-name').textContent = w.name;
   document.getElementById('modal-ls').textContent = w.lifeskill || '';
+  if (w.note) {
+    document.getElementById('modal-ls').innerHTML += ` <span style="font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:10px;background:#fff4e0;color:#d97706;border:1px solid #fde68a;margin-left:6px;">${w.note}</span>`;
+  }
 
   const icanEl = document.getElementById('modal-ican');
   const icanSec = document.getElementById('modal-ican-section');
@@ -518,5 +543,10 @@ function closeModal() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 loadPassRates(); // async — calls render() when done
 </script>
+<div class="page-toggle">
+  <button class="tog" onclick="window.location.href='tracker.html'">Patch Tracker</button>
+  <button class="tog on">Workshop Directory</button>
+</div>
+
 </body>
 </html>
