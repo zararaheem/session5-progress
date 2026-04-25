@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>T2P Tracker — Alpha NYC</title>
+<title>T2P Patch Tracker — Alpha NYC</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -265,7 +265,7 @@ select:focus{border-color:#3b82f6;}
 <body>
 
 <header>
-  <span class="hdr-title">T2P Tracker</span>
+  <span class="hdr-title">T2P Patch Tracker</span>
   <div class="hdr-right">
     <span class="s5-dot">S5 Live</span>
     <span id="hdr-date" style="font-family:'DM Mono',monospace;font-size:11px;color:#666;"></span>
@@ -492,6 +492,7 @@ const BASE = [
   {n:"Harvey Caulin",l:"L1",note:"Joined S4",joinedS:4,scores:{"S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
   {n:"Lola Propp",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Not passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
   {n:"London Politi",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Not passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Not passed","S3: Speak like a Scientist":"Not passed","S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
+  {n:"Max Rzepecki",l:"L1",note:"Moved to PR after S4",leftAfterS:4,scores:{}},
   {n:"Oleander Poulson",l:"L1",note:"Joined S4",joinedS:4,scores:{"S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
   {n:"Raika Ackman",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
   {n:"Van McDavid",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
@@ -919,7 +920,7 @@ function loadEpStudent() {
 function deleteStudent() {
   const name = document.getElementById('ep-stu').value;
   if (!name) return;
-  if (!confirm(`Delete "${name}" from the tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
+  if (!confirm(`Delete "${name}" from the patch tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
   // Remove from students array
   const idx = students.findIndex(s=>s.n===name);
   if (idx > -1) students.splice(idx, 1);
@@ -1101,7 +1102,7 @@ initWsMeta();
 </script>
 <!-- PAGE TOGGLE -->
 <div class="page-toggle">
-  <button class="toggle-btn tracker-active">T2P Tracker</button>
+  <button class="toggle-btn tracker-active">Patch Tracker</button>
   <button class="toggle-btn" onclick="window.location.href='workshops.html'">Workshop Directory</button>
 </div>
 

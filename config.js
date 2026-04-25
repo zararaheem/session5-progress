@@ -6,19 +6,18 @@ const T2P_CONFIG = {
 
   // ── Access ────────────────────────────────────────────────────
   password: "nyc2025",
-  
+
   // Admins — see everything, audit log, all students
   superadmins: ["Zara", "Tasha", "Liam"],
 
   // Staff list (auto-sorted alphabetically)
   staff: [
     "Chauncey", "Emily", "Jenna K.", "Jenna P.",
-    "Jesse", "Liam", "Nathan",
-    "Parthvi"
+    "Jesse", "Julianne", "Liam", "Nancy", "Nathan",
+    "Parthvi", "Tasha", "Zara"
   ].sort(),
 
- 
- // ── Level → Guide assignments ─────────────────────────────────
+  // ── Level → Guide assignments ─────────────────────────────────
   // Students in each level are pre-assigned these guides by default.
   // Individual overrides can still be made in the editor.
   levelGuides: {
@@ -78,7 +77,7 @@ const T2P_CONFIG = {
     { n: "Harvey Caulin",            l: "L1", note: "Joined S4" },
     { n: "Lola Propp",               l: "L1" },
     { n: "London Politi",            l: "L1" },
-    { n: "Max Rzepecki",             l: "L1", note: "Moved to PR after S2" },
+    { n: "Max Rzepecki",             l: "L1", note: "Moved to PR after S4" },
     { n: "Oleander Poulson",         l: "L1", note: "Joined S4" },
     { n: "Raika Ackman",             l: "L1" },
     { n: "Van McDavid",              l: "L1" },

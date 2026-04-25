@@ -372,7 +372,7 @@ header{background:rgba(13,24,41,.95);border-bottom:1px solid var(--border2);padd
     </div>
     <div class="dm-tabs">
       <button class="dm-tab active" onclick="switchDmTab('progress',this)">S5 Progress</button>
-      <button class="dm-tab" onclick="switchDmTab('3cs',this)">3Cs</button>
+      <button class="dm-tab" onclick="switchDmTab('3cs',this)">3 Commitments</button>
       <button class="dm-tab" onclick="switchDmTab('meetings',this)">Meetings</button>
       <button class="dm-tab" onclick="switchDmTab('notes',this)">Notes</button>
       <button class="dm-tab" id="ws-tab" style="display:none" onclick="switchDmTab('wsdelivery',this)">Workshops</button>
@@ -941,18 +941,61 @@ function renderDmBody(){
   }
 
   else if(currentDmTab==='3cs'){
-    html=`<div class="ds-section">
-      <div class="ds-title">3Cs — Challenge · Connect · Create</div>
-      <div class="ds-field"><label>Challenge (what is being challenged?)</label>
-        <textarea class="ds-textarea" id="3c-challenge-${sl}" placeholder="What challenge are they working on or working through…">${threeCs.challenge||''}</textarea></div>
-      <div class="ds-field"><label>Connect (how are they connecting it to themselves?)</label>
-        <textarea class="ds-textarea" id="3c-connect-${sl}" placeholder="How is this connecting to their life, goals, identity…">${threeCs.connect||''}</textarea></div>
-      <div class="ds-field"><label>Create (what are they creating?)</label>
-        <textarea class="ds-textarea" id="3c-create-${sl}" placeholder="What are they building, making, delivering…">${threeCs.create||''}</textarea></div>
-      <div class="ds-field"><label>Delivery plan for next week</label>
-        <textarea class="ds-textarea" id="3c-plan-${sl}" placeholder="How will you deliver the 3Cs to this student next week…">${threeCs.plan||''}</textarea></div>
+    const wks = ['w2','w4','w6'];
+    const wkLabels = {w2:'Week 2',w4:'Week 4',w6:'Week 6'};
+    const threeCs=s5data.__3cs__?.[name]||{};
+
+    const weekForms = wks.map(wk => {
+      const d = threeCs[wk]||{};
+      return `<div style="margin-bottom:20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+        <div style="padding:8px 14px;background:var(--surface3);border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);font-weight:600;letter-spacing:.07em;text-transform:uppercase;">${wkLabels[wk]}</div>
+        <div style="padding:12px 14px;display:flex;flex-direction:column;gap:12px;">
+
+          <div>
+            <div class="field-label" style="margin-bottom:6px;">1 · Loves School?</div>
+            <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+              ${['Yes','No','N/A'].map(v=>`<button
+                class="score-btn ${d.lovesSchool===v ? (v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent') : ''}"
+                onclick="set3C('${name}','${wk}','lovesSchool','${v}',this)"
+                style="padding:5px 14px;border-radius:5px;font-size:11px;">${v}</button>`).join('')}
+            </div>
+            <textarea class="field-textarea" id="3c-${wk}-lovesnote-${sl}" placeholder="What are they loving or not liking about school?" style="min-height:48px;">${d.lovesNote||''}</textarea>
+          </div>
+
+          <div>
+            <div class="field-label" style="margin-bottom:6px;">2 · Learning 2x?</div>
+            <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;">
+              ${['All at 2x','Some at 2x','None at 2x','N/A'].map(v=>`<button
+                class="score-btn ${d.learning2x===v ? 'active-track' : ''}"
+                onclick="set3C('${name}','${wk}','learning2x','${v}',this)"
+                style="padding:5px 11px;border-radius:5px;font-size:10px;">${v}</button>`).join('')}
+            </div>
+            <textarea class="field-textarea" id="3c-${wk}-learnnote-${sl}" placeholder="Which subjects excelling / need support? Motivation or academics issue?" style="min-height:48px;">${d.learnNote||''}</textarea>
+          </div>
+
+          <div>
+            <div class="field-label" style="margin-bottom:6px;">3 · Lifeskills — On track to T2P?</div>
+            <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+              ${['Yes','No','N/A'].map(v=>`<button
+                class="score-btn ${d.onTrack===v ? (v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent') : ''}"
+                onclick="set3C('${name}','${wk}','onTrack','${v}',this)"
+                style="padding:5px 14px;border-radius:5px;font-size:11px;">${v}</button>`).join('')}
+            </div>
+            <textarea class="field-textarea" id="3c-${wk}-tracknote-${sl}" placeholder="If No — what's the action plan?" style="min-height:48px;">${d.trackNote||''}</textarea>
+          </div>
+
+        </div>
+      </div>`;
+    }).join('');
+
+    html = `<div class="ds-section">
+      <div class="ds-title">Alpha's 3 Commitments</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-bottom:16px;line-height:1.5;">
+        Loves School · Learning 2x · Lifeskills — tracked at Weeks 2, 4, and 6.
+      </div>
+      ${weekForms}
     </div>
-    <button class="save-detail-btn" onclick="save3Cs('${safeN}')">Save 3Cs</button>`;
+    <button class="save-detail-btn" onclick="save3Cs('${safeN}')">Save commitments</button>`;
   }
 
   else if(currentDmTab==='meetings'){
@@ -1084,19 +1127,42 @@ function saveWsDeliveries(name){
   logAudit('wsdata',name,'deliverables+meetings','updated');
   saveAll();showToast('✓ Saved');
 }
-  const sl=slug(name);
-  if(!s5data.__3cs__)s5data.__3cs__={};
-  s5data.__3cs__[name]={
-    challenge:document.getElementById(`3c-challenge-${sl}`)?.value||'',
-    connect:document.getElementById(`3c-connect-${sl}`)?.value||'',
-    create:document.getElementById(`3c-create-${sl}`)?.value||'',
-    plan:document.getElementById(`3c-plan-${sl}`)?.value||'',
-  };
-  logAudit('profile',name,'3Cs','updated');
-  saveAll();showToast('✓ 3Cs saved');
+
+function set3C(name, wk, field, val, btn) {
+  if (!s5data.__3cs__) s5data.__3cs__ = {};
+  if (!s5data.__3cs__[name]) s5data.__3cs__[name] = {};
+  if (!s5data.__3cs__[name][wk]) s5data.__3cs__[name][wk] = {};
+  s5data.__3cs__[name][wk][field] = val;
+  // Update button styles
+  const group = btn.parentElement;
+  group.querySelectorAll('.score-btn').forEach(b => {
+    b.className = 'score-btn';
+    b.style.padding = '5px 14px';
+    b.style.borderRadius = '5px';
+    b.style.fontSize = field === 'learning2x' ? '10px' : '11px';
+    if (field === 'learning2x') { b.style.padding = '5px 11px'; }
+  });
+  const cls = field === 'learning2x' ? 'active-track' : val === 'Yes' ? 'active-pass' : val === 'No' ? 'active-fail' : 'active-absent';
+  btn.classList.add(cls);
 }
 
-function saveMeetings(name){
+function save3Cs(name) {
+  const sl = slug(name);
+  if (!s5data.__3cs__) s5data.__3cs__ = {};
+  if (!s5data.__3cs__[name]) s5data.__3cs__[name] = {};
+  ['w2','w4','w6'].forEach(wk => {
+    if (!s5data.__3cs__[name][wk]) s5data.__3cs__[name][wk] = {};
+    const d = s5data.__3cs__[name][wk];
+    const lovesnote = document.getElementById(`3c-${wk}-lovesnote-${sl}`);
+    const learnnote = document.getElementById(`3c-${wk}-learnnote-${sl}`);
+    const tracknote = document.getElementById(`3c-${wk}-tracknote-${sl}`);
+    if (lovesnote) d.lovesNote = lovesnote.value;
+    if (learnnote) d.learnNote = learnnote.value;
+    if (tracknote) d.trackNote = tracknote.value;
+  });
+  logAudit('profile', name, '3 Commitments', 'updated');
+  saveAll(); showToast('✓ Commitments saved');
+}
   const sl=slug(name);
   const meetings=s5data.__meetings__?.[name]||[];
   if(!s5data.__meetings__)s5data.__meetings__={};

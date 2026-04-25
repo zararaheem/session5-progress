@@ -182,8 +182,8 @@ let gdata = { S1:{photos:[],video:'',notes:[]}, S2:{photos:[],video:'',notes:[]}
               S5:{photos:[],video:'',notes:[]} };
 
 // S4 has a default Frame.io embed
-const S4_FRAMEIO = 'https://next.frame.io/project/32598040-dc78-4dca-9199-71a429d89ca7';
-const S4_FRAMEIO_SHORT = 'https://f.io/ep4qPU7H';
+const S4_FRAMEIO = 'https://app.frame.io/reviews/ep4qPU7H';
+const S4_FRAMEIO_SHARE = 'https://f.io/ep4qPU7H';
 
 // ── Storage ────────────────────────────────────────────────────────
 async function load() {
@@ -423,8 +423,8 @@ function render() {
     // S4 Frame.io gallery + local photos
     if (isS4) {
       html += `<div class="video-wrap" style="margin-bottom:20px;">
-        <iframe src="${S4_FRAMEIO}" width="75%" title="S4 Frame.io Gallery"></iframe>
-        <div class="video-meta"><span>Session 4 · Google Drive</span><a href="${S4_FRAMEIO_SHORT}" target="_blank">Open in Drive ↗</a></div>
+        <iframe src="${S4_FRAMEIO}" height="560" allow="fullscreen" title="S4 Frame.io Gallery"></iframe>
+        <div class="video-meta"><span>Session 4 · Frame.io</span><a href="${S4_FRAMEIO_SHARE}" target="_blank">Open in Frame.io ↗</a></div>
       </div>`;
     }
 
@@ -467,7 +467,7 @@ function render() {
       html += `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;margin-top:${embed?'20px':'0'}">Session 4 · Frame.io Review</div>
         <div class="video-wrap">
           <iframe src="${S4_FRAMEIO}" height="540" allow="fullscreen" title="S4 Frame.io"></iframe>
-          <div class="video-meta"><span>Frame.io · Session 4</span><a href="${S4_FRAMEIO_SHORT}" target="_blank">Open in Frame.io ↗</a></div>
+          <div class="video-meta"><span>Frame.io · Session 4</span><a href="${S4_FRAMEIO_SHARE}" target="_blank">Open in Frame.io ↗</a></div>
         </div>`;
     }
 
