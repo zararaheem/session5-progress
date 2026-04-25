@@ -4,7 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>T2P Data Tracker — Session 5</title>
-<script src="config.js"></script>
+<script>
+// ── Inlined config (keeps editor self-contained) ──────────────────
+const T2P_CONFIG = {
+  password: "nyc2025",
+  superadmins: ["Zara", "Tasha", "Liam"],
+  staff: ["Chauncey","Emily","Jenna K.","Jenna P.","Jesse","Julianne","Liam","Nancy","Nathan","Parthvi","Tasha","Zara"].sort(),
+  levelGuides: { LL:["Jenna K.","Jesse"], L1:["Parthvi","Nathan"], L2:["Jenna P."], MS:["Emily","Chauncey"] },
+  checkpoints: [
+    {key:"w1",label:"Week 1 Baseline"},{key:"w3",label:"Week 3: Checkpoint 1"},
+    {key:"w5",label:"Week 5: Checkpoint 2"},{key:"w7",label:"Week 7: T2P"},
+  ],
+  students: [
+    {n:"Colm Bowen",l:"LL"},{n:"Harper Lembo",l:"LL"},{n:"Hildy (Alice) Grimm",l:"LL"},{n:"Oliver McLeod",l:"LL",note:"Joined S4"},
+    {n:"Ada Cone",l:"L1"},{n:"Blake Richheimer",l:"L1"},{n:"Conan Hogan",l:"L1"},{n:"Harvey Caulin",l:"L1",note:"Joined S4"},
+    {n:"Lola Propp",l:"L1"},{n:"London Politi",l:"L1"},{n:"Oleander Poulson",l:"L1",note:"Joined S4"},
+    {n:"Raika Ackman",l:"L1"},{n:"Van McDavid",l:"L1"},{n:"Vasilios Giannopoulos",l:"L1",note:"Joined S2"},
+    {n:"Annabelle Lembo",l:"L2"},{n:"Casper White",l:"L2",note:"Joined S4"},{n:"Catherine Henry",l:"L2",note:"Joined S3"},
+    {n:"Hunter Taback",l:"L2",note:"Joined S3"},{n:"Jaya Vora",l:"L2"},{n:"Liv Brodsky",l:"L2"},
+    {n:"Lucian McDavid",l:"L2"},{n:"Nicholas Sidea",l:"L2",note:"Joined S4"},{n:"Pax Ovitz",l:"L2"},
+    {n:"Ayla White",l:"MS",note:"Joined S4"},{n:"Eli Slifka",l:"MS"},{n:"Emma Slifka",l:"MS"},
+    {n:"Georgia Flaherty",l:"MS",note:"Joined S4"},{n:"Glen-Eric Ostrander",l:"MS"},
+    {n:"Grace Lefkowitz",l:"MS",note:"Joined S5",newS5:true},{n:"Leah Abramovich",l:"MS"},
+    {n:"Leonie Weernink",l:"MS"},{n:"Max Brodsky",l:"MS",note:"Joined S3"},
+    {n:"Mireille (Mimi) Prospere",l:"MS"},{n:"Penelope Carrington",l:"MS"},{n:"Yorgos Weernink",l:"MS",note:"Joined S4"},
+  ]
+};
+</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -481,9 +507,17 @@ function chkMiniClass(val){
 }
 
 // ── Login ────────────────────────────────────────────────────────
-const ns=document.getElementById('login-name');
-const bo=document.createElement('option');bo.value='';bo.textContent='— Select your name —';bo.disabled=true;bo.selected=true;ns.appendChild(bo);
-STAFF_SORTED.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;ns.appendChild(o);});
+document.addEventListener('DOMContentLoaded', () => {
+  const ns = document.getElementById('login-name');
+  const bo = document.createElement('option');
+  bo.value=''; bo.textContent='— Select your name —'; bo.disabled=true; bo.selected=true;
+  ns.appendChild(bo);
+  STAFF_SORTED.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s; o.textContent = s;
+    ns.appendChild(o);
+  });
+});
 
 function doLogin(){
   const name=document.getElementById('login-name').value;
@@ -746,73 +780,6 @@ function renderList(){
   }).join('');
 }
 
-  document.getElementById('students-list').innerHTML=students.map(s=>{
-    const guides=getGuides(s);const mine=guides.includes(currentUser);
-    const photo=s5data.__photos__?.[s.n];
-    const profile=s5data.__profiles__?.[s.n]||{};
-    const scores=s5data[s.n]||{};
-    const sl=slug(s.n);const safeN=s.n.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    const levelWs=S5_WORKSHOPS[s.l]||[];
-
-    const avatarHtml=photo
-      ?`<div class="student-avatar" data-avatar="${sl}"><img src="${photo}" alt="${s.n}"></div>`
-      :`<div class="student-avatar-initials" data-avatar="${sl}">${initials(s.n)}</div>`;
-
-    const guideTagsHtml=guides.length
-      ?guides.map(g=>`<span class="guide-tag">${g}</span>`).join('')
-      :'<span style="color:var(--muted);font-size:10px">No guides</span>';
-
-    const photoAreaHtml=photo
-      ?`<div class="photo-area has-photo" onclick="document.getElementById('phi-${sl}').click()"><img class="photo-preview" src="${photo}"><button class="photo-clear" onclick="clearPhoto('${safeN}',event)">✕ Remove</button></div>`
-      :`<div class="photo-area" onclick="document.getElementById('phi-${sl}').click()"><div class="photo-hint"><div style="font-size:18px;margin-bottom:4px">📷</div><div>Upload</div><div style="color:var(--muted);font-size:8px">max 500KB</div></div></div>`;
-
-    const scoreLines=levelWs.map(ws=>{
-      const wsKey=ws.name;const cur=scores[wsKey];const safeW=wsKey.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      const chkRows=CHECKPOINTS.map(chk=>{
-        const kv=scores[chkKey(wsKey,chk.key)];
-        const opts=getChkOptions(chk.key);
-        const btns=opts.map(opt=>`<button class="score-btn ${kv===opt.val?opt.cls:''}" data-val="${opt.val}" onclick="setCheckpoint('${safeN}','${safeW}','${chk.key}','${opt.val}',this)">${opt.label}</button>`).join('');
-        return`<div class="score-line" style="padding-left:12px;opacity:.85;"><span class="score-ws-name" style="color:var(--muted);font-size:11px">↳ ${chk.label}</span><div class="score-btns">${btns}</div></div>`;
-      }).join('');
-      const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
-      const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" onclick="setScore('${safeN}','${safeW}','${opt.val}',this)">${opt.label}</button>`).join('');
-      return`<div style="border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:4px;">
-        <div class="score-line" style="background:var(--surface2);padding:7px 12px;">
-          <div style="flex:1"><span style="font-weight:600;color:var(--text);font-size:12px">${ws.code} · ${ws.name}</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-left:8px">${ws.guide} · ${ws.day}</span></div>
-          <div class="score-btns">${finalBtns}</div>
-        </div>
-        <div style="padding:4px 0 2px">${chkRows}</div>
-      </div>`;
-    }).join('');
-
-    return`<div class="student-row ${mine?'mine':''}">
-      <div class="row-top">
-        ${avatarHtml}
-        <div class="row-info">
-          <div class="row-name"><span class="row-level lv-${s.l}">${s.l}</span>${s.n}</div>
-          <div class="row-meta"><span id="guides-${sl}">${guideTagsHtml}</span>${s.note?`<span style="color:var(--muted);font-style:italic">* ${s.note}</span>`:''}</div>
-        </div>
-        <div class="row-actions">
-          ${s.patchUrl?`<a href="${s.patchUrl}" target="_blank" class="patch-link">Patches ↗</a>`:''}
-          <button class="row-btn" onclick="openAssign('${safeN}')">Guides</button>
-          <button class="row-btn" id="toggle-${sl}" onclick="toggleRow('${safeN}')">▼ Expand</button>
-        </div>
-      </div>
-      <div class="row-body" id="body-${sl}">
-        <div class="profile-section">
-          <div>${photoAreaHtml}<input type="file" id="phi-${sl}" accept="image/*" style="display:none" onchange="handlePhotoUpload('${safeN}',this)"></div>
-          <div class="profile-col">
-            <div><div class="field-label">Motivational model</div><textarea class="field-textarea" id="mot-${sl}" onchange="saveProfile('${safeN}')" placeholder="What drives them, how they work best…">${profile.motivation||''}</textarea></div>
-          </div>
-          <div class="profile-col">
-            <div><div class="field-label">Guide notes</div><textarea class="field-textarea" id="note-${sl}" onchange="saveProfile('${safeN}')" placeholder="This week's observations, action plan…">${profile.notes||''}</textarea></div>
-          </div>
-        </div>
-        <div class="scores-section">${scoreLines}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
 
 function saveProfile(sName){
   const sl=slug(sName);
@@ -1163,6 +1130,8 @@ function save3Cs(name) {
   logAudit('profile', name, '3 Commitments', 'updated');
   saveAll(); showToast('✓ Commitments saved');
 }
+
+function saveMeetings(name){
   const sl=slug(name);
   const meetings=s5data.__meetings__?.[name]||[];
   if(!s5data.__meetings__)s5data.__meetings__={};
