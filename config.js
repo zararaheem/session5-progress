@@ -77,7 +77,7 @@ const T2P_CONFIG = {
     { n: "Harvey Caulin",            l: "L1", note: "Joined S4" },
     { n: "Lola Propp",               l: "L1" },
     { n: "London Politi",            l: "L1" },
-    { n: "Max Rzepecki",             l: "L1", note: "Moved to PR after S4" },
+    { n: "Max Rzepecki",             l: "L1", note: "Moved to PR after S2" },
     { n: "Oleander Poulson",         l: "L1", note: "Joined S4" },
     { n: "Raika Ackman",             l: "L1" },
     { n: "Van McDavid",              l: "L1" },

@@ -4,22 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Alpha NYC — Gallery</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#080e1a;--surface:#0d1829;--surface2:#111f36;--surface3:#162440;
   --border:#1e3050;--border2:#264070;
   --text:#e8f0fc;--muted:#4a6080;--muted2:#7090b0;
-  --accent:#3b82f6;--accent2:#60a5fa;
+  --accent:#1a56db;--accent2:#60a5fa;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:linear-gradient(rgba(59,130,246,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.03) 1px,transparent 1px);
+  background-image:linear-gradient(rgba(26,86,219,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(26,86,219,.03) 1px,transparent 1px);
   background-size:48px 48px;}
 
+/* SITE NAV */
+.site-nav{display:flex;align-items:center;gap:3px;padding:7px 20px;flex-wrap:wrap;position:sticky;top:0;z-index:1000;background:#060c18;border-bottom:1px solid #1e3050;}
+.sn-link{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.04em;text-decoration:none;padding:5px 12px;border-radius:20px;border:1px solid transparent;transition:all .15s;white-space:nowrap;color:#4a6080;}
+.sn-link:hover{color:#e8f0fc;border-color:#264070;}
+.sn-link.active{background:#1a56db;color:white;border-color:#1a56db;}
+.sn-link.home{color:#7090b0;border-color:#1e3050;}
+
 /* HEADER */
-header{position:sticky;top:0;z-index:50;padding:0 28px;display:flex;align-items:stretch;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(8,14,26,.95);backdrop-filter:blur(10px);}
+header{position:sticky;top:37px;z-index:50;padding:0 28px;display:flex;align-items:stretch;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(8,14,26,.97);backdrop-filter:blur(10px);}
 .logo{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent2);display:flex;align-items:center;padding:16px 20px 16px 0;border-right:1px solid var(--border);margin-right:16px;}
 .header-title{font-size:14px;font-weight:500;color:var(--text);display:flex;align-items:center;}
 .hdr-right{display:flex;align-items:center;gap:8px;}
@@ -28,82 +35,112 @@ header{position:sticky;top:0;z-index:50;padding:0 28px;display:flex;align-items:
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .hdr-btn{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);text-decoration:none;padding:6px 13px;border:1px solid var(--border);border-radius:6px;transition:all .15s;background:transparent;cursor:pointer;}
 .hdr-btn:hover{color:var(--accent2);border-color:var(--accent);}
-.hdr-btn.unlock{color:var(--accent2);border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.06);}
+.hdr-btn.unlock{color:var(--accent2);border-color:rgba(26,86,219,.3);background:rgba(26,86,219,.06);}
 
-/* SESSION TABS — top level */
+/* SESSION RAIL */
 .session-rail{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);overflow-x:auto;scrollbar-width:none;}
 .session-rail::-webkit-scrollbar{display:none;}
 .srail-btn{font-family:'DM Mono',monospace;font-size:11px;padding:14px 22px;color:var(--muted2);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;letter-spacing:.04em;display:flex;align-items:center;gap:8px;}
-.srail-btn:hover{color:var(--accent2);}
+.srail-btn:hover:not(.locked){color:var(--accent2);}
 .srail-btn.active{color:var(--accent2);border-bottom-color:var(--accent);}
+.srail-btn.locked{opacity:.35;cursor:not-allowed;}
 .s5-live-dot{width:5px;height:5px;border-radius:50%;background:#ef4444;animation:pulse 1.5s infinite;flex-shrink:0;}
 
-/* INNER TABS — photos / video / notes */
+/* INNER TABS */
 .inner-tabs{display:flex;gap:6px;padding:16px 28px 0;flex-wrap:wrap;}
 .itab{font-family:'DM Mono',monospace;font-size:10px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.07em;}
 .itab:hover{border-color:var(--accent);color:var(--accent2);}
-.itab.active{background:rgba(59,130,246,.12);border-color:var(--accent);color:var(--accent2);}
+.itab.active{background:rgba(26,86,219,.15);border-color:var(--accent);color:var(--accent2);}
 
-/* PAGE */
-.page{position:relative;z-index:1;padding:20px 28px 60px;}
+.page{position:relative;z-index:1;padding:20px 28px 80px;}
 
-/* ADMIN BAR */
+/* ADMIN PANEL */
 .pw-row{display:flex;align-items:center;gap:8px;padding:12px 0;flex-wrap:wrap;}
 .pw-inp{font-family:'DM Mono',monospace;font-size:12px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:7px 11px;border-radius:6px;outline:none;width:140px;}
 .pw-inp:focus{border-color:var(--accent);}
 .pw-submit{font-family:'DM Mono',monospace;font-size:11px;background:var(--accent);color:white;border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-weight:600;}
 .pw-err{font-family:'DM Mono',monospace;font-size:11px;color:#f87171;}
-
-.admin-panel{background:var(--surface2);border:1px dashed var(--border2);border-radius:10px;padding:16px 18px;margin-bottom:20px;}
-.admin-panel-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+.admin-panel{background:var(--surface2);border:1px dashed var(--border2);border-radius:12px;padding:18px 20px;margin-bottom:24px;}
+.admin-panel-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .admin-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
-.adm-inp{font-family:'DM Mono',monospace;font-size:12px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:7px 11px;border-radius:6px;outline:none;flex:1;min-width:160px;}
+.adm-inp{font-family:'DM Mono',monospace;font-size:12px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:7px 11px;border-radius:6px;outline:none;flex:1;min-width:200px;}
 .adm-inp:focus{border-color:var(--accent);}
-.adm-textarea{font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 11px;border-radius:6px;outline:none;width:100%;resize:vertical;min-height:70px;margin-bottom:8px;line-height:1.5;}
+.adm-textarea{font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 11px;border-radius:6px;outline:none;width:100%;resize:vertical;min-height:60px;margin-bottom:8px;line-height:1.5;}
 .adm-textarea:focus{border-color:var(--accent);}
 .adm-btn{font-family:'DM Mono',monospace;font-size:11px;background:var(--accent);color:white;border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-weight:600;white-space:nowrap;transition:all .15s;}
-.adm-btn:hover{background:var(--accent2);}
+.adm-btn:hover{opacity:.85;}
 .adm-btn.sec{background:var(--surface);color:var(--accent2);border:1px solid var(--border2);}
 .adm-btn.sec:hover{border-color:var(--accent);}
+.adm-btn.danger{background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b;}
 
-/* VIDEO PLAYER */
-.video-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
-.video-wrap iframe,.video-wrap video{width:100%;display:block;border:none;}
-.video-empty{padding:48px 24px;text-align:center;color:var(--muted2);font-size:13px;}
-.video-empty-icon{font-size:36px;margin-bottom:12px;opacity:.3;}
-.video-meta{padding:8px 14px 14px;display:flex;justify-content:space-between;align-items:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
-.video-meta a{color:var(--muted2);text-decoration:none;}
-.video-meta a:hover{color:var(--accent2);}
+/* BULK UPLOAD */
+.bulk-drop{border:2px dashed var(--border2);border-radius:10px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px;}
+.bulk-drop:hover,.bulk-drop.dragover{border-color:var(--accent);background:rgba(26,86,219,.05);}
+.bulk-drop-icon{font-size:32px;margin-bottom:8px;opacity:.4;}
+.bulk-drop-text{font-size:13px;color:var(--muted2);line-height:1.5;}
+.bulk-drop-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;}
+.bulk-progress{margin-top:10px;}
+.bulk-bar-wrap{background:var(--surface3);border-radius:20px;height:6px;overflow:hidden;margin-bottom:6px;}
+.bulk-bar{height:100%;background:var(--accent);border-radius:20px;transition:width .3s;width:0%;}
+.bulk-status{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);}
 
-/* PHOTO GRID */
-.photo-grid{columns:3 260px;column-gap:10px;margin-bottom:20px;}
-.photo-item{break-inside:avoid;margin-bottom:10px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .2s;position:relative;}
-.photo-item:hover{transform:scale(1.01);border-color:var(--border2);box-shadow:0 8px 32px rgba(0,0,0,.4);}
-.photo-item img{width:100%;display:block;}
-.photo-caption{padding:7px 11px;font-size:11px;color:var(--muted2);border-top:1px solid var(--border);}
-.photo-del{position:absolute;top:7px;right:7px;background:rgba(8,14,26,.85);color:#f87171;border:1px solid rgba(248,113,113,.3);border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;display:none;transition:all .15s;}
-.photo-item:hover .photo-del{display:block;}
+/* EMBED SECTION */
+.embed-section{margin-bottom:16px;}
+.embed-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+
+/* HERO VIDEO — cinematic at top */
+.hero-video{position:relative;width:100%;border-radius:14px;overflow:hidden;background:#000;margin-bottom:24px;box-shadow:0 8px 40px rgba(0,0,0,.5);}
+.hero-video iframe,.hero-video video{width:100%;display:block;border:none;aspect-ratio:16/9;}
+.hero-video-label{position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,.7));font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.7);}
+
+/* PHOTOS — cinematic masonry */
+.photo-masonry{columns:3 220px;column-gap:8px;margin-bottom:20px;}
+@media(max-width:600px){.photo-masonry{columns:2 160px;}}
+.photo-item{break-inside:avoid;margin-bottom:8px;border-radius:10px;overflow:hidden;cursor:pointer;position:relative;display:block;}
+.photo-item img{width:100%;display:block;transition:transform .3s;background:#0d1829;}
+.photo-item:hover img{transform:scale(1.03);}
+.photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .2s;display:flex;align-items:flex-end;}
+.photo-item:hover .photo-overlay{background:rgba(0,0,0,.25);}
+.photo-caption-bar{padding:8px 10px;color:white;font-size:11px;opacity:0;transition:opacity .2s;width:100%;background:linear-gradient(transparent,rgba(0,0,0,.6));}
+.photo-item:hover .photo-caption-bar{opacity:1;}
+.photo-del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);color:#f87171;border:1px solid rgba(248,113,113,.4);border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;opacity:0;transition:opacity .2s;}
+.photo-item:hover .photo-del{opacity:1;}
+
+/* VIDEO GRID */
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-bottom:20px;}
+.video-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.video-card iframe,.video-card video{width:100%;display:block;aspect-ratio:16/9;background:#000;}
+.video-card-foot{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.video-card-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);}
 
 /* NOTES */
 .notes-list{display:flex;flex-direction:column;gap:10px;}
 .note-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;}
-.note-title{font-size:15px;font-weight:600;margin-bottom:6px;color:var(--text);padding-right:28px;}
+.note-title{font-size:15px;font-weight:600;margin-bottom:6px;padding-right:28px;}
 .note-body{font-size:13px;color:var(--muted2);line-height:1.65;white-space:pre-wrap;}
 .note-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:10px;}
-.note-del{position:absolute;top:12px;right:14px;background:transparent;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .15s;}
+.note-del{position:absolute;top:12px;right:14px;background:transparent;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px 6px;border-radius:4px;}
 .note-del:hover{color:#f87171;}
 
-/* EMPTY */
+/* EMPTY / LOCKED */
 .empty-state{padding:60px 20px;text-align:center;color:var(--muted2);}
 .empty-icon{font-size:36px;margin-bottom:14px;opacity:.25;display:block;}
+.locked-state{padding:60px 20px;text-align:center;}
+.locked-icon{font-size:40px;margin-bottom:16px;display:block;opacity:.3;}
+.locked-text{font-size:14px;color:var(--muted2);margin-bottom:4px;}
+.locked-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
 
 /* LIGHTBOX */
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
 .lightbox.open{opacity:1;pointer-events:all;}
-.lb-img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:8px;}
-.lb-close{position:fixed;top:18px;right:20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;width:34px;height:34px;border-radius:7px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.lb-img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:6px;}
+.lb-close{position:fixed;top:18px;right:20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;width:36px;height:36px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .lb-close:hover{background:rgba(255,255,255,.2);}
-.lb-caption{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:12px;color:rgba(255,255,255,.6);text-align:center;font-family:'DM Mono',monospace;max-width:400px;}
+.lb-caption{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:12px;color:rgba(255,255,255,.6);font-family:'DM Mono',monospace;}
+.lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:none;color:white;width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.lb-nav:hover{background:rgba(255,255,255,.2);}
+.lb-prev{left:16px;}
+.lb-next{right:16px;}
 
 footer{position:relative;z-index:1;padding:20px 28px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
 footer a{color:var(--muted2);text-decoration:none;}
@@ -111,12 +148,22 @@ footer a{color:var(--muted2);text-decoration:none;}
 @media(max-width:640px){
   .page,.inner-tabs{padding-left:16px;padding-right:16px;}
   header{padding:0 16px;}
-  .photo-grid{columns:2 160px;}
+  .video-grid{grid-template-columns:1fr;}
   footer{padding:16px;}
 }
 </style>
 </head>
 <body>
+
+<!-- SITE NAV -->
+<div class="site-nav">
+  <a href="https://t2p-dashboard.vercel.app/index.html" target="_blank" class="sn-link home">Home</a>
+  <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" class="sn-link">T2P Tracker</a>
+  <a href="https://t2p-dashboard.vercel.app/workshops.html" target="_blank" class="sn-link">Workshop Directory</a>
+  <a href="https://t2p-dashboard.vercel.app/gallery.html" target="_blank" class="sn-link active">Gallery</a>
+  <a href="https://t2p-dashboard.vercel.app/session5.html" target="_blank" class="sn-link">Session 5</a>
+  <a href="https://t2p-dashboard.vercel.app/editor.html" target="_blank" class="sn-link">Staff Login</a>
+</div>
 
 <header>
   <div style="display:flex;align-items:center;">
@@ -125,21 +172,19 @@ footer a{color:var(--muted2);text-decoration:none;}
   </div>
   <div class="hdr-right">
     <span class="live-badge">S5 Live</span>
-    <a href="index.html" class="hdr-btn">← Home</a>
+    <a href="https://t2p-dashboard.vercel.app/index.html" target="_blank" class="hdr-btn">← Home</a>
     <button class="hdr-btn unlock" id="admin-toggle" onclick="toggleAdminMode()">+ Manage</button>
   </div>
 </header>
 
-<!-- Session rail -->
 <div class="session-rail" id="session-rail">
   <button class="srail-btn active" data-sess="S5" onclick="switchSession('S5',this)"><span class="s5-live-dot"></span>Session 5</button>
   <button class="srail-btn" data-sess="S4" onclick="switchSession('S4',this)">Session 4</button>
-  <button class="srail-btn" data-sess="S3" onclick="switchSession('S3',this)">Session 3</button>
-  <button class="srail-btn" data-sess="S2" onclick="switchSession('S2',this)">Session 2</button>
-  <button class="srail-btn" data-sess="S1" onclick="switchSession('S1',this)">Session 1</button>
+  <button class="srail-btn locked" data-sess="S3" onclick="showLocked(this)">Session 3</button>
+  <button class="srail-btn locked" data-sess="S2" onclick="showLocked(this)">Session 2</button>
+  <button class="srail-btn locked" data-sess="S1" onclick="showLocked(this)">Session 1</button>
 </div>
 
-<!-- Password prompt (hidden until needed) -->
 <div id="pw-bar" style="display:none;padding:12px 28px;background:var(--surface);border-bottom:1px solid var(--border);">
   <div class="pw-row">
     <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);">Access code:</span>
@@ -149,7 +194,6 @@ footer a{color:var(--muted2);text-decoration:none;}
   </div>
 </div>
 
-<!-- Inner tabs -->
 <div class="inner-tabs" id="inner-tabs">
   <button class="itab active" data-tab="photos" onclick="switchTab('photos',this)">Photos</button>
   <button class="itab" data-tab="video" onclick="switchTab('video',this)">Video</button>
@@ -159,15 +203,17 @@ footer a{color:var(--muted2);text-decoration:none;}
 <div class="page" id="page-content"></div>
 
 <!-- Lightbox -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+<div class="lightbox" id="lightbox">
   <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <button class="lb-nav lb-prev" onclick="lbNav(-1)">‹</button>
   <img class="lb-img" id="lb-img" src="" alt="">
+  <button class="lb-nav lb-next" onclick="lbNav(1)">›</button>
   <div class="lb-caption" id="lb-caption"></div>
 </div>
 
 <footer>
   <span>Alpha Space Agency · NYC · Session 05</span>
-  <a href="index.html">← Home</a>
+  <a href="https://t2p-dashboard.vercel.app/index.html" target="_blank">← Home</a>
 </footer>
 
 <script>
@@ -175,25 +221,28 @@ const PW = 'nyc2025';
 let adminUnlocked = false;
 let activeSess = 'S5';
 let activeTab  = 'photos';
+let lbIndex = 0;
 
-// data shape: { S1:{photos:[],video:'',notes:[]}, S2:{...}, ... }
-let gdata = { S1:{photos:[],video:'',notes:[]}, S2:{photos:[],video:'',notes:[]},
-              S3:{photos:[],video:'',notes:[]}, S4:{photos:[],video:'',notes:[]},
-              S5:{photos:[],video:'',notes:[]} };
+// S4 highlight video (Google Drive)
+const S4_HIGHLIGHT = 'https://drive.google.com/file/d/1twf7lfopcLu7iWt-A08jGsLQ6BKBalvK/preview';
+const S4_HIGHLIGHT_LABEL = 'S4 Space Race Highlight';
 
-// S4 has a default Frame.io embed
-const S4_FRAMEIO = 'https://app.frame.io/reviews/ep4qPU7H';
-const S4_FRAMEIO_SHARE = 'https://f.io/ep4qPU7H';
+let gdata = {
+  S1:{photos:[],videos:[],notes:[],embed:'',locked:true},
+  S2:{photos:[],videos:[],notes:[],embed:'',locked:true},
+  S3:{photos:[],videos:[],notes:[],embed:'',locked:true},
+  S4:{photos:[],videos:[],notes:[],embed:S4_HIGHLIGHT},
+  S5:{photos:[],videos:[],notes:[],embed:'',slackUrl:''},
+};
 
 // ── Storage ────────────────────────────────────────────────────────
 async function load() {
   try {
-    const r = await window.storage.get('gallery_v2');
+    const r = await window.storage.get('gallery_v3');
     if (r?.value) {
       const saved = JSON.parse(r.value);
-      // Merge saved into defaults (in case new sessions added)
       Object.keys(gdata).forEach(s => {
-        if (saved[s]) gdata[s] = { photos:[], video:'', notes:[], ...saved[s] };
+        if (saved[s]) gdata[s] = { ...gdata[s], ...saved[s] };
       });
     }
   } catch(e) {}
@@ -201,20 +250,36 @@ async function load() {
 }
 
 async function save() {
-  try { await window.storage.set('gallery_v2', JSON.stringify(gdata)); }
-  catch(e) { alert('Save failed — storage limit may be reached'); }
+  try { await window.storage.set('gallery_v3', JSON.stringify(gdata)); }
+  catch(e) { alert('Save failed — storage may be full. Try removing some uploaded photos.'); }
 }
 
 // ── Navigation ─────────────────────────────────────────────────────
 function switchSession(sess, btn) {
+  if (gdata[sess]?.locked && !adminUnlocked) return;
   activeSess = sess;
-  activeTab  = 'photos';
+  activeTab = 'photos';
   document.querySelectorAll('.srail-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.querySelectorAll('.itab').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === 'photos');
-  });
+  document.querySelectorAll('.itab').forEach(b => b.classList.toggle('active', b.dataset.tab==='photos'));
   render();
+}
+
+function showLocked(btn) {
+  if (!adminUnlocked) {
+    const s = btn.dataset.sess;
+    document.getElementById('page-content').innerHTML = `<div class="locked-state">
+      <span class="locked-icon">🔒</span>
+      <div class="locked-text">${s} photos coming soon</div>
+      <div class="locked-sub">This session will be unlocked once photos are available</div>
+    </div>`;
+  } else {
+    // Admin can access locked sessions
+    activeSess = btn.dataset.sess;
+    document.querySelectorAll('.srail-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
 }
 
 function switchTab(tab, btn) {
@@ -237,12 +302,13 @@ function toggleAdminMode() {
 }
 
 function unlock() {
-  const val = document.getElementById('pw-input').value;
-  if (val === PW) {
+  if (document.getElementById('pw-input').value === PW) {
     adminUnlocked = true;
     document.getElementById('pw-bar').style.display = 'none';
     document.getElementById('pw-input').value = '';
     document.getElementById('admin-toggle').textContent = '✕ Exit manage';
+    // Unlock locked session buttons visually for admin
+    document.querySelectorAll('.srail-btn.locked').forEach(b => b.style.opacity = '0.7');
     render();
   } else {
     document.getElementById('pw-err').textContent = 'Incorrect.';
@@ -250,263 +316,320 @@ function unlock() {
   }
 }
 
-// ── Photos ─────────────────────────────────────────────────────────
-function addPhotoUrl() {
-  const url  = document.getElementById('p-url').value.trim();
-  const cap  = document.getElementById('p-cap').value.trim();
-  if (!url) return;
-  gdata[activeSess].photos.unshift({ url, cap, ts: Date.now() });
-  document.getElementById('p-url').value = '';
-  document.getElementById('p-cap').value = '';
-  save(); render();
-}
-
-function uploadPhotos(input) {
-  const cap = document.getElementById('p-cap')?.value.trim() || '';
-  Array.from(input.files).forEach(file => {
-    if (file.size > 2.5 * 1024 * 1024) { alert(`${file.name} too large (max 2.5MB)`); return; }
-    const reader = new FileReader();
-    reader.onload = e => {
-      gdata[activeSess].photos.unshift({ url: e.target.result, cap, ts: Date.now() });
-      save(); render();
-    };
-    reader.readAsDataURL(file);
+// ── Bulk photo upload ──────────────────────────────────────────────
+function setupBulkDrop() {
+  const drop = document.getElementById('bulk-drop');
+  if (!drop) return;
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.classList.remove('dragover');
+    handleBulkFiles(Array.from(e.dataTransfer.files));
   });
-  input.value = '';
 }
 
-function deletePhoto(idx) {
-  if (!confirm('Remove this photo?')) return;
-  gdata[activeSess].photos.splice(idx, 1);
+async function handleBulkFiles(files) {
+  const mediaFiles = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+  if (!mediaFiles.length) return;
+  const bar = document.getElementById('bulk-bar');
+  const status = document.getElementById('bulk-status');
+  const progressWrap = document.getElementById('bulk-progress');
+  if (progressWrap) progressWrap.style.display = 'block';
+  let done = 0;
+  for (const file of mediaFiles) {
+    if (file.size > 4 * 1024 * 1024) {
+      status && (status.textContent = `Skipped ${file.name} (>4MB — use URL instead)`);
+      done++;
+      continue;
+    }
+    await new Promise(res => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const isVideo = file.type.startsWith('video/');
+        if (isVideo) {
+          gdata[activeSess].videos.push({ url: e.target.result, cap: file.name.replace(/\.[^.]+$/, ''), ts: Date.now() });
+        } else {
+          gdata[activeSess].photos.push({ url: e.target.result, cap: '', ts: Date.now() });
+        }
+        done++;
+        const pct = Math.round(done / mediaFiles.length * 100);
+        if (bar) bar.style.width = pct + '%';
+        if (status) status.textContent = `${done}/${mediaFiles.length} uploaded…`;
+        res();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  await save();
+  if (status) status.textContent = `✓ ${done} files added`;
+  setTimeout(() => { if (progressWrap) progressWrap.style.display = 'none'; }, 3000);
+  render();
+}
+
+// ── Add single URL ─────────────────────────────────────────────────
+function addMediaUrl() {
+  const url = document.getElementById('m-url')?.value.trim();
+  const cap = document.getElementById('m-cap')?.value.trim() || '';
+  const type = document.getElementById('m-type')?.value;
+  if (!url) return;
+  if (type === 'video') {
+    gdata[activeSess].videos.push({ url, cap, ts: Date.now() });
+  } else {
+    gdata[activeSess].photos.push({ url, cap, ts: Date.now() });
+  }
+  document.getElementById('m-url').value = '';
+  document.getElementById('m-cap').value = '';
   save(); render();
 }
 
-function openLightbox(url, cap) {
-  document.getElementById('lb-img').src = url;
-  document.getElementById('lb-caption').textContent = cap || '';
-  document.getElementById('lightbox').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
+function saveEmbed() {
+  const url = document.getElementById('embed-url')?.value.trim();
+  gdata[activeSess].embed = url || '';
+  save(); render();
 }
 
-// ── Video ──────────────────────────────────────────────────────────
-async function saveSheetUrl() {
-  const url = document.getElementById(`sheet-url-${activeSess}`)?.value.trim();
-  gdata[activeSess].sheetUrl = url || '';
-  await save();
-  if (url) pullFromSheet();
-  else render();
-}
-
-async function pullFromSheet() {
-  const url = gdata[activeSess].sheetUrl;
+// ── S5 Slack pull ──────────────────────────────────────────────────
+async function pullSlack() {
+  const url = document.getElementById('slack-url')?.value.trim();
   if (!url) return;
-  const statusEl = document.getElementById('sheet-status');
-  if (statusEl) statusEl.textContent = 'Pulling…';
+  gdata.S5.slackUrl = url;
+  const status = document.getElementById('slack-status');
+  if (status) status.textContent = 'Pulling…';
   try {
     const r = await fetch(url);
-    if (!r.ok) throw new Error('Fetch failed');
+    if (!r.ok) throw new Error();
     const csv = await r.text();
     const lines = csv.split('\n').map(l => l.split(',').map(c => c.replace(/^"|"$/g,'').trim()));
     const headers = lines[0].map(h => h.toLowerCase());
-    const urlIdx = headers.indexOf('url');
-    const capIdx = headers.indexOf('caption');
-    if (urlIdx === -1) { if (statusEl) statusEl.textContent = '⚠ No "url" column found in sheet'; return; }
-    const existing = new Set(gdata[activeSess].photos.map(p => p.url));
+    const urlIdx = headers.indexOf('url'), capIdx = headers.indexOf('caption');
+    if (urlIdx === -1) { if (status) status.textContent = '⚠ No "url" column'; return; }
+    const existing = new Set(gdata.S5.photos.map(p => p.url));
     let added = 0;
     for (let i = 1; i < lines.length; i++) {
-      const row = lines[i];
-      const imgUrl = row[urlIdx]?.trim();
+      const imgUrl = lines[i][urlIdx]?.trim();
       if (!imgUrl || existing.has(imgUrl)) continue;
-      const cap = capIdx >= 0 ? (row[capIdx]||'').trim() : '';
-      gdata[activeSess].photos.unshift({ url: imgUrl, cap, ts: Date.now(), fromSheet: true });
+      gdata.S5.photos.unshift({ url: imgUrl, cap: capIdx >= 0 ? lines[i][capIdx]||'' : '', ts: Date.now(), fromSlack: true });
       added++;
     }
     await save();
-    if (statusEl) statusEl.textContent = added > 0 ? `✓ Added ${added} photo${added>1?'s':''} from sheet` : '✓ Up to date — no new photos';
+    if (status) status.textContent = added > 0 ? `✓ ${added} new photos from Slack` : '✓ Up to date';
     render();
   } catch(e) {
-    if (statusEl) statusEl.textContent = '⚠ Could not fetch — ensure sheet is published publicly as CSV';
+    if (status) status.textContent = '⚠ Could not fetch — publish sheet as CSV first';
   }
 }
 
-function saveVideo() {
-  const url = document.getElementById('v-url')?.value.trim();
-  if (!url) return;
-  gdata[activeSess].video = url;
-  save(); render();
-}
-
-function clearVideo() {
-  if (!confirm('Remove video?')) return;
-  gdata[activeSess].video = '';
-  save(); render();
-}
-
-function videoEmbed(url, height) {
-  if (!url) return null;
-  height = height || 480;
-  if (url.match(/youtube\.com|youtu\.be/)) {
-    const id = url.match(/(?:v=|youtu\.be\/|embed\/)([^&?/]+)/)?.[1];
-    if (id) return `<iframe src="https://www.youtube.com/embed/${id}?rel=0" height="${height}" allow="fullscreen" allowfullscreen></iframe>`;
-  }
-  if (url.match(/vimeo\.com/)) {
-    const id = url.match(/vimeo\.com\/(\d+)/)?.[1];
-    if (id) return `<iframe src="https://player.vimeo.com/video/${id}" height="${height}" allow="fullscreen" allowfullscreen></iframe>`;
-  }
-  if (url.match(/drive\.google\.com/)) {
-    const id = url.match(/\/d\/([^/]+)/)?.[1];
-    if (id) return `<iframe src="https://drive.google.com/file/d/${id}/preview" height="${height}" allow="fullscreen"></iframe>`;
-  }
-  if (url.match(/frame\.io|f\.io/)) {
-    return `<iframe src="${url.replace('f.io','app.frame.io/reviews')}" height="${height}" allow="fullscreen"></iframe>`;
-  }
-  if (url.match(/\.(mp4|webm|mov)(\?|$)/i)) {
-    return `<video controls style="height:${height}px;background:#000;"><source src="${url}">Your browser does not support video.</video>`;
-  }
-  return `<iframe src="${url}" height="${height}" allow="fullscreen"></iframe>`;
-}
-
-// ── Notes ──────────────────────────────────────────────────────────
+// ── Delete ─────────────────────────────────────────────────────────
+function deletePhoto(idx) { if (!confirm('Remove?')) return; gdata[activeSess].photos.splice(idx,1); save(); render(); }
+function deleteVideo(idx) { if (!confirm('Remove?')) return; gdata[activeSess].videos.splice(idx,1); save(); render(); }
+function deleteNote(idx)  { if (!confirm('Delete?')) return; gdata[activeSess].notes.splice(idx,1); save(); render(); }
 function addNote() {
-  const title = document.getElementById('n-title')?.value.trim();
-  const body  = document.getElementById('n-body')?.value.trim();
-  if (!body) return;
-  gdata[activeSess].notes.unshift({ title, body, ts: Date.now() });
+  const t = document.getElementById('n-title')?.value.trim();
+  const b = document.getElementById('n-body')?.value.trim();
+  if (!b) return;
+  gdata[activeSess].notes.unshift({ title:t, body:b, ts:Date.now() });
   document.getElementById('n-title').value = '';
   document.getElementById('n-body').value = '';
   save(); render();
 }
 
-function deleteNote(idx) {
-  if (!confirm('Delete this note?')) return;
-  gdata[activeSess].notes.splice(idx, 1);
-  save(); render();
+// ── Video embed helper ─────────────────────────────────────────────
+function videoEmbed(url, autoplay) {
+  if (!url) return null;
+  const ap = autoplay ? '&autoplay=1&mute=1' : '';
+  if (url.match(/youtube\.com|youtu\.be/)) {
+    const id = url.match(/(?:v=|youtu\.be\/|embed\/)([^&?/]+)/)?.[1];
+    if (id) return `<iframe src="https://www.youtube.com/embed/${id}?rel=0&loop=1${ap}" allow="autoplay;fullscreen;accelerometer;gyroscope" allowfullscreen></iframe>`;
+  }
+  if (url.match(/vimeo\.com/)) {
+    const id = url.match(/vimeo\.com\/(\d+)/)?.[1];
+    if (id) return `<iframe src="https://player.vimeo.com/video/${id}?loop=1${ap.replace('&','&amp;')}" allow="autoplay;fullscreen" allowfullscreen></iframe>`;
+  }
+  if (url.match(/drive\.google\.com/)) {
+    const id = url.match(/\/d\/([^/]+)/)?.[1];
+    if (id) return `<iframe src="https://drive.google.com/file/d/${id}/preview" allow="autoplay;fullscreen"></iframe>`;
+  }
+  if (url.match(/frame\.io|f\.io/)) return `<iframe src="${url}" allow="fullscreen"></iframe>`;
+  if (url.match(/\.(mp4|webm|mov)(\?|$)/i)) return `<video controls${autoplay?' autoplay muted loop':''} playsinline><source src="${url}">Your browser does not support video.</video>`;
+  if (url.match(/\/preview$/)) return `<iframe src="${url}" allow="autoplay;fullscreen"></iframe>`;
+  return `<iframe src="${url}" allow="autoplay;fullscreen" allowfullscreen></iframe>`;
 }
+
+// ── Lightbox ───────────────────────────────────────────────────────
+function openLightbox(idx) {
+  lbIndex = idx;
+  showLbPhoto();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function showLbPhoto() {
+  const photos = gdata[activeSess].photos;
+  const p = photos[lbIndex];
+  if (!p) return;
+  document.getElementById('lb-img').src = p.url;
+  document.getElementById('lb-caption').textContent = p.cap || '';
+}
+function lbNav(dir) {
+  const photos = gdata[activeSess].photos;
+  lbIndex = (lbIndex + dir + photos.length) % photos.length;
+  showLbPhoto();
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'ArrowLeft') lbNav(-1);
+  if (e.key === 'ArrowRight') lbNav(1);
+  if (e.key === 'Escape') closeLightbox();
+});
+document.getElementById('lightbox').addEventListener('click', e => {
+  if (e.target === document.getElementById('lightbox')) closeLightbox();
+});
 
 // ── Render ─────────────────────────────────────────────────────────
 function render() {
-  const sess   = gdata[activeSess];
-  const isS5   = activeSess === 'S5';
-  const isS4   = activeSess === 'S4';
+  const sess = gdata[activeSess];
+  const isAdmin = adminUnlocked;
   let html = '';
 
-  if (activeTab === 'photos') {
-    // Admin panel
-    if (adminUnlocked) {
-      html += `<div class="admin-panel">
-        <div class="admin-panel-title">Add photos — ${activeSess}</div>
+  // Admin panel
+  if (isAdmin) {
+    html += `<div class="admin-panel">
+      <div class="admin-panel-title">✦ Manage — ${activeSess}</div>
+
+      <!-- Embed / pinned video -->
+      <div class="embed-section">
+        <div class="embed-label">Pinned video (embed URL)</div>
         <div class="admin-row">
-          <input class="adm-inp" id="p-url" placeholder="Image URL (https://…)" onkeydown="if(event.key==='Enter')addPhotoUrl()">
-          <input class="adm-inp" id="p-cap" placeholder="Caption (optional)" style="max-width:240px">
-          <button class="adm-btn" onclick="addPhotoUrl()">+ Add URL</button>
-          <button class="adm-btn sec" onclick="document.getElementById('p-file').click()">↑ Upload file</button>
-          <input type="file" id="p-file" accept="image/*" multiple style="display:none" onchange="uploadPhotos(this)">
+          <input class="adm-inp" id="embed-url" placeholder="YouTube, Google Drive /preview, Vimeo, Frame.io…" value="${sess.embed||''}">
+          <button class="adm-btn" onclick="saveEmbed()">Save embed</button>
+          ${sess.embed ? `<button class="adm-btn danger" onclick="gdata[activeSess].embed='';save();render()">✕ Remove</button>` : ''}
         </div>
-        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em;">📋 Pull from Google Sheet (Slack → Zapier → Sheet)</div>
-          <div class="admin-row" style="margin-bottom:0">
-            <input class="adm-inp" id="sheet-url-${activeSess}" placeholder="Published Google Sheet CSV URL" value="${sess.sheetUrl||''}">
-            <button class="adm-btn" onclick="saveSheetUrl()">Save feed</button>
-            ${sess.sheetUrl?`<button class="adm-btn sec" onclick="pullFromSheet()">↓ Pull now</button>`:''}
-          </div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:5px;">Sheet must have columns: <strong style="color:var(--muted2)">url</strong> and optionally <strong style="color:var(--muted2)">caption</strong> · File → Share → Publish to web → CSV</div>
-          ${sess.sheetUrl?`<div id="sheet-status" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);margin-top:4px;"></div>`:''}
+      </div>
+
+      <!-- Bulk upload -->
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div class="embed-label">Bulk upload photos + videos</div>
+        <div class="bulk-drop" id="bulk-drop" onclick="document.getElementById('bulk-file').click()">
+          <div class="bulk-drop-icon">📁</div>
+          <div class="bulk-drop-text">Drop files here or click to browse</div>
+          <div class="bulk-drop-sub">Images and videos · max 4MB each · use URL for larger files</div>
         </div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:10px;">Max 2.5MB per uploaded file · For large collections use image URLs or a Google Sheet feed</div>
-      </div>`;
+        <input type="file" id="bulk-file" accept="image/*,video/*" multiple style="display:none" onchange="handleBulkFiles(Array.from(this.files));this.value=''">
+        <div id="bulk-progress" style="display:none;" class="bulk-progress">
+          <div class="bulk-bar-wrap"><div class="bulk-bar" id="bulk-bar"></div></div>
+          <div class="bulk-status" id="bulk-status"></div>
+        </div>
+      </div>
+
+      <!-- Single URL add -->
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <div class="embed-label">Add single URL</div>
+        <div class="admin-row">
+          <select class="adm-inp" id="m-type" style="flex:0 0 90px;min-width:90px;">
+            <option value="photo">Photo</option>
+            <option value="video">Video</option>
+          </select>
+          <input class="adm-inp" id="m-url" placeholder="https://…">
+          <input class="adm-inp" id="m-cap" placeholder="Caption (optional)" style="max-width:200px">
+          <button class="adm-btn" onclick="addMediaUrl()">+ Add</button>
+        </div>
+      </div>
+
+      ${activeSess === 'S5' ? `
+      <!-- Slack / sheet pull for S5 -->
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <div class="embed-label">Pull photos from Slack → Google Sheet (S5 only)</div>
+        <div class="admin-row">
+          <input class="adm-inp" id="slack-url" placeholder="Published Google Sheet CSV URL" value="${gdata.S5.slackUrl||''}">
+          <button class="adm-btn" onclick="pullSlack()">↓ Pull now</button>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;">
+          Sheet needs columns: <strong style="color:var(--muted2)">url</strong> (and optionally <strong style="color:var(--muted2)">caption</strong>) · File → Share → Publish to web → CSV
+        </div>
+        <div id="slack-status" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);margin-top:4px;"></div>
+      </div>` : ''}
+
+      ${activeSess === 'S1' || activeSess === 'S2' || activeSess === 'S3' ? `
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" ${sess.locked===false?'checked':''} onchange="gdata[activeSess].locked=!this.checked;save();render()">
+          Unlocked for public (photos visible to all)
+        </label>
+      </div>` : ''}
+    </div>`;
+    setTimeout(setupBulkDrop, 50);
+  }
+
+  if (activeTab === 'photos') {
+    // Pinned video hero
+    if (sess.embed) {
+      const emb = videoEmbed(sess.embed, true);
+      if (emb) html += `<div class="hero-video">${emb}<div class="hero-video-label">${activeSess === 'S4' ? S4_HIGHLIGHT_LABEL : activeSess + ' · Featured'}</div></div>`;
     }
 
-    // S4 Frame.io gallery + local photos
-    if (isS4) {
-      html += `<div class="video-wrap" style="margin-bottom:20px;">
-        <iframe src="${S4_FRAMEIO}" height="560" allow="fullscreen" title="S4 Frame.io Gallery"></iframe>
-        <div class="video-meta"><span>Session 4 · Frame.io</span><a href="${S4_FRAMEIO_SHARE}" target="_blank">Open in Frame.io ↗</a></div>
-      </div>`;
-    }
-
-    if (!sess.photos.length && !isS4) {
-      html += `<div class="empty-state"><span class="empty-icon">📷</span><div>No photos yet for ${activeSess}.</div>${adminUnlocked?'<div style="margin-top:8px;font-size:12px;color:var(--muted)">Use the panel above to add photos.</div>':''}</div>`;
-    } else if (sess.photos.length) {
-      html += `<div class="photo-grid">${sess.photos.map((p,i) => `
-        <div class="photo-item" onclick="openLightbox('${p.url.replace(/'/g,"\\'")}','${(p.cap||'').replace(/'/g,"\\'")}')">
+    if (!sess.photos.length) {
+      html += `<div class="empty-state"><span class="empty-icon">📷</span><div>No photos yet for ${activeSess}.</div>${isAdmin?'<div style="margin-top:8px;font-size:12px;color:var(--muted)">Use the panel above to upload.</div>':''}</div>`;
+    } else {
+      html += `<div class="photo-masonry">`;
+      sess.photos.forEach((p, i) => {
+        html += `<div class="photo-item" onclick="openLightbox(${i})">
           <img src="${p.url}" alt="${p.cap||''}" loading="lazy" onerror="this.parentElement.style.display='none'">
-          ${p.cap ? `<div class="photo-caption">${p.cap}</div>` : ''}
-          ${adminUnlocked ? `<button class="photo-del" onclick="event.stopPropagation();deletePhoto(${i})">✕ Remove</button>` : ''}
-        </div>`).join('')}</div>`;
+          <div class="photo-overlay">
+            <div class="photo-caption-bar">${p.cap||''}</div>
+          </div>
+          ${isAdmin ? `<button class="photo-del" onclick="event.stopPropagation();deletePhoto(${i})">✕</button>` : ''}
+        </div>`;
+      });
+      html += `</div>`;
     }
   }
 
   else if (activeTab === 'video') {
-    if (adminUnlocked) {
-      html += `<div class="admin-panel">
-        <div class="admin-panel-title">Video — ${activeSess}</div>
-        <div class="admin-row">
-          <input class="adm-inp" id="v-url" placeholder="YouTube, Vimeo, Google Drive, Frame.io, or direct .mp4 URL" value="${sess.video||''}">
-          <button class="adm-btn" onclick="saveVideo()">Save video</button>
-          ${sess.video ? `<button class="adm-btn sec" onclick="clearVideo()">✕ Remove</button>` : ''}
-        </div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;">Supports: YouTube · Vimeo · Google Drive · Frame.io · Direct .mp4 link</div>
-        ${isS4 ? `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);margin-top:8px;">S4 already has Frame.io embedded below. Paste a URL above to add a highlight reel on top.</div>` : ''}
-      </div>`;
-    }
-
-    // Custom video first
-    const embed = videoEmbed(sess.video, 520);
-    if (embed) {
-      html += `<div class="video-wrap">${embed}
-        <div class="video-meta"><span>${activeSess} Highlights</span></div>
-      </div>`;
-    }
-
-    // S4 always also shows Frame.io
-    if (isS4) {
-      html += `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;margin-top:${embed?'20px':'0'}">Session 4 · Frame.io Review</div>
-        <div class="video-wrap">
-          <iframe src="${S4_FRAMEIO}" height="540" allow="fullscreen" title="S4 Frame.io"></iframe>
-          <div class="video-meta"><span>Frame.io · Session 4</span><a href="${S4_FRAMEIO_SHARE}" target="_blank">Open in Frame.io ↗</a></div>
-        </div>`;
-    }
-
-    if (!embed && !isS4) {
-      html += `<div class="empty-state"><span class="empty-icon">🎬</span>
-        <div>No video yet for ${activeSess}.</div>
-        ${adminUnlocked ? '<div style="margin-top:8px;font-size:12px;color:var(--muted)">Paste a video URL in the panel above.</div>' : '<div style="margin-top:8px;font-size:12px;color:var(--muted)">Video will appear here once added.</div>'}
-      </div>`;
+    if (!sess.embed && !sess.videos.length) {
+      html += `<div class="empty-state"><span class="empty-icon">🎬</span><div>No videos yet for ${activeSess}.</div>${isAdmin?'<div style="margin-top:8px;font-size:12px;color:var(--muted)">Add an embed URL or upload videos above.</div>':''}</div>`;
+    } else {
+      html += `<div class="video-grid">`;
+      // Pinned embed first
+      if (sess.embed) {
+        const emb = videoEmbed(sess.embed, true);
+        if (emb) html += `<div class="video-card" style="grid-column:1/-1">${emb}<div class="video-card-foot"><span class="video-card-label">${activeSess === 'S4' ? S4_HIGHLIGHT_LABEL : 'Featured · ' + activeSess}</span></div></div>`;
+      }
+      sess.videos.forEach((v, i) => {
+        const emb = videoEmbed(v.url, true);
+        if (emb) html += `<div class="video-card">${emb}<div class="video-card-foot"><span class="video-card-label">${v.cap||v.url.split('/').pop()}</span>${isAdmin?`<button style="background:transparent;border:none;color:#f87171;cursor:pointer;font-size:12px;" onclick="deleteVideo(${i})">✕</button>`:''}</div></div>`;
+      });
+      html += `</div>`;
     }
   }
 
   else if (activeTab === 'notes') {
-    if (adminUnlocked) {
-      html += `<div class="admin-panel">
-        <div class="admin-panel-title">Add note — ${activeSess}</div>
+    if (isAdmin) {
+      html += `<div class="admin-panel" style="margin-bottom:20px;">
+        <div class="admin-panel-title">Add note</div>
         <input class="adm-inp" id="n-title" placeholder="Title (optional)" style="width:100%;margin-bottom:8px">
-        <textarea class="adm-textarea" id="n-body" placeholder="Write a note, reflection, weekly recap, or field trip description…"></textarea>
+        <textarea class="adm-textarea" id="n-body" placeholder="Write a note, recap, or field trip description…"></textarea>
         <button class="adm-btn" onclick="addNote()">+ Add note</button>
       </div>`;
     }
-
     if (!sess.notes.length) {
-      html += `<div class="empty-state"><span class="empty-icon">📝</span><div>No notes yet for ${activeSess}.</div></div>`;
+      html += `<div class="empty-state"><span class="empty-icon">📝</span><div>No notes yet.</div></div>`;
     } else {
-      html += `<div class="notes-list">${sess.notes.map((n,i) => `
+      html += `<div class="notes-list">` + sess.notes.map((n,i) => `
         <div class="note-card">
-          ${adminUnlocked ? `<button class="note-del" onclick="deleteNote(${i})">✕</button>` : ''}
+          ${isAdmin ? `<button class="note-del" onclick="deleteNote(${i})">✕</button>` : ''}
           ${n.title ? `<div class="note-title">${n.title}</div>` : ''}
           <div class="note-body">${n.body}</div>
           <div class="note-date">${new Date(n.ts).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
-        </div>`).join('')}
-      </div>`;
+        </div>`).join('') + `</div>`;
     }
   }
 
   document.getElementById('page-content').innerHTML = html;
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 load();
 </script>
 </body>

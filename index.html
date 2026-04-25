@@ -52,10 +52,31 @@ footer a{color:var(--muted2);text-decoration:none;}
   .cards{padding:0 20px 60px;grid-template-columns:1fr;}
   footer{padding:18px 20px;flex-direction:column;gap:8px;text-align:center;}
 }
+
+/* ── SITE NAV ── */
+.site-nav{display:flex;align-items:center;gap:3px;padding:7px 20px;flex-wrap:wrap;position:sticky;top:0;z-index:1000;}
+.site-nav.dark{background:#060c18;border-bottom:1px solid #1e3050;}
+.site-nav.light{background:rgba(248,247,244,.97);border-bottom:1px solid #e2e0db;backdrop-filter:blur(8px);}
+.sn-link{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.04em;text-decoration:none;padding:5px 12px;border-radius:20px;border:1px solid transparent;transition:all .15s;white-space:nowrap;}
+.site-nav.dark .sn-link{color:#4a6080;}
+.site-nav.dark .sn-link:hover{color:#e8f0fc;border-color:#264070;}
+.site-nav.dark .sn-link.active{background:#1a56db;color:white;border-color:#1a56db;}
+.site-nav.dark .sn-link.home{color:#7090b0;border-color:#1e3050;}
+.site-nav.light .sn-link{color:#888;}
+.site-nav.light .sn-link:hover{color:#111;border-color:#aaa;}
+.site-nav.light .sn-link.active{background:#1a56db;color:white;border-color:#1a56db;}
+.site-nav.light .sn-link.home{color:#444;border-color:#e2e0db;}
 </style>
 </head>
 <body>
-<header>
+<div class="site-nav dark">
+  <a href="https://t2p-dashboard.vercel.app/index.html" target="_blank" class="sn-link home active">Home</a>
+  <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" class="sn-link">T2P Tracker</a>
+  <a href="https://t2p-dashboard.vercel.app/workshops.html" target="_blank" class="sn-link">Workshop Directory</a>
+  <a href="https://t2p-dashboard.vercel.app/gallery.html" target="_blank" class="sn-link">Gallery</a>
+  <a href="https://t2p-dashboard.vercel.app/session5.html" target="_blank" class="sn-link">Session 5</a>
+  <a href="https://t2p-dashboard.vercel.app/editor.html" target="_blank" class="sn-link">Staff Login</a>
+</div><header>
   <span class="logo">Alpha · NYC · S5</span>
   <a href="editor.html" class="hn-link staff">Staff login →</a>
 </header>

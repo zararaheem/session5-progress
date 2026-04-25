@@ -20,7 +20,7 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
 /* HEADER */
-header{background:var(--text);color:white;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+header{top:37px;background:var(--text);color:white;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .hdr-title{font-size:15px;font-weight:600;}
 .hdr-right{display:flex;align-items:center;gap:8px;}
 .hdr-link{font-family:'DM Mono',monospace;font-size:11px;color:#666;text-decoration:none;border:1px solid #333;padding:5px 12px;border-radius:20px;transition:all .15s;}
@@ -260,17 +260,37 @@ select:focus{border-color:#3b82f6;}
 .toggle-btn:hover{color:#ccc;}
 .toggle-btn.tracker-active{background:#ef4444;color:white;}
 .toggle-btn.ws-active{background:#2563eb;color:white;}
+
+/* ── SITE NAV ── */
+.site-nav{display:flex;align-items:center;gap:3px;padding:7px 20px;flex-wrap:wrap;position:sticky;top:0;z-index:1000;}
+.site-nav.dark{background:#060c18;border-bottom:1px solid #1e3050;}
+.site-nav.light{background:rgba(248,247,244,.97);border-bottom:1px solid #e2e0db;backdrop-filter:blur(8px);}
+.sn-link{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.04em;text-decoration:none;padding:5px 12px;border-radius:20px;border:1px solid transparent;transition:all .15s;white-space:nowrap;}
+.site-nav.dark .sn-link{color:#4a6080;}
+.site-nav.dark .sn-link:hover{color:#e8f0fc;border-color:#264070;}
+.site-nav.dark .sn-link.active{background:#1a56db;color:white;border-color:#1a56db;}
+.site-nav.dark .sn-link.home{color:#7090b0;border-color:#1e3050;}
+.site-nav.light .sn-link{color:#888;}
+.site-nav.light .sn-link:hover{color:#111;border-color:#aaa;}
+.site-nav.light .sn-link.active{background:#1a56db;color:white;border-color:#1a56db;}
+.site-nav.light .sn-link.home{color:#444;border-color:#e2e0db;}
 </style>
 </head>
 <body>
-
+<div class="site-nav dark">
+  <a href="https://t2p-dashboard.vercel.app/index.html" target="_blank" class="sn-link home">Home</a>
+  <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" class="sn-link active">T2P Tracker</a>
+  <a href="https://t2p-dashboard.vercel.app/workshops.html" target="_blank" class="sn-link">Workshop Directory</a>
+  <a href="https://t2p-dashboard.vercel.app/gallery.html" target="_blank" class="sn-link">Gallery</a>
+  <a href="https://t2p-dashboard.vercel.app/session5.html" target="_blank" class="sn-link">Session 5</a>
+  <a href="https://t2p-dashboard.vercel.app/editor.html" target="_blank" class="sn-link">Staff Login</a>
+</div>
 <header>
-  <span class="hdr-title">T2P Patch Tracker</span>
+  <span class="hdr-title">T2P Tracker</span>
   <div class="hdr-right">
+    <a href="index.html" target="_blank" class="hdr-link">← Home</a>
     <span class="s5-dot">S5 Live</span>
     <span id="hdr-date" style="font-family:'DM Mono',monospace;font-size:11px;color:#666;"></span>
-    <a href="index.html" class="hdr-link">← Home</a>
-    <a href="workshops.html" class="hdr-link" style="color:#60a5fa;border-color:#1e3a5f;">Workshop Directory</a>
     <button class="edit-btn" id="edit-btn" onclick="toggleEdit()">✏ Edit</button>
   </div>
 </header>
@@ -492,7 +512,7 @@ const BASE = [
   {n:"Harvey Caulin",l:"L1",note:"Joined S4",joinedS:4,scores:{"S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
   {n:"Lola Propp",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Not passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
   {n:"London Politi",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Not passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Not passed","S3: Speak like a Scientist":"Not passed","S4: Space Race":"Not passed","S4: Rock Stars":"Passed"}},
-  {n:"Max Rzepecki",l:"L1",note:"Moved to PR after S4",leftAfterS:4,scores:{}},
+  {n:"Max Rzepecki",l:"L1",note:"Moved to PR after S2",leftAfterS:2,scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S2: Budget Battles: NYC Edition":"Not passed"}},
   {n:"Oleander Poulson",l:"L1",note:"Joined S4",joinedS:4,scores:{"S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
   {n:"Raika Ackman",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
   {n:"Van McDavid",l:"L1",note:"",scores:{"S1: Social Social Club":"Passed","S1: Pressure Playbook":"Not passed","S1: Alpha Legends":"Passed","S1: 10x-ers":"Passed","S1: Community Garden":"Passed","S2: Taste Buds":"Passed","S2: Articulate Artists":"Passed","S2: Hard Things on the Hard Court":"Passed","S2: Community Garden":"Passed","S3: Goalgetters":"Passed","S3: Idea to Object":"Passed","S3: Speak like a Scientist":"Passed","S4: Space Race":"Passed","S4: Rock Stars":"Passed"}},
@@ -598,7 +618,33 @@ function toggleBreakdown() {
   document.getElementById('breakdown-toggle').textContent = breakdownCollapsed ? '▼ Expand' : '▲ Collapse';
 }
 
-const SC_COL  = {S1:'#3b82f6',S2:'#8b5cf6',S3:'#10b981',S4:'#f59e0b',S5:'#ef4444'};
+// Workshop → level lookup (for breakdown cards)
+const WS_LEVELS = {
+  'Social Social Club':'LL/L1','Pressure Playbook':'LL/L1','Alpha Legends':'LL/L1',
+  'Community Garden':'ALL','10x-ers':'L1/L2/MS','Artful Insights':'L2/MS','Just Do It!':'L1/L2/MS',
+  'Museum Masters':'MS','Taste Buds':'LL/L1','Articulate Artists':'ALL',
+  "President's AI Challenge":'MS','Hard Things on the Hard Court':'ALL',
+  'Budget Battles: NYC Edition':'L1/L2/MS','Unbreakable Bridgatoni':'LL/L1','Alpha Bets':'ALL',
+  'Goalgetters':'ALL','Ultimate Agent':'LL','Storybook Studio':'LL',
+  'Idea to Object':'L1','Speak like a Scientist':'L1','Money Machines':'L2',
+  'Master Carpenters':'L2/MS','Social Networking':'MS',
+  'Community Builders':'ALL','Alpha Emporium Exchange':'ALL','Polite Society':'LL',
+  'Space Race':'L1','The Coachability Combine':'MS','Rock Stars':'ALL',
+  'Mission Laika':'ALL','Propulsion Lab':'LL','Mission Control':'LL',
+  'Cadet Qualification Training':'LL','Drone Wing':'L1/L2',
+  'Stock Simulator':'L1','Recon Expedition':'L1',
+  'Tri Hard (Row · Ride · Run)':'L2/MS','Sail La Vie':'MS',
+  'Rover Engineering Corps':'MS','Island Standard':'ALL',
+};
+function wsLevelBadges(name) {
+  const lv = WS_LEVELS[name] || '';
+  if (!lv) return '';
+  const map = {LL:'#fff4e0:#e8a020',L1:'#ffeee8:#e8522a',L2:'#e0f7f4:#2ab5a0',MS:'#fde8f1:#e03d7c',ALL:'#f0ede8:#888'};
+  return lv.split('/').map(l => {
+    const [bg,col] = (map[l.trim()]||'#f0ede8:#888').split(':');
+    return `<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;background:${bg};color:${col}">${l.trim()}</span>`;
+  }).join('');
+}
 const SC_SESS = {S1:'Session 1',S2:'Session 2',S3:'Session 3',S4:'Session 4',S5:'Session 5'};
 
 function renderBreakdown() {
@@ -649,7 +695,10 @@ function renderBreakdown() {
       const safeWs = ws.replace(/'/g,"\\'");
       return `<div class="ws-card ${scClass}" onclick="openWsModal('${safeWs}')">
         <span class="wsc-arrow">→</span>
-        <div class="wsc-name">${name}</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;margin-bottom:4px;">
+          <div class="wsc-name" style="margin-bottom:0">${name}</div>
+          <div style="display:flex;gap:3px;flex-wrap:wrap;flex-shrink:0;margin-top:1px;">${wsLevelBadges(name)}</div>
+        </div>
         <div class="wsc-stats">
           <span class="wsc-passed" style="color:${SC_COL[sess]}">${passed}</span>
           <span class="wsc-slash">/</span>
@@ -735,8 +784,16 @@ function render() {
   const lf = document.getElementById('lvlFilter').value;
   const sf = document.getElementById('sortFilter').value;
   let list = [...students];
-  // Grace and other S5-only students should be hidden when S5 is greyed out
+  // Hide S5-only students when S5 not active
   if (!activeSess.has('S5')) list = list.filter(s => !s.newS5);
+  // Hide students who joined after all active sessions (e.g. joinedS:4 but only S1-S3 active)
+  // Hide students who left before all active sessions (e.g. leftAfterS:2 but only S3-S5 active)
+  list = list.filter(s => {
+    const activeSessNums = [...activeSess].map(s => parseInt(s.slice(1)));
+    if (s.joinedS && Math.max(...activeSessNums) < s.joinedS) return false;
+    if (s.leftAfterS && Math.min(...activeSessNums) > s.leftAfterS) return false;
+    return true;
+  });
   if (lf) list = list.filter(s=>s.l===lf);
   if (sf==='level') list.sort((a,b)=>{const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l);return d||a.n.localeCompare(b.n);});
   else if (sf==='name') list.sort((a,b)=>a.n.localeCompare(b.n));
@@ -1045,7 +1102,7 @@ function showEpToast() {
 // ── Workshop meta editor ──────────────────────────────────────────
 const WS_BY_SESS = {
   S5:['SP-01|Mission Laika — Storytelling','SP-02|Propulsion Lab','SP-03|Mission Control','SP-04|Cadet Qualification Training','SP-05|Junior Space Camp — Island Standard','OP-01|Mission Laika — Media + Outreach','OP-02|Drone Wing','OP-03|Stock Simulator','OP-04|Recon Expedition','OP-05|Junior Space Camp — Island Standard (L1)','FC-01|Mission Laika — Product + Sales','FC-02|Alpha Emporium Exchange','FC-03|Drone Wing (L2)','FC-04|Tri Hard (Row · Ride · Run)','FC-05|Junior Space Camp — Island Standard (L2)','MS-01|Mission Laika — Strategy + Execution','MS-02|Sail La Vie','MS-03|Rover Engineering Corps','MS-04|Tri Hard (Row · Ride · Run) (MS)','MS-05|Mission Command — Island Standard'],
-  S4:['S4-01|Community Builders','S4-02|Alpha Emporium Exchange','S4-03|Polite Society (LL)','S4-04|Space Race (L1)','S4-05|Money Machines (L2)','S4-06|The Coachability Combine (MS)','S4-07|Rock Stars — Bouldering'],
+  S4:['S4-01|Community Builders','S4-02|Alpha Emporium Exchange','S4-03|Polite Society (LL)','S4-04|Space Race (L1)','S4-05|Money Machines (L2)','S4-06|Rock Stars — Bouldering'],
   S3:['S3-01|Goalgetters','S3-02|Ultimate Agent','S3-03|Storybook Studio','S3-04|Idea to Object','S3-05|Speak like a Scientist','S3-06|Money Machines','S3-07|Master Carpenters','S3-08|Social Networking'],
   S2:['S2-01|Museum Masters','S2-02|Taste Buds','S2-03|Articulate Artists','S2-04|President\'s AI Challenge','S2-05|Hard Things on the Hard Court','S2-06|Community Garden','S2-07|Budget Battles: NYC Edition','S2-08|Unbreakable Bridgatoni'],
   S1:['S1-01|Social Social Club','S1-02|Pressure Playbook','S1-03|Alpha Legends','S1-04|10x-ers','S1-05|Artful Insights','S1-06|Community Garden'],
@@ -1099,12 +1156,5 @@ function saveWsMeta() {
 
 init();
 initWsMeta();
-</script>
-<!-- PAGE TOGGLE -->
-<div class="page-toggle">
-  <button class="toggle-btn tracker-active">Patch Tracker</button>
-  <button class="toggle-btn" onclick="window.location.href='workshops.html'">Workshop Directory</button>
-</div>
-
-</body>
+</script></body>
 </html>

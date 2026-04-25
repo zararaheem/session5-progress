@@ -15,7 +15,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-header{background:#1a1a1a;color:white;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+header{top:37px;background:#1a1a1a;color:white;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .header-left{display:flex;align-items:center;gap:12px;}
 header h1{font-size:15px;font-weight:600;}
 .s5-live{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:#ef4444;background:#2a0a0a;border:1px solid #5a1a1a;padding:3px 9px;border-radius:20px;}
@@ -108,17 +108,38 @@ tr:hover td{background:#fafaf8;}
   .page,.controls,header{padding-left:14px;padding-right:14px;}
   .ws-name{font-size:13px;}
 }
+
+/* ── SITE NAV ── */
+.site-nav{display:flex;align-items:center;gap:3px;padding:7px 20px;flex-wrap:wrap;position:sticky;top:0;z-index:1000;}
+.site-nav.dark{background:#060c18;border-bottom:1px solid #1e3050;}
+.site-nav.light{background:rgba(248,247,244,.97);border-bottom:1px solid #e2e0db;backdrop-filter:blur(8px);}
+.sn-link{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.04em;text-decoration:none;padding:5px 12px;border-radius:20px;border:1px solid transparent;transition:all .15s;white-space:nowrap;}
+.site-nav.dark .sn-link{color:#4a6080;}
+.site-nav.dark .sn-link:hover{color:#e8f0fc;border-color:#264070;}
+.site-nav.dark .sn-link.active{background:#1a56db;color:white;border-color:#1a56db;}
+.site-nav.dark .sn-link.home{color:#7090b0;border-color:#1e3050;}
+.site-nav.light .sn-link{color:#888;}
+.site-nav.light .sn-link:hover{color:#111;border-color:#aaa;}
+.site-nav.light .sn-link.active{background:#1a56db;color:white;border-color:#1a56db;}
+.site-nav.light .sn-link.home{color:#444;border-color:#e2e0db;}
 </style>
 </head>
 <body>
-
+<div class="site-nav dark">
+  <a href="https://t2p-dashboard.vercel.app/index.html" target="_blank" class="sn-link home">Home</a>
+  <a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" class="sn-link">T2P Tracker</a>
+  <a href="https://t2p-dashboard.vercel.app/workshops.html" target="_blank" class="sn-link">Workshop Directory</a>
+  <a href="https://t2p-dashboard.vercel.app/gallery.html" target="_blank" class="sn-link">Gallery</a>
+  <a href="https://t2p-dashboard.vercel.app/session5.html" target="_blank" class="sn-link active">Session 5</a>
+  <a href="https://t2p-dashboard.vercel.app/editor.html" target="_blank" class="sn-link">Staff Login</a>
+</div>
 <header>
   <div class="header-left">
     <h1>Session 5 Progress</h1>
     <span class="s5-live">Live</span>
   </div>
   <div class="nav-links">
-    <a href="index.html" class="nav-link">← Home</a>
+    <a href="index.html" target="_blank" class="nav-link">← Home</a>
   </div>
 </header>
 
