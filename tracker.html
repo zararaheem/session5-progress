@@ -989,7 +989,7 @@ function loadEpStudent() {
 function deleteStudent() {
   const name = document.getElementById('ep-stu').value;
   if (!name) return;
-  if (!confirm(`Delete "${name}" from the patch tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
+  if (!confirm(`Delete "${name}" from the tracker?\n\nThis removes all their workshop data and cannot be undone.`)) return;
   // Remove from students array
   const idx = students.findIndex(s=>s.n===name);
   if (idx > -1) students.splice(idx, 1);
