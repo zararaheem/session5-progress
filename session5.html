@@ -591,6 +591,9 @@ function render(){
   document.getElementById('page').innerHTML=allBlocks.join('');
 }
 
+// Render hero immediately so it shows before storage resolves
+renderStats();
+populateWsFilter();
 loadData();
 </script>
 </body>
