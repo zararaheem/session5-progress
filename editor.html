@@ -149,6 +149,25 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .score-btn.active-ahead{background:rgba(167,139,250,.15);color:var(--ahead);}
 
 /* ── DASHBOARD TAB ── */
+.dash-stats-card{margin:14px 28px 0;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 18px;}
+.dash-stats-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.dash-stats-week{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:2px 8px;border-radius:4px;letter-spacing:.07em;}
+.dash-stats-due{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:.04em;}
+.dash-stats-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.dash-stats-bar-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);white-space:nowrap;min-width:160px;}
+.dash-stats-bar{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
+.dash-stats-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s;}
+.stat-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.stat-pill{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;padding:3px 9px;border-radius:5px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.sp-n{font-size:13px;font-weight:700;}
+.sp-behind{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);}
+.sp-track{background:rgba(96,165,250,.12);color:var(--accent2);border:1px solid rgba(96,165,250,.25);}
+.sp-ahead{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.25);}
+.sp-empty{background:rgba(74,96,128,.08);color:var(--muted2);border:1px solid rgba(74,96,128,.2);}
+.sp-yes{background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.25);}
+.sp-no{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);}
+.sp-head{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 4px;}
+.sp-sep{color:var(--border2);font-size:16px;font-weight:200;line-height:1;}
 .dash-grid{padding:16px 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
 .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;}
 .dash-card:hover{border-color:var(--border2);transform:translateY(-2px);}
@@ -307,7 +326,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 </head>
 <body>
 <div class="site-nav dark">
-  <a href="https://session5-progress.vercel.app/index.html" class="sn-link home">Home</a>
+  <a href="https://session5-progress.vercel.app/" class="sn-link home">Home</a>
   <a href="https://t2p-dashboard.vercel.app/tracker.html" class="sn-link" target="_blank" rel="noopener noreferrer">T2P Tracker</a>
   <a href="https://t2p-dashboard.vercel.app/workshops.html" class="sn-link" target="_blank" rel="noopener noreferrer">Workshop Directory</a>
   <a href="https://session5-progress.vercel.app/session5.html" class="sn-link">Session 5 Data</a>
@@ -382,7 +401,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
     <div class="toolbar" style="border-top:none;">
       <span class="tlbl">Level</span>
       <select id="dash-level" onchange="renderDashboard()">
-        <option value="">All</option>
+        <option value="">All levels</option>
         <option value="LL">LL</option>
         <option value="L1">L1</option>
         <option value="L2">L2</option>
@@ -390,6 +409,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
       </select>
       <span class="count-pill" id="dash-count"></span>
     </div>
+    <div id="dash-stats"></div>
     <div class="dash-grid" id="dash-grid"></div>
   </div>
 
@@ -859,12 +879,94 @@ function saveProfile(sName){
   logAudit('profile',sName,'notes','updated');
 }
 
+// ── Dashboard stats ───────────────────────────────────────────────
+function renderDashboardStats(students){
+  const container=document.getElementById('dash-stats');
+  if(!container)return;
+  const due=getDueThisWeek();
+  const weekNum=getCurrentSessionWeek();
+  if(weekNum<=0||weekNum>7||!due){container.innerHTML='';return;}
+  const total=students.length;
+  let html='';
+
+  if(due.type==='checkpoint'){
+    const ck=due.key;
+    const ckLabel=CHECKPOINTS.find(c=>c.key===ck)?.label||ck;
+    let behind=0,onTrack=0,ahead=0,withData=0;
+    students.forEach(s=>{
+      const sc=s5data[s.n]||{};
+      const ws=S5_WORKSHOPS[s.l]||[];
+      let hasBehind=false,hasTrack=false,hasAhead=false,hasAny=false;
+      ws.forEach(w=>{
+        const v=sc[chkKey(w.name,ck)];
+        if(v){hasAny=true;if(v==='Behind')hasBehind=true;else if(v==='On Track')hasTrack=true;else if(v==='Ahead')hasAhead=true;}
+      });
+      if(hasAny)withData++;
+      if(hasBehind)behind++;else if(hasTrack)onTrack++;else if(hasAhead)ahead++;
+    });
+    const pct=total>0?Math.round(withData/total*100):0;
+    html=`<div class="dash-stats-card">
+      <div class="dash-stats-hdr">
+        <span class="dash-stats-week">Week ${weekNum}</span>
+        <span class="dash-stats-due">Due this week · ${ckLabel}</span>
+      </div>
+      <div class="dash-stats-bar-row">
+        <span class="dash-stats-bar-lbl">${withData} / ${total} students have data</span>
+        <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="stat-pills">
+        <span class="stat-pill sp-behind"><span class="sp-n">${behind}</span>Behind</span>
+        <span class="stat-pill sp-track"><span class="sp-n">${onTrack}</span>On Track</span>
+        <span class="stat-pill sp-ahead"><span class="sp-n">${ahead}</span>Ahead</span>
+        <span class="stat-pill sp-empty"><span class="sp-n">${total-withData}</span>No data yet</span>
+      </div>
+    </div>`;
+  } else {
+    const wk=due.key;
+    let withData=0,lovesY=0,lovesN=0,l2xAll=0,l2xSome=0,l2xNone=0,t2pY=0,t2pN=0;
+    students.forEach(s=>{
+      const d=s5data.__3cs__?.[s.n]?.[wk]||{};
+      if(d.lovesSchool||d.learning2x||d.onTrack)withData++;
+      if(d.lovesSchool==='Yes')lovesY++;else if(d.lovesSchool==='No')lovesN++;
+      if(d.learning2x==='All at 2x')l2xAll++;else if(d.learning2x==='Some at 2x')l2xSome++;else if(d.learning2x==='None at 2x')l2xNone++;
+      if(d.onTrack==='Yes')t2pY++;else if(d.onTrack==='No')t2pN++;
+    });
+    const pct=total>0?Math.round(withData/total*100):0;
+    html=`<div class="dash-stats-card">
+      <div class="dash-stats-hdr">
+        <span class="dash-stats-week">Week ${weekNum}</span>
+        <span class="dash-stats-due">Due this week · 3 Commitments</span>
+      </div>
+      <div class="dash-stats-bar-row">
+        <span class="dash-stats-bar-lbl">${withData} / ${total} students have data</span>
+        <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="stat-pills">
+        <span class="sp-head">Love School</span>
+        <span class="stat-pill sp-yes"><span class="sp-n">${lovesY}</span>Yes</span>
+        <span class="stat-pill sp-no"><span class="sp-n">${lovesN}</span>No</span>
+        <span class="sp-sep">|</span>
+        <span class="sp-head">Learning 2x</span>
+        <span class="stat-pill sp-track"><span class="sp-n">${l2xAll}</span>All at 2x</span>
+        <span class="stat-pill sp-track" style="opacity:.65"><span class="sp-n">${l2xSome}</span>Some</span>
+        <span class="stat-pill sp-no"><span class="sp-n">${l2xNone}</span>None</span>
+        <span class="sp-sep">|</span>
+        <span class="sp-head">T2P</span>
+        <span class="stat-pill sp-yes"><span class="sp-n">${t2pY}</span>On track</span>
+        <span class="stat-pill sp-no"><span class="sp-n">${t2pN}</span>Behind</span>
+      </div>
+    </div>`;
+  }
+  container.innerHTML=html;
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────
 function renderDashboard(){
   const lf=document.getElementById('dash-level').value;
   let students=[...STUDENTS].sort((a,b)=>{const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l);return d||a.n.localeCompare(b.n);});
   if(lf)students=students.filter(s=>s.l===lf);
   document.getElementById('dash-count').textContent=`${students.length} students`;
+  renderDashboardStats(students);
 
   document.getElementById('dash-grid').innerHTML=students.map(s=>{
     const photo=s5data.__photos__?.[s.n];
