@@ -77,18 +77,27 @@ select,input{padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;bo
 .count-pill{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border);}
 
 /* WORKSHOP BLOCK */
-.page{padding:20px 28px;display:flex;flex-direction:column;gap:24px;}
+.page{padding:20px 28px;display:flex;flex-direction:column;gap:16px;}
 .ws-block{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
-.ws-block-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;}
-.ws-code-badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px;}
+.ws-block-header{padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;cursor:pointer;user-select:none;transition:background .15s;}
+.ws-block-header:hover{background:#fafaf8;}
+.ws-block:not(.open) .ws-block-header{border-bottom:none;}
+.ws-block.open .ws-block-header{border-bottom:1px solid var(--border);}
+.ws-body{display:none;}
+.ws-block.open .ws-body{display:block;}
+.ws-chevron{font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0;margin-left:auto;}
+.ws-block.open .ws-chevron{transform:rotate(180deg);}
+.ws-code-badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0;}
 .ws-info{flex:1;min-width:180px;}
-.ws-name{font-size:15px;font-weight:600;margin-bottom:2px;}
+.ws-name{font-size:14px;font-weight:600;margin-bottom:1px;}
 .ws-guide-row{font-size:11px;color:var(--muted);}
 .ws-skill-pill{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;background:var(--bg);border:1px solid var(--border);color:var(--muted);flex-shrink:0;margin-top:3px;}
 .ws-pbar-wrap{display:flex;align-items:center;gap:8px;min-width:120px;}
 .ws-pbar{flex:1;height:5px;background:#eee;border-radius:3px;overflow:hidden;}
 .ws-pbar-fill{height:100%;border-radius:3px;background:#16a34a;transition:width .4s;}
 .ws-pbar-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;}
+.dot-link{text-decoration:none;display:inline-flex;}
+.dot-link:focus-visible{outline:2px solid #1a56db;border-radius:50%;}
 
 /* I-CAN STATEMENT */
 .ican-row{padding:10px 18px;background:#fafaf8;border-bottom:1px solid var(--border);font-size:12px;color:#444;display:flex;align-items:flex-start;gap:8px;}
@@ -365,11 +374,20 @@ function renderStats(){
     }
   }
 
+  // Week date range helper
+  function weekDateRange(w){
+    const s=new Date('2026-04-27');
+    const mon=new Date(s.getTime()+(w-1)*7*24*60*60*1000);
+    const fri=new Date(mon.getTime()+4*24*60*60*1000);
+    const fmt=d=>`${d.getMonth()+1}/${String(d.getDate()).padStart(2,'0')}`;
+    return`${fmt(mon)}–${fmt(fri)}`;
+  }
+
   // Week info bar (centered, with Enter data CTA)
   const dueLabel=campusStats.type==='checkpoint'?campusStats.ckLabel:campusStats.type==='3cs'?'3 Commitments':'';
   const weekInfoHtml=(weekNum>0&&weekNum<=7&&due)
     ?`<div class="s5-week-bar">
-        <span class="ph-week-badge">Week ${weekNum}</span>
+        <span class="ph-week-badge">Week ${weekNum} · ${weekDateRange(weekNum)}</span>
         ${dueLabel?`<span class="ph-due-label">Due: ${dueLabel}</span>`:''}
         <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
       </div>`
@@ -381,14 +399,13 @@ function renderStats(){
   if(campusStats.type==='checkpoint'){
     campusStatsHtml=`<div class="campus-stats">
       <div class="cs s-total"><span class="cs-num">${totalAll}</span><span class="cs-label">Students</span></div>
-      <div class="cs s-filled"><span class="cs-num">${campusStats.withData}</span><span class="cs-label">Data In</span></div>
       <div class="cs s-behind"><span class="cs-num">${campusStats.behind}</span><span class="cs-label">Behind</span></div>
       <div class="cs s-track"><span class="cs-num">${campusStats.track}</span><span class="cs-label">On Track</span></div>
       <div class="cs s-ahead"><span class="cs-num">${campusStats.ahead}</span><span class="cs-label">Ahead</span></div>
     </div>
     <div class="cs-bar-row">
       <div class="cs-bar-track"><div class="cs-bar-fill" style="width:${pctAll}%"></div></div>
-      <span class="cs-bar-label">${campusStats.withData}/${totalAll} students · ${campusStats.ckLabel}</span>
+      <span class="cs-bar-label">${pctAll}% entered · ${campusStats.withData}/${totalAll} students</span>
     </div>`;
   } else if(campusStats.type==='3cs'){
     campusStatsHtml=`<div class="campus-stats">
@@ -412,8 +429,7 @@ function renderStats(){
   function levelPills(ls){
     if(ls.type==='checkpoint')return(ls.behind>0?`<span class="lvc-pill" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;">${ls.behind} Behind</span>`:'')+
       (ls.track>0?`<span class="lvc-pill" style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;">${ls.track} On Track</span>`:'')+
-      (ls.ahead>0?`<span class="lvc-pill" style="background:#f5f3ff;color:#6d28d9;border:1px solid #c4b5fd;">${ls.ahead} Ahead</span>`:'')+
-      ((ls.total-ls.withData)>0?`<span class="lvc-pill" style="background:#f7f6f2;color:#999;border:1px solid #e2e0db;">${ls.total-ls.withData} no data</span>`:'');
+      (ls.ahead>0?`<span class="lvc-pill" style="background:#f5f3ff;color:#6d28d9;border:1px solid #c4b5fd;">${ls.ahead} Ahead</span>`:'');
     if(ls.type==='3cs')return`<span class="lvc-pill" style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;">${ls.lovesY||0} Love</span>`+
       `<span class="lvc-pill" style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;">${ls.l2xGood||0} 2×</span>`+
       `<span class="lvc-pill" style="${(ls.t2pN||0)>0?'background:#fef2f2;color:#dc2626;border:1px solid #fca5a5':'background:#ecfdf5;color:#16a34a;border:1px solid #86efac'}">${ls.t2pY||0} T2P✓</span>`;
@@ -422,8 +438,8 @@ function renderStats(){
   const allActive=currentLevel==='ALL';
   const allCard=`<div class="lvc" onclick="setLevelCard('ALL')" style="${allActive?'background:#eff6ff;border-color:var(--ll);':''}">
     <div class="lvc-top"><span class="lvc-label" style="color:${allActive?'var(--ll)':'#555'}">All</span><span class="lvc-count">${totalAll}</span></div>
-    <div class="lvc-pills">${campusStats.type==='checkpoint'?levelPills(campusStats):campusStats.type==='3cs'?levelPills(campusStats):''}</div>
-    <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${pctAll}%;background:var(--ll);"></div></div><span class="lvc-bar-label">${campusStats.withData}/${totalAll}</span></div>
+    <div class="lvc-pills">${levelPills(campusStats)}</div>
+    <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${pctAll}%;background:var(--ll);"></div></div><span class="lvc-bar-label">${pctAll}%</span></div>
   </div>`;
 
   const lvlCardsHtml=allLevels.map(lvl=>{
@@ -433,7 +449,7 @@ function renderStats(){
     return`<div class="lvc" onclick="setLevelCard('${lvl}')" style="${isActive?`background:${lvlBgs[lvl]};border-color:${lvlColors[lvl]};`:''}">
       <div class="lvc-top"><span class="lvc-label" style="color:${lvlColors[lvl]}">${lvl}</span><span class="lvc-count">${ls.total} students</span></div>
       <div class="lvc-pills">${levelPills(ls)}</div>
-      <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${lsPct}%;background:${lvlColors[lvl]};"></div></div><span class="lvc-bar-label">${ls.withData}/${ls.total}</span></div>
+      <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${lsPct}%;background:${lvlColors[lvl]};"></div></div><span class="lvc-bar-label">${lsPct}%</span></div>
     </div>`;
   }).join('');
 
@@ -519,20 +535,20 @@ function getTownhalls() {
   return s5data.__townhalls__ || [];
 }
 
+function toggleWs(id){
+  const el=document.getElementById(id);
+  if(el)el.classList.toggle('open');
+}
+
 function render(){
   renderStats();
   const wsFilter=document.getElementById('wsFilter').value;
   const sort=document.getElementById('sortSel').value;
   const due=getDueThisWeek();
   const levelsToRender=currentLevel==='ALL'?['LL','L1','L2','MS']:[currentLevel];
-  const lvlNames={LL:'Launch Level',L1:'Level 1',L2:'Level 2',MS:'Middle School'};
+  const lvlNames={LL:'Learning Lab',L1:'Level 1',L2:'Level 2',MS:'Middle School'};
 
-  const townhalls=getTownhalls();
-  const thHtml=townhalls.length
-    ?townhalls.map(t=>`<div class="townhall-row"><span class="townhall-date">${t.date||''}</span><span class="townhall-topic">${t.topic||''}</span></div>`).join('')
-    :'<div class="extras-empty">No town halls recorded yet</div>';
-  const allBlocks=[`<div class="ws-block"><div class="ws-block-header" style="padding:12px 18px;"><div class="ws-info"><div class="ws-name" style="font-size:14px;">📢 Weekly Town Halls</div><div class="ws-guide-row">All levels · Full school</div></div></div><div class="extras-list">${thHtml}</div></div>`];
-
+  const allBlocks=[];
   let totalStudents=0,totalWs=0;
 
   levelsToRender.forEach(lvl=>{
@@ -554,12 +570,14 @@ function render(){
     const color=LEVEL_COLORS[lvl];
     const bg=LEVEL_BGS[lvl];
     if(currentLevel==='ALL'){
-      allBlocks.push(`<div class="lvl-section-head" style="color:${color};border-color:${color};">${lvl} — ${lvlNames[lvl]} · ${students.length} students</div>`);
+      allBlocks.push(`<div class="lvl-section-head" style="color:${color};border-color:${color};">${lvlNames[lvl]} · ${students.length} students</div>`);
     }
-    workshops.forEach(ws=>{
+    workshops.forEach((ws,wsIdx)=>{
+      const wsId=`ws-${lvl}-${wsIdx}`;
       const skipped=s5data.__skip__?.[ws.name];
       const passCount=students.filter(s=>getFinal(s.n,ws.name)==='Passed').length;
       const pct=students.length?Math.round(passCount/students.length*100):0;
+      const skipBadge=skipped?`<span style="font-family:'DM Mono',monospace;font-size:9px;background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:2px 7px;border-radius:4px;margin-left:6px">data not collected</span>`:'';
       const headerRow=`<th style="min-width:160px">Student</th>${CHECKPOINTS.map(c=>{
         const isDue=due&&due.type==='checkpoint'&&due.key===c.key;
         return`<th class="chk-th${isDue?' chk-th-due':''}">${c.label}${isDue?'<span class="due-col-badge">Due this Week</span>':''}</th>`;
@@ -567,28 +585,23 @@ function render(){
       const bodyRows=students.map(s=>{
         const chkCells=CHECKPOINTS.map(c=>{
           const isDue=due&&due.type==='checkpoint'&&due.key===c.key;
-          return`<td class="chk-td${isDue?' due-col':''}">${dotHtml(getChk(s.n,ws.name,c.key))}</td>`;
+          const val=getChk(s.n,ws.name,c.key);
+          return`<td class="chk-td${isDue?' due-col':''}"><a href="https://session5-progress.vercel.app/editor.html?level=${lvl}" class="dot-link" title="Enter ${c.label} for ${s.n}">${dotHtml(val)}</a></td>`;
         }).join('');
         return`<tr><td><span class="s-name">${s.n}</span>${s.note?`<span class="s-note">* ${s.note}</span>`:''}</td>${chkCells}<td>${finalPill(getFinal(s.n,ws.name))}</td></tr>`;
       }).join('');
-      const deliverables=getDeliverables(ws.name);
-      const delHtml=deliverables.length?deliverables.map(d=>`<div class="deliverable-row"><span class="del-week">${d.week||''}</span><span class="del-text">${d.text||''}</span></div>`).join(''):'<div class="extras-empty">No deliverables recorded yet</div>';
-      const meetings=getMeetings(ws.name);
-      const meetHtml=meetings.length?meetings.map(m=>`<div class="meeting-row"><span class="meeting-date">${m.date||''}</span><div class="meeting-text">${m.notes||''}<div class="meeting-sub">${m.type||''}</div></div></div>`).join(''):'<div class="extras-empty">No meetings recorded yet</div>';
-      const skipBadge=skipped?`<span style="font-family:'DM Mono',monospace;font-size:9px;background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:2px 7px;border-radius:4px;margin-left:8px">data not collected</span>`:'';
-      allBlocks.push(`<div class="ws-block">
-        <div class="ws-block-header">
+      allBlocks.push(`<div class="ws-block" id="${wsId}">
+        <div class="ws-block-header" onclick="toggleWs('${wsId}')">
           <span class="ws-code-badge" style="background:${bg};color:${color}">${ws.code}</span>
-          <div class="ws-info"><div class="ws-name">${ws.name}${skipBadge}</div><div class="ws-guide-row">${ws.guide} · ${ws.day}</div></div>
+          <div class="ws-info"><div class="ws-name">${ws.name}${skipBadge}</div><div class="ws-guide-row">${ws.day}</div></div>
           <span class="ws-skill-pill">${ws.skill}</span>
           <div class="ws-pbar-wrap"><div class="ws-pbar"><div class="ws-pbar-fill" style="width:${pct}%"></div></div><span class="ws-pbar-label">${passCount}/${students.length} passed</span></div>
+          <span class="ws-chevron">▼</span>
         </div>
-        <div class="ican-row"><span class="ican-tag">I can</span><span>${ws.ican}</span></div>
-        <div class="ws-table-wrap"><table><thead><tr>${headerRow}</tr></thead><tbody>${bodyRows}</tbody></table></div>
-        <div class="ws-extras"><div class="extras-row">
-          <div class="extras-block"><div class="extras-title">Weekly Deliverables</div><div class="extras-list">${delHtml}</div></div>
-          <div class="extras-block"><div class="extras-title">Meetings</div><div class="extras-list">${meetHtml}</div></div>
-        </div></div>
+        <div class="ws-body">
+          <div class="ican-row"><span class="ican-tag">I can</span><span>${ws.ican}</span></div>
+          <div class="ws-table-wrap"><table><thead><tr>${headerRow}</tr></thead><tbody>${bodyRows}</tbody></table></div>
+        </div>
       </div>`);
     });
   });
