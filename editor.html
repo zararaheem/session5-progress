@@ -310,7 +310,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
   <a href="https://session5-progress.vercel.app/index.html" class="sn-link home">Home</a>
   <a href="https://t2p-dashboard.vercel.app/tracker.html" class="sn-link" target="_blank" rel="noopener noreferrer">T2P Tracker</a>
   <a href="https://t2p-dashboard.vercel.app/workshops.html" class="sn-link" target="_blank" rel="noopener noreferrer">Workshop Directory</a>
-  <a href="https://session5-progress.vercel.app/session5.html" class="sn-link">Session 5</a>
+  <a href="https://session5-progress.vercel.app/session5.html" class="sn-link">Session 5 Data</a>
   <a href="https://session5-progress.vercel.app/editor.html" class="sn-link active">Staff Login</a>
 </div><!-- LOGIN -->
 <div id="login-screen">
@@ -531,6 +531,36 @@ function chkMiniClass(val){
   if(!val)return'chk-e';if(val==='Passed')return'chk-p';if(val==='On Track')return'chk-t';
   if(val==='Ahead')return'chk-a-h';if(val==='Behind')return'chk-b';return'chk-ab';
 }
+function getCurrentSessionWeek(){
+  const start=new Date('2026-04-27');
+  const now=new Date();
+  const diff=Math.floor((now-start)/(1000*60*60*24));
+  if(diff<0)return 0;
+  const w=Math.floor(diff/7)+1;
+  return w>7?8:w;
+}
+function getDueThisWeek(){
+  const w=getCurrentSessionWeek();
+  if(w===1)return{type:'checkpoint',key:'w1'};
+  if(w===2)return{type:'3cs',key:'w2'};
+  if(w===3)return{type:'checkpoint',key:'w3'};
+  if(w===4)return{type:'3cs',key:'w4'};
+  if(w===5)return{type:'checkpoint',key:'w5'};
+  if(w===6)return{type:'3cs',key:'w6'};
+  if(w===7)return{type:'checkpoint',key:'w7'};
+  return null;
+}
+function saveCoaching(sSlug,wsSlug,ck,val){
+  const sName=nameFromSlug(sSlug);
+  const s=STUDENTS.find(s=>slug(s.n)===sSlug);
+  const ws=(S5_WORKSHOPS[s?.l]||[]).find(w=>slug(w.name)===wsSlug);
+  const wsKey=ws?ws.name:wsSlug;
+  if(!s5data.__coaching__)s5data.__coaching__={};
+  if(!s5data.__coaching__[sName])s5data.__coaching__[sName]={};
+  if(!s5data.__coaching__[sName][wsKey])s5data.__coaching__[sName][wsKey]={};
+  s5data.__coaching__[sName][wsKey][ck]=val;
+  saveAll();
+}
 
 // ── Login ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -584,6 +614,7 @@ async function loadData(){
       if(!s5data.__deliverables__)s5data.__deliverables__={};
       if(!s5data.__wsmeetings__)s5data.__wsmeetings__={};
       if(!s5data.__townhalls__)s5data.__townhalls__=[];
+      if(!s5data.__coaching__)s5data.__coaching__={};
     }
   }catch(e){}
   renderList();
@@ -708,6 +739,13 @@ function setCheckpointBySlug(btn){
   const ws=(S5_WORKSHOPS[s?.l]||[]).find(w=>slug(w.name)===btn.dataset.wsslug);
   const wsKey=ws?ws.name:btn.dataset.wsslug;
   setCheckpoint(sName,wsKey,btn.dataset.ck,btn.dataset.val,btn);
+  if(btn.dataset.ck!=='w7'){
+    const coachDiv=document.getElementById(`coach-${btn.dataset.sslug}-${btn.dataset.wsslug}-${btn.dataset.ck}`);
+    if(coachDiv){
+      const isNowBehind=s5data[sName]?.[chkKey(wsKey,btn.dataset.ck)]==='Behind';
+      coachDiv.style.display=isNowBehind?'block':'none';
+    }
+  }
 }
 function openAssignBySlug(sl){ openAssign(nameFromSlug(sl)); }
 function clearPhotoBySlug(sl,ev){ clearPhoto(nameFromSlug(sl),ev); }
@@ -760,11 +798,16 @@ function renderList(){
       const wsKey=ws.name;const cur=scores[wsKey];
       // Use data attributes instead of inline string escaping
       const wsSlug=slug(wsKey);
+      const due=getDueThisWeek();
       const chkRows=CHECKPOINTS.map(chk=>{
         const kv=scores[chkKey(wsKey,chk.key)];
         const opts=getChkOptions(chk.key);
         const btns=opts.map(opt=>`<button class="score-btn ${kv===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" data-ck="${chk.key}" onclick="setCheckpointBySlug(this)">${opt.label}</button>`).join('');
-        return`<div class="score-line" style="padding-left:12px;opacity:.85;"><span class="score-ws-name" style="color:var(--muted);font-size:11px">↳ ${chk.label}</span><div class="score-btns">${btns}</div></div>`;
+        const isDue=due&&due.type==='checkpoint'&&due.key===chk.key;
+        const dueBadge=isDue?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:600;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.05em">DUE THIS WEEK</span>`:'';
+        const coaching=s5data.__coaching__?.[s.n]?.[wsKey]?.[chk.key]||'';
+        const coachDiv=chk.key!=='w7'?`<div id="coach-${sl}-${wsSlug}-${chk.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:36px;font-size:11px;" placeholder="Coaching / action plan to get back on track…" onchange="saveCoaching('${sl}','${wsSlug}','${chk.key}',this.value)">${coaching}</textarea></div>`:'';
+        return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${coachDiv}`;
       }).join('');
       const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
       const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" onclick="setScoreBySlug(this)">${opt.label}</button>`).join('');
@@ -905,8 +948,15 @@ function renderDmBody(){
   let html='';
 
   if(currentDmTab==='progress'){
+    const due=getDueThisWeek();
+    const weekNum=getCurrentSessionWeek();
+    let weekBanner='';
+    if(weekNum>0&&weekNum<=7){
+      const dueLabel=due?due.type==='checkpoint'?CHECKPOINTS.find(c=>c.key===due.key)?.label:'3 Commitments check-in':'—';
+      weekBanner=`<div style="font-family:'DM Mono',monospace;font-size:10px;padding:7px 12px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:6px;color:#fbbf24;margin-bottom:12px;letter-spacing:.04em">Week ${weekNum} · Due this week: ${dueLabel}</div>`;
+    }
     // S5 workshops with checkpoint dots
-    html=`<div style="display:flex;flex-direction:column;gap:6px">`;
+    html=weekBanner+`<div style="display:flex;flex-direction:column;gap:6px">`;
     levelWs.forEach(ws=>{
       const final=scores[ws.name];
       const finalCls=final==='Passed'?'st-pass':final==='Not passed'?'st-fail':final==='Absent'?'st-absent':'st-na';
@@ -938,10 +988,12 @@ function renderDmBody(){
     const wkLabels = {w2:'Week 2',w4:'Week 4',w6:'Week 6'};
     const threeCs=s5data.__3cs__?.[name]||{};
 
+    const due=getDueThisWeek();
     const weekForms = wks.map(wk => {
       const d = threeCs[wk]||{};
-      return `<div style="margin-bottom:20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
-        <div style="padding:8px 14px;background:var(--surface3);border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);font-weight:600;letter-spacing:.07em;text-transform:uppercase;">${wkLabels[wk]}</div>
+      const isDue3c=due&&due.type==='3cs'&&due.key===wk;
+      return `<div style="margin-bottom:20px;background:var(--surface2);border:1px solid ${isDue3c?'rgba(251,191,36,.35)':'var(--border)'};border-radius:10px;overflow:hidden;">
+        <div style="padding:8px 14px;background:${isDue3c?'rgba(251,191,36,.08)':'var(--surface3)'};border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;color:${isDue3c?'#fbbf24':'var(--accent2)'};font-weight:600;letter-spacing:.07em;text-transform:uppercase;">${wkLabels[wk]}${isDue3c?`<span style="margin-left:8px;font-size:8px;background:rgba(251,191,36,.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(251,191,36,.3)">DUE THIS WEEK</span>`:''}</div>
         <div style="padding:12px 14px;display:flex;flex-direction:column;gap:12px;">
 
           <div>
