@@ -5,10 +5,8 @@
 const T2P_CONFIG = {
 
   // ── Access ────────────────────────────────────────────────────
-  password: "nyc2025",
-
   // Admins — see everything, audit log, all students
-  superadmins: ["Zara", "Tasha", "Liam"],
+  superadmins: ["Admin"],
 
   // Staff list (auto-sorted alphabetically)
   staff: [
