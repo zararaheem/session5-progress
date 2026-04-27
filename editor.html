@@ -767,7 +767,8 @@ function setCheckpointBySlug(btn){
   const wsKey=ws?ws.name:btn.dataset.wsslug;
   setCheckpoint(sName,wsKey,btn.dataset.ck,btn.dataset.val,btn);
   if(btn.dataset.ck!=='w7'){
-    const coachDiv=document.getElementById(`coach-${btn.dataset.sslug}-${btn.dataset.wsslug}-${btn.dataset.ck}`);
+    const scoreLine=btn.closest('.score-line');
+    const coachDiv=scoreLine?.nextElementSibling;
     if(coachDiv){
       const isNowBehind=s5data[sName]?.[chkKey(wsKey,btn.dataset.ck)]==='Behind';
       coachDiv.style.display=isNowBehind?'block':'none';
