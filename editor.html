@@ -588,6 +588,14 @@ function saveCoaching(sSlug,wsSlug,ck,val){
   s5data.__coaching__[sName][wsKey][ck]=val;
   saveAll();
 }
+function toggleSkipWs(wsSlug,checked){
+  const allWs=[...S5_WORKSHOPS.LL||[],...S5_WORKSHOPS.L1||[],...S5_WORKSHOPS.L2||[],...S5_WORKSHOPS.MS||[]];
+  const ws=allWs.find(w=>slug(w.name)===wsSlug);
+  const wsKey=ws?ws.name:wsSlug;
+  if(!s5data.__skip__)s5data.__skip__={};
+  if(checked)s5data.__skip__[wsKey]=true;else delete s5data.__skip__[wsKey];
+  saveAll();
+}
 
 // ── Login ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -824,27 +832,31 @@ function renderList(){
 
     const scoreLines=levelWs.map(ws=>{
       const wsKey=ws.name;const cur=scores[wsKey];
-      // Use data attributes instead of inline string escaping
       const wsSlug=slug(wsKey);
       const due=getDueThisWeek();
+      const wsSkipped=s5data.__skip__?.[wsKey]||false;
       const chkRows=CHECKPOINTS.map(chk=>{
         const kv=scores[chkKey(wsKey,chk.key)];
+        const isDue=due&&due.type==='checkpoint'&&due.key===chk.key;
+        // Only show if this checkpoint is due this week OR already has data
+        if(!isDue&&!kv) return '';
         const opts=getChkOptions(chk.key);
         const btns=opts.map(opt=>`<button class="score-btn ${kv===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" data-ck="${chk.key}" onclick="setCheckpointBySlug(this)">${opt.label}</button>`).join('');
-        const isDue=due&&due.type==='checkpoint'&&due.key===chk.key;
         const dueBadge=isDue?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:600;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.05em">DUE THIS WEEK</span>`:'';
         const coaching=s5data.__coaching__?.[s.n]?.[wsKey]?.[chk.key]||'';
-        const coachDiv=chk.key!=='w7'?`<div id="coach-${sl}-${wsSlug}-${chk.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:36px;font-size:11px;" placeholder="Coaching / action plan to get back on track…" onchange="saveCoaching('${sl}','${wsSlug}','${chk.key}',this.value)">${coaching}</textarea></div>`:'';
+        const coachPlaceholder=isDue?`${chk.label} is Behind — what's the coaching plan to get back on track? (Due this week)`:`Coaching / action plan to get back on track…`;
+        const coachDiv=chk.key!=='w7'?`<div id="coach-${sl}-${wsSlug}-${chk.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:36px;font-size:11px;" placeholder="${coachPlaceholder}" onchange="saveCoaching('${sl}','${wsSlug}','${chk.key}',this.value)">${coaching}</textarea></div>`:'';
         return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${coachDiv}`;
       }).join('');
       const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
       const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" onclick="setScoreBySlug(this)">${opt.label}</button>`).join('');
-      return`<div style="border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:4px;">
+      return`<div style="border:1px solid ${wsSkipped?'rgba(251,191,36,.3)':'var(--border)'};border-radius:7px;overflow:hidden;margin-bottom:4px;${wsSkipped?'opacity:.6;':''}">
         <div class="score-line" style="background:var(--surface2);padding:7px 12px;">
           <div style="flex:1"><span style="font-weight:600;color:var(--text);font-size:12px">${ws.code} · ${ws.name}</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-left:8px">${ws.guide} · ${ws.day}</span></div>
+          <label style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);cursor:pointer;display:flex;align-items:center;gap:4px;margin-right:10px;white-space:nowrap;" title="Mark this workshop as not collecting data this session"><input type="checkbox" ${wsSkipped?'checked':''} onchange="toggleSkipWs('${wsSlug}',this.checked)"> Skip data</label>
           <div class="score-btns">${finalBtns}</div>
         </div>
-        <div style="padding:4px 0 2px">${chkRows}</div>
+        <div style="padding:4px 0 2px">${chkRows||`<div style="padding:5px 14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);opacity:.6">${wsSkipped?'Data collection skipped for this workshop':'No data due yet — check back when this checkpoint week arrives'}</div>`}</div>
       </div>`;
     }).join('');
 
@@ -893,78 +905,116 @@ function renderDashboardStats(students){
   if(!container)return;
   const due=getDueThisWeek();
   const weekNum=getCurrentSessionWeek();
-  if(weekNum<=0||weekNum>7||!due){container.innerHTML='';return;}
   const total=students.length;
   let html='';
 
-  if(due.type==='checkpoint'){
-    const ck=due.key;
-    const ckLabel=CHECKPOINTS.find(c=>c.key===ck)?.label||ck;
-    let behind=0,onTrack=0,ahead=0,withData=0;
-    students.forEach(s=>{
-      const sc=s5data[s.n]||{};
-      const ws=S5_WORKSHOPS[s.l]||[];
-      let hasBehind=false,hasTrack=false,hasAhead=false,hasAny=false;
-      ws.forEach(w=>{
-        const v=sc[chkKey(w.name,ck)];
-        if(v){hasAny=true;if(v==='Behind')hasBehind=true;else if(v==='On Track')hasTrack=true;else if(v==='Ahead')hasAhead=true;}
+  // Current-week stats card (checkpoint or 3Cs)
+  if(weekNum>0&&weekNum<=7&&due){
+    if(due.type==='checkpoint'){
+      const ck=due.key;
+      const ckLabel=CHECKPOINTS.find(c=>c.key===ck)?.label||ck;
+      let behind=0,onTrack=0,ahead=0,withData=0;
+      students.forEach(s=>{
+        const sc=s5data[s.n]||{};
+        const ws=S5_WORKSHOPS[s.l]||[];
+        let hasBehind=false,hasTrack=false,hasAhead=false,hasAny=false;
+        ws.forEach(w=>{
+          if(s5data.__skip__?.[w.name])return;
+          const v=sc[chkKey(w.name,ck)];
+          if(v){hasAny=true;if(v==='Behind')hasBehind=true;else if(v==='On Track')hasTrack=true;else if(v==='Ahead')hasAhead=true;}
+        });
+        if(hasAny)withData++;
+        if(hasBehind)behind++;else if(hasTrack)onTrack++;else if(hasAhead)ahead++;
       });
-      if(hasAny)withData++;
-      if(hasBehind)behind++;else if(hasTrack)onTrack++;else if(hasAhead)ahead++;
-    });
-    const pct=total>0?Math.round(withData/total*100):0;
-    html=`<div class="dash-stats-card">
-      <div class="dash-stats-hdr">
-        <span class="dash-stats-week">Week ${weekNum}</span>
-        <span class="dash-stats-due">Due this week · ${ckLabel}</span>
-      </div>
-      <div class="dash-stats-bar-row">
-        <span class="dash-stats-bar-lbl">${withData} / ${total} students have data</span>
-        <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${pct}%"></div></div>
-      </div>
-      <div class="stat-pills">
-        <span class="stat-pill sp-behind"><span class="sp-n">${behind}</span>Behind</span>
-        <span class="stat-pill sp-track"><span class="sp-n">${onTrack}</span>On Track</span>
-        <span class="stat-pill sp-ahead"><span class="sp-n">${ahead}</span>Ahead</span>
-        <span class="stat-pill sp-empty"><span class="sp-n">${total-withData}</span>No data yet</span>
-      </div>
-    </div>`;
-  } else {
-    const wk=due.key;
-    let withData=0,lovesY=0,lovesN=0,l2xAll=0,l2xSome=0,l2xNone=0,t2pY=0,t2pN=0;
-    students.forEach(s=>{
-      const d=s5data.__3cs__?.[s.n]?.[wk]||{};
-      if(d.lovesSchool||d.learning2x||d.onTrack)withData++;
-      if(d.lovesSchool==='Yes')lovesY++;else if(d.lovesSchool==='No')lovesN++;
-      if(d.learning2x==='All at 2x')l2xAll++;else if(d.learning2x==='Some at 2x')l2xSome++;else if(d.learning2x==='None at 2x')l2xNone++;
-      if(d.onTrack==='Yes')t2pY++;else if(d.onTrack==='No')t2pN++;
-    });
-    const pct=total>0?Math.round(withData/total*100):0;
-    html=`<div class="dash-stats-card">
-      <div class="dash-stats-hdr">
-        <span class="dash-stats-week">Week ${weekNum}</span>
-        <span class="dash-stats-due">Due this week · 3 Commitments</span>
-      </div>
-      <div class="dash-stats-bar-row">
-        <span class="dash-stats-bar-lbl">${withData} / ${total} students have data</span>
-        <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${pct}%"></div></div>
-      </div>
-      <div class="stat-pills">
-        <span class="sp-head">Love School</span>
-        <span class="stat-pill sp-yes"><span class="sp-n">${lovesY}</span>Yes</span>
-        <span class="stat-pill sp-no"><span class="sp-n">${lovesN}</span>No</span>
-        <span class="sp-sep">|</span>
-        <span class="sp-head">Learning 2x</span>
-        <span class="stat-pill sp-track"><span class="sp-n">${l2xAll}</span>All at 2x</span>
-        <span class="stat-pill sp-track" style="opacity:.65"><span class="sp-n">${l2xSome}</span>Some</span>
-        <span class="stat-pill sp-no"><span class="sp-n">${l2xNone}</span>None</span>
-        <span class="sp-sep">|</span>
-        <span class="sp-head">T2P</span>
-        <span class="stat-pill sp-yes"><span class="sp-n">${t2pY}</span>On track</span>
-        <span class="stat-pill sp-no"><span class="sp-n">${t2pN}</span>Behind</span>
-      </div>
-    </div>`;
+      const pct=total>0?Math.round(withData/total*100):0;
+      html+=`<div class="dash-stats-card">
+        <div class="dash-stats-hdr">
+          <span class="dash-stats-week">Week ${weekNum}</span>
+          <span class="dash-stats-due">Due this week · ${ckLabel}</span>
+        </div>
+        <div class="dash-stats-bar-row">
+          <span class="dash-stats-bar-lbl">${withData} / ${total} students have data</span>
+          <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="stat-pills">
+          <span class="stat-pill sp-behind"><span class="sp-n">${behind}</span>Behind</span>
+          <span class="stat-pill sp-track"><span class="sp-n">${onTrack}</span>On Track</span>
+          <span class="stat-pill sp-ahead"><span class="sp-n">${ahead}</span>Ahead</span>
+          <span class="stat-pill sp-empty"><span class="sp-n">${total-withData}</span>No data yet</span>
+        </div>
+      </div>`;
+    } else {
+      const wk=due.key;
+      let withData=0,lovesY=0,lovesN=0,l2xAll=0,l2xSome=0,l2xNone=0,t2pY=0,t2pN=0;
+      students.forEach(s=>{
+        const d=s5data.__3cs__?.[s.n]?.[wk]||{};
+        if(d.lovesSchool||d.learning2x||d.onTrack)withData++;
+        if(d.lovesSchool==='Yes')lovesY++;else if(d.lovesSchool==='No')lovesN++;
+        if(d.learning2x==='All at 2x')l2xAll++;else if(d.learning2x==='Some at 2x')l2xSome++;else if(d.learning2x==='None at 2x')l2xNone++;
+        if(d.onTrack==='Yes')t2pY++;else if(d.onTrack==='No')t2pN++;
+      });
+      const pct=total>0?Math.round(withData/total*100):0;
+      html+=`<div class="dash-stats-card">
+        <div class="dash-stats-hdr">
+          <span class="dash-stats-week">Week ${weekNum}</span>
+          <span class="dash-stats-due">Due this week · 3 Commitments</span>
+        </div>
+        <div class="dash-stats-bar-row">
+          <span class="dash-stats-bar-lbl">${withData} / ${total} have data</span>
+          <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="stat-pills">
+          <span class="sp-head">Love School</span>
+          <span class="stat-pill sp-yes"><span class="sp-n">${lovesY}</span>Yes</span>
+          <span class="stat-pill sp-no"><span class="sp-n">${lovesN}</span>No</span>
+          <span class="sp-sep">|</span>
+          <span class="sp-head">Learning 2x</span>
+          <span class="stat-pill sp-track"><span class="sp-n">${l2xAll}</span>All at 2x</span>
+          <span class="stat-pill sp-track" style="opacity:.65"><span class="sp-n">${l2xSome}</span>Some</span>
+          <span class="stat-pill sp-no"><span class="sp-n">${l2xNone}</span>None</span>
+          <span class="sp-sep">|</span>
+          <span class="sp-head">T2P</span>
+          <span class="stat-pill sp-yes"><span class="sp-n">${t2pY}</span>On track</span>
+          <span class="stat-pill sp-no"><span class="sp-n">${t2pN}</span>Behind</span>
+        </div>
+      </div>`;
+    }
   }
+
+  // Always-visible 3Cs summary bars (most recent check-in per student)
+  let lovesY=0,l2xGood=0,t2pY=0,withData3c=0;
+  students.forEach(s=>{
+    let latest=null;
+    ['w6','w4','w2'].forEach(wk=>{
+      if(!latest){const d=s5data.__3cs__?.[s.n]?.[wk];if(d&&(d.lovesSchool||d.learning2x||d.onTrack))latest=d;}
+    });
+    if(latest){
+      withData3c++;
+      if(latest.lovesSchool==='Yes')lovesY++;
+      if(latest.learning2x==='All at 2x'||latest.learning2x==='Some at 2x')l2xGood++;
+      if(latest.onTrack==='Yes')t2pY++;
+    }
+  });
+  const n=withData3c||1;
+  html+=`<div class="dash-stats-card" style="margin-top:8px;">
+    <div class="dash-stats-hdr">
+      <span class="dash-stats-week" style="background:rgba(52,211,153,.12);color:#34d399;border-color:rgba(52,211,153,.3)">3 Commitments</span>
+      <span class="dash-stats-due">Most recent check-in · ${withData3c}/${total} entered</span>
+    </div>
+    <div class="dash-stats-bar-row">
+      <span class="dash-stats-bar-lbl">Love School: ${lovesY} / ${withData3c||'—'}</span>
+      <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${Math.round(lovesY/n*100)}%;background:var(--pass)"></div></div>
+    </div>
+    <div class="dash-stats-bar-row">
+      <span class="dash-stats-bar-lbl">Learning 2×: ${l2xGood} / ${withData3c||'—'}</span>
+      <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${Math.round(l2xGood/n*100)}%;background:var(--accent)"></div></div>
+    </div>
+    <div class="dash-stats-bar-row">
+      <span class="dash-stats-bar-lbl">T2P On Track: ${t2pY} / ${withData3c||'—'}</span>
+      <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${Math.round(t2pY/n*100)}%;background:var(--accent)"></div></div>
+    </div>
+  </div>`;
+
   container.innerHTML=html;
 }
 

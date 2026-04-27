@@ -15,25 +15,57 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-header{top:37px;background:#1a1a1a;color:white;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.header-left{display:flex;align-items:center;gap:12px;}
-header h1{font-size:15px;font-weight:600;}
-.s5-live{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:#ef4444;background:#2a0a0a;border:1px solid #5a1a1a;padding:3px 9px;border-radius:20px;}
-.s5-live::before{content:'';width:5px;height:5px;border-radius:50%;background:#ef4444;flex-shrink:0;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.nav-links{display:flex;gap:8px;}
-.nav-link{font-size:12px;color:#aaa;text-decoration:none;padding:5px 12px;border:1px solid #333;border-radius:20px;transition:all .15s;}
-.nav-link:hover{color:white;border-color:#666;}
+
+/* PAGE HERO */
+.page-hero{background:white;border-bottom:1px solid var(--border);padding:32px 28px 0;}
+.ph-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:16px;}
+.ph-live{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#ef4444;background:#fff0f0;border:1px solid #fca5a5;padding:3px 9px;border-radius:20px;margin-bottom:10px;}
+.ph-live::before{content:'';width:5px;height:5px;border-radius:50%;background:#ef4444;flex-shrink:0;animation:pulse 1.5s infinite;}
+.ph-title{font-size:clamp(26px,4vw,40px);font-weight:700;color:var(--text);line-height:1.1;margin-bottom:6px;}
+.ph-sub{font-size:13px;color:var(--muted);line-height:1.5;}
+.ph-week-info{text-align:right;flex-shrink:0;}
+.ph-week-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:rgba(251,191,36,.1);color:#b45309;border:1px solid rgba(251,191,36,.4);padding:4px 12px;border-radius:4px;display:inline-block;margin-bottom:4px;}
+.ph-due-label{font-size:11px;color:var(--muted);display:block;}
+
+/* CAMPUS STATS */
+.campus-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.cs{display:flex;flex-direction:column;align-items:center;padding:12px 18px;border-radius:10px;min-width:76px;text-align:center;}
+.cs-num{font-family:'DM Mono',monospace;font-size:28px;font-weight:700;line-height:1;}
+.cs-label{font-size:9px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;}
+.cs.s-total{background:#f7f6f2;border:1px solid var(--border);}
+.cs.s-total .cs-num{color:var(--text);}
+.cs.s-filled{background:#ecfdf5;border:1px solid #86efac;}
+.cs.s-filled .cs-num{color:#16a34a;}
+.cs.s-behind{background:#fef2f2;border:1px solid #fca5a5;}
+.cs.s-behind .cs-num{color:#dc2626;}
+.cs.s-track{background:#eff6ff;border:1px solid #93c5fd;}
+.cs.s-track .cs-num{color:#1d4ed8;}
+.cs.s-ahead{background:#f5f3ff;border:1px solid #c4b5fd;}
+.cs.s-ahead .cs-num{color:#6d28d9;}
+.cs-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;}
+.cs-bar-track{flex:1;max-width:320px;height:6px;background:#f0ede8;border-radius:3px;overflow:hidden;}
+.cs-bar-fill{height:100%;background:#1a56db;border-radius:3px;transition:width .4s;}
+.cs-bar-label{font-family:'DM Mono',monospace;font-size:11px;color:#666;}
+
+/* LEVEL SELECTOR */
+.level-selector{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding-bottom:2px;}
+@media(max-width:860px){.level-selector{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:540px){.level-selector{grid-template-columns:repeat(2,1fr);}}
+.lvc{background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .18s;}
+.lvc:hover{box-shadow:0 4px 12px rgba(0,0,0,.1);transform:translateY(-1px);}
+.lvc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.lvc-label{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;}
+.lvc-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.lvc-pills{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px;min-height:18px;}
+.lvc-pill{font-family:'DM Mono',monospace;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;}
+.lvc-bar-wrap{display:flex;align-items:center;gap:6px;}
+.lvc-bar{flex:1;height:3px;background:#e0dedd;border-radius:2px;overflow:hidden;}
+.lvc-bar-fill{height:100%;border-radius:2px;transition:width .4s;}
+.lvc-bar-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);}
 
 /* CONTROLS */
 .controls{padding:10px 28px;background:white;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.level-tabs{display:flex;gap:4px;}
-.lvl-btn{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:#f0f0ee;color:#bbb;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
-.lvl-btn.aLL{background:var(--ll-bg);color:var(--ll);border-color:var(--ll);}
-.lvl-btn.aL1{background:var(--l1-bg);color:var(--l1);border-color:var(--l1);}
-.lvl-btn.aL2{background:var(--l2-bg);color:var(--l2);border-color:var(--l2);}
-.lvl-btn.aMS{background:var(--ms-bg);color:var(--ms);border-color:var(--ms);}
-.vdiv{width:1px;height:24px;background:var(--border);}
 select,input{padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid var(--border);border-radius:7px;background:white;color:var(--text);outline:none;}
 .count-pill{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border);}
 
@@ -97,21 +129,10 @@ tr:hover td{background:#fafaf8;}
 .chk-dot.st-track{background:#eff6ff;border-color:#93c5fd;color:#2563eb;}
 .chk-dot.st-ahead{background:#f5f3ff;border-color:#c4b5fd;color:#6d28d9;}
 
-/* WEEK STATS BAR */
-.week-stats-bar{display:flex;align-items:center;gap:10px;padding:10px 28px;background:white;border-bottom:1px solid var(--border);flex-wrap:wrap;}
-.ws-week-badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;background:rgba(251,191,36,.1);color:#b45309;border:1px solid rgba(251,191,36,.4);padding:3px 9px;border-radius:4px;white-space:nowrap;}
-.ws-due-label{font-family:'DM Mono',monospace;font-size:10px;color:#666;white-space:nowrap;}
-.ws-fill-track{flex:1;min-width:80px;max-width:160px;height:5px;background:#f0ede8;border-radius:3px;overflow:hidden;}
-.ws-fill-bar{height:100%;background:#1a56db;border-radius:3px;transition:width .4s;}
-.ws-fill-label{font-family:'DM Mono',monospace;font-size:10px;color:#999;white-space:nowrap;}
-.ws-stat-pills{display:flex;gap:5px;flex-wrap:wrap;}
-.ws-stat-pill{font-family:'DM Mono',monospace;font-size:9px;font-weight:600;padding:3px 8px;border-radius:5px;white-space:nowrap;}
-.wsp-behind{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;}
-.wsp-track{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;}
-.wsp-ahead{background:#f5f3ff;color:#6d28d9;border:1px solid #c4b5fd;}
-.wsp-empty{background:#f7f6f2;color:#999;border:1px solid #e2e0db;}
-.chk-th-due{background:rgba(251,191,36,.06)!important;}
+.due-col{background:rgba(251,191,36,.07)!important;}
+.chk-th-due{background:rgba(251,191,36,.07)!important;}
 .due-col-badge{display:block;font-size:8px;font-weight:700;color:#d97706;margin-top:2px;letter-spacing:.06em;text-align:center;}
+.lvl-section-head{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 0 6px;border-bottom:2px solid;margin-bottom:4px;}
 
 /* FINAL STATUS */
 .st-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;}
@@ -124,8 +145,10 @@ tr:hover td{background:#fafaf8;}
 .empty-msg{padding:40px;text-align:center;color:var(--muted);font-size:13px;font-style:italic;}
 
 @media(max-width:640px){
-  .page,.controls,header{padding-left:14px;padding-right:14px;}
+  .page,.controls,.page-hero{padding-left:14px;padding-right:14px;}
   .ws-name{font-size:13px;}
+  .ph-title{font-size:26px;}
+  .cs-num{font-size:22px;}
 }
 
 /* ── SITE NAV ── */
@@ -151,25 +174,8 @@ tr:hover td{background:#fafaf8;}
   <a href="https://session5-progress.vercel.app/session5.html" class="sn-link active">Session 5 Data</a>
   <a href="https://session5-progress.vercel.app/editor.html" class="sn-link">Staff Login</a>
 </div>
-<header>
-  <div class="header-left">
-    <h1>Session 5 Progress</h1>
-    <span class="s5-live">Live</span>
-  </div>
-  <div class="nav-links">
-    <a href="index.html" class="nav-link">← Home</a>
-  </div>
-</header>
-
-<div id="week-stats"></div>
+<div id="stats-hero"></div>
 <div class="controls">
-  <div class="level-tabs" id="level-tabs">
-    <button class="lvl-btn aLL" data-l="LL" onclick="setLevel('LL',this)">LL</button>
-    <button class="lvl-btn" data-l="L1" onclick="setLevel('L1',this)">L1</button>
-    <button class="lvl-btn" data-l="L2" onclick="setLevel('L2',this)">L2</button>
-    <button class="lvl-btn" data-l="MS" onclick="setLevel('MS',this)">MS</button>
-  </div>
-  <div class="vdiv"></div>
   <select id="wsFilter" onchange="render()">
     <option value="">All workshops</option>
   </select>
@@ -267,7 +273,7 @@ const CHECKPOINTS = CFG.checkpoints || [
   {key:'w7', label:'Week 7: T2P'},
 ];
 
-let currentLevel = 'LL';
+let currentLevel = 'ALL';
 let s5data = {};
 
 function getCurrentSessionWeek(){
@@ -290,65 +296,158 @@ function getDueThisWeek(){
   return null;
 }
 function renderStats(){
-  const container=document.getElementById('week-stats');
+  const container=document.getElementById('stats-hero');
   if(!container)return;
   const weekNum=getCurrentSessionWeek();
   const due=getDueThisWeek();
-  if(weekNum<=0||weekNum>7||!due){container.innerHTML='';return;}
-  const students=(CFG.students||[]).filter(s=>s.l===currentLevel);
-  const workshops=WORKSHOPS[currentLevel]||[];
-  const total=students.length;
-  let html='';
-  if(due.type==='checkpoint'){
-    const ck=due.key;
-    const ckLabel=CHECKPOINTS.find(c=>c.key===ck)?.label||ck;
-    let behind=0,onTrack=0,ahead=0,withData=0;
-    students.forEach(s=>{
-      let hasBehind=false,hasTrack=false,hasAhead=false,hasAny=false;
-      workshops.forEach(ws=>{
-        const v=getChk(s.n,ws.name,ck);
-        if(v){hasAny=true;if(v==='Behind')hasBehind=true;else if(v==='On Track')hasTrack=true;else if(v==='Ahead')hasAhead=true;}
+  const allStudents=CFG.students||[];
+  const allLevels=['LL','L1','L2','MS'];
+  const totalAll=allStudents.length;
+  const lvlColors={LL:'var(--ll)',L1:'var(--l1)',L2:'var(--l2)',MS:'var(--ms)'};
+  const lvlBgs={LL:'var(--ll-bg)',L1:'var(--l1-bg)',L2:'var(--l2-bg)',MS:'var(--ms-bg)'};
+
+  let campusStats={type:'none',total:totalAll,withData:0};
+  const levelStats={};
+  allLevels.forEach(lvl=>{levelStats[lvl]={type:'none',withData:0,total:allStudents.filter(s=>s.l===lvl).length};});
+
+  if(weekNum>0&&weekNum<=7&&due){
+    if(due.type==='checkpoint'){
+      const ck=due.key;
+      const ckLabel=CHECKPOINTS.find(c=>c.key===ck)?.label||ck;
+      function sStatus(s){
+        const wss=WORKSHOPS[s.l]||[];
+        let behind=false,track=false,ahead=false,hasAny=false;
+        wss.forEach(ws=>{
+          const v=getChk(s.n,ws.name,ck);
+          if(v){hasAny=true;if(v==='Behind')behind=true;else if(v==='On Track')track=true;else if(v==='Ahead')ahead=true;}
+        });
+        if(!hasAny)return null;
+        if(behind)return'Behind';if(track)return'On Track';return'Ahead';
+      }
+      let cB=0,cT=0,cA=0,cD=0;
+      allStudents.forEach(s=>{const st=sStatus(s);if(st){cD++;if(st==='Behind')cB++;else if(st==='On Track')cT++;else cA++;}});
+      campusStats={type:'checkpoint',ckLabel,behind:cB,track:cT,ahead:cA,withData:cD,total:totalAll};
+      allLevels.forEach(lvl=>{
+        const sts=allStudents.filter(s=>s.l===lvl);
+        let lB=0,lT=0,lA=0,lD=0;
+        sts.forEach(s=>{const st=sStatus(s);if(st){lD++;if(st==='Behind')lB++;else if(st==='On Track')lT++;else lA++;}});
+        levelStats[lvl]={type:'checkpoint',behind:lB,track:lT,ahead:lA,withData:lD,total:sts.length};
       });
-      if(hasAny)withData++;
-      if(hasBehind)behind++;else if(hasTrack)onTrack++;else if(hasAhead)ahead++;
-    });
-    const pct=total>0?Math.round(withData/total*100):0;
-    html=`<div class="week-stats-bar">
-      <span class="ws-week-badge">Week ${weekNum}</span>
-      <span class="ws-due-label">Due: ${ckLabel}</span>
-      <div class="ws-fill-track"><div class="ws-fill-bar" style="width:${pct}%"></div></div>
-      <span class="ws-fill-label">${withData}/${total} have data</span>
-      <div class="ws-stat-pills">
-        <span class="ws-stat-pill wsp-behind">${behind} Behind</span>
-        <span class="ws-stat-pill wsp-track">${onTrack} On Track</span>
-        <span class="ws-stat-pill wsp-ahead">${ahead} Ahead</span>
-        ${total-withData>0?`<span class="ws-stat-pill wsp-empty">${total-withData} no data</span>`:''}
-      </div>
+    } else {
+      const wk=due.key;
+      let cD=0,cLY=0,cL2=0,cTY=0,cTN=0;
+      allStudents.forEach(s=>{
+        const d=s5data.__3cs__?.[s.n]?.[wk]||{};
+        if(d.lovesSchool||d.learning2x||d.onTrack)cD++;
+        if(d.lovesSchool==='Yes')cLY++;
+        if(d.learning2x==='All at 2x'||d.learning2x==='Some at 2x')cL2++;
+        if(d.onTrack==='Yes')cTY++;else if(d.onTrack==='No')cTN++;
+      });
+      campusStats={type:'3cs',withData:cD,total:totalAll,lovesY:cLY,l2xGood:cL2,t2pY:cTY,t2pN:cTN};
+      allLevels.forEach(lvl=>{
+        const sts=allStudents.filter(s=>s.l===lvl);
+        let lD=0,lLY=0,lL2=0,lTY=0,lTN=0;
+        sts.forEach(s=>{
+          const d=s5data.__3cs__?.[s.n]?.[wk]||{};
+          if(d.lovesSchool||d.learning2x||d.onTrack)lD++;
+          if(d.lovesSchool==='Yes')lLY++;
+          if(d.learning2x==='All at 2x'||d.learning2x==='Some at 2x')lL2++;
+          if(d.onTrack==='Yes')lTY++;else if(d.onTrack==='No')lTN++;
+        });
+        levelStats[lvl]={type:'3cs',withData:lD,total:sts.length,lovesY:lLY,l2xGood:lL2,t2pY:lTY,t2pN:lTN};
+      });
+    }
+  }
+
+  // Week info block (top right of hero)
+  const weekInfoHtml=(weekNum>0&&weekNum<=7&&due)
+    ?`<div class="ph-week-info">
+        <span class="ph-week-badge">Week ${weekNum}</span>
+        <span class="ph-due-label">Due: ${campusStats.type==='checkpoint'?campusStats.ckLabel:'3 Commitments'}</span>
+      </div>`
+    :`<div class="ph-week-info"><span class="ph-week-badge">Session ${weekNum>7?'Complete':'Starting'}</span></div>`;
+
+  // Campus stat numbers
+  const pctAll=totalAll>0?Math.round(campusStats.withData/totalAll*100):0;
+  let campusStatsHtml='';
+  if(campusStats.type==='checkpoint'){
+    campusStatsHtml=`<div class="campus-stats">
+      <div class="cs s-total"><span class="cs-num">${totalAll}</span><span class="cs-label">Students</span></div>
+      <div class="cs s-filled"><span class="cs-num">${campusStats.withData}</span><span class="cs-label">Data In</span></div>
+      <div class="cs s-behind"><span class="cs-num">${campusStats.behind}</span><span class="cs-label">Behind</span></div>
+      <div class="cs s-track"><span class="cs-num">${campusStats.track}</span><span class="cs-label">On Track</span></div>
+      <div class="cs s-ahead"><span class="cs-num">${campusStats.ahead}</span><span class="cs-label">Ahead</span></div>
+    </div>
+    <div class="cs-bar-row">
+      <div class="cs-bar-track"><div class="cs-bar-fill" style="width:${pctAll}%"></div></div>
+      <span class="cs-bar-label">${campusStats.withData}/${totalAll} students · ${campusStats.ckLabel}</span>
+    </div>`;
+  } else if(campusStats.type==='3cs'){
+    campusStatsHtml=`<div class="campus-stats">
+      <div class="cs s-total"><span class="cs-num">${totalAll}</span><span class="cs-label">Students</span></div>
+      <div class="cs s-filled"><span class="cs-num">${campusStats.withData}</span><span class="cs-label">3Cs In</span></div>
+      <div class="cs s-track"><span class="cs-num">${campusStats.lovesY}</span><span class="cs-label">Love School</span></div>
+      <div class="cs s-track"><span class="cs-num">${campusStats.l2xGood}</span><span class="cs-label">Learning 2×</span></div>
+      <div class="cs s-${campusStats.t2pN>0?'behind':'track'}"><span class="cs-num">${campusStats.t2pY}</span><span class="cs-label">T2P On Track</span></div>
+    </div>
+    <div class="cs-bar-row">
+      <div class="cs-bar-track"><div class="cs-bar-fill" style="width:${pctAll}%"></div></div>
+      <span class="cs-bar-label">${campusStats.withData}/${totalAll} students have 3 Commitments data</span>
     </div>`;
   } else {
-    const wk=due.key;
-    let withData=0,lovesY=0,lovesN=0,l2xAll=0,l2xSome=0,l2xNone=0,t2pY=0,t2pN=0;
-    students.forEach(s=>{
-      const d=s5data.__3cs__?.[s.n]?.[wk]||{};
-      if(d.lovesSchool||d.learning2x||d.onTrack)withData++;
-      if(d.lovesSchool==='Yes')lovesY++;else if(d.lovesSchool==='No')lovesN++;
-      if(d.learning2x==='All at 2x')l2xAll++;else if(d.learning2x==='Some at 2x')l2xSome++;else if(d.learning2x==='None at 2x')l2xNone++;
-      if(d.onTrack==='Yes')t2pY++;else if(d.onTrack==='No')t2pN++;
-    });
-    const pct=total>0?Math.round(withData/total*100):0;
-    html=`<div class="week-stats-bar">
-      <span class="ws-week-badge">Week ${weekNum}</span>
-      <span class="ws-due-label">Due: 3 Commitments</span>
-      <div class="ws-fill-track"><div class="ws-fill-bar" style="width:${pct}%"></div></div>
-      <span class="ws-fill-label">${withData}/${total} have data</span>
-      <div class="ws-stat-pills">
-        <span class="ws-stat-pill wsp-track">Love School: ${lovesY}✓ ${lovesN}✗</span>
-        <span class="ws-stat-pill wsp-track">Learning 2x: ${l2xAll+l2xSome}/${total}</span>
-        <span class="ws-stat-pill ${t2pN>0?'wsp-behind':'wsp-track'}">T2P on track: ${t2pY}✓ ${t2pN}✗</span>
-      </div>
+    campusStatsHtml=`<div class="campus-stats">
+      <div class="cs s-total"><span class="cs-num">${totalAll}</span><span class="cs-label">Students</span></div>
     </div>`;
   }
-  container.innerHTML=html;
+
+  // "All" card
+  function levelPills(ls){
+    if(ls.type==='checkpoint')return(ls.behind>0?`<span class="lvc-pill" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;">${ls.behind} Behind</span>`:'')+
+      (ls.track>0?`<span class="lvc-pill" style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;">${ls.track} On Track</span>`:'')+
+      (ls.ahead>0?`<span class="lvc-pill" style="background:#f5f3ff;color:#6d28d9;border:1px solid #c4b5fd;">${ls.ahead} Ahead</span>`:'')+
+      ((ls.total-ls.withData)>0?`<span class="lvc-pill" style="background:#f7f6f2;color:#999;border:1px solid #e2e0db;">${ls.total-ls.withData} no data</span>`:'');
+    if(ls.type==='3cs')return`<span class="lvc-pill" style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;">${ls.lovesY||0} Love</span>`+
+      `<span class="lvc-pill" style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;">${ls.l2xGood||0} 2×</span>`+
+      `<span class="lvc-pill" style="${(ls.t2pN||0)>0?'background:#fef2f2;color:#dc2626;border:1px solid #fca5a5':'background:#ecfdf5;color:#16a34a;border:1px solid #86efac'}">${ls.t2pY||0} T2P✓</span>`;
+    return'';
+  }
+  const allActive=currentLevel==='ALL';
+  const allCard=`<div class="lvc" onclick="setLevelCard('ALL')" style="${allActive?'background:#eff6ff;border-color:var(--ll);':''}">
+    <div class="lvc-top"><span class="lvc-label" style="color:${allActive?'var(--ll)':'#555'}">All</span><span class="lvc-count">${totalAll}</span></div>
+    <div class="lvc-pills">${campusStats.type==='checkpoint'?levelPills(campusStats):campusStats.type==='3cs'?levelPills(campusStats):''}</div>
+    <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${pctAll}%;background:var(--ll);"></div></div><span class="lvc-bar-label">${campusStats.withData}/${totalAll}</span></div>
+  </div>`;
+
+  const lvlCardsHtml=allLevels.map(lvl=>{
+    const ls=levelStats[lvl];
+    const isActive=lvl===currentLevel;
+    const lsPct=ls.total>0?Math.round(ls.withData/ls.total*100):0;
+    return`<div class="lvc" onclick="setLevelCard('${lvl}')" style="${isActive?`background:${lvlBgs[lvl]};border-color:${lvlColors[lvl]};`:''}">
+      <div class="lvc-top"><span class="lvc-label" style="color:${lvlColors[lvl]}">${lvl}</span><span class="lvc-count">${ls.total} students</span></div>
+      <div class="lvc-pills">${levelPills(ls)}</div>
+      <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${lsPct}%;background:${lvlColors[lvl]};"></div></div><span class="lvc-bar-label">${ls.withData}/${ls.total}</span></div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML=`<div class="page-hero">
+    <div class="ph-top">
+      <div>
+        <div class="ph-live">Live · Session 5</div>
+        <div class="ph-title">Session 5 Data Tracker</div>
+        <div class="ph-sub">Workshop progress, checkpoints &amp; 3 Commitments · Alpha NYC</div>
+      </div>
+      ${weekInfoHtml}
+    </div>
+    ${campusStatsHtml}
+    <div class="level-selector">${allCard}${lvlCardsHtml}</div>
+  </div>`;
+}
+
+function setLevelCard(l){
+  currentLevel=l;
+  populateWsFilter();
+  render();
+  document.querySelector('.controls')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 async function loadData(){
@@ -363,19 +462,19 @@ async function loadData(){
 function populateWsFilter(){
   const sel = document.getElementById('wsFilter');
   sel.innerHTML = '<option value="">All workshops</option>';
-  (WORKSHOPS[currentLevel]||[]).forEach(ws=>{
-    const o=document.createElement('option');
-    o.value=ws.name; o.textContent=`${ws.code} — ${ws.name}`;
-    sel.appendChild(o);
+  const levels = currentLevel==='ALL' ? ['LL','L1','L2','MS'] : [currentLevel];
+  levels.forEach(lvl=>{
+    (WORKSHOPS[lvl]||[]).forEach(ws=>{
+      const o=document.createElement('option');
+      o.value=ws.name;
+      o.textContent=currentLevel==='ALL'?`[${lvl}] ${ws.code} — ${ws.name}`:`${ws.code} — ${ws.name}`;
+      sel.appendChild(o);
+    });
   });
 }
 
-function setLevel(l,btn){
+function setLevel(l){
   currentLevel=l;
-  document.querySelectorAll('.lvl-btn').forEach(b=>{
-    b.className='lvl-btn';
-  });
-  btn.classList.add('a'+l);
   populateWsFilter();
   render();
 }
@@ -416,112 +515,80 @@ function getTownhalls() {
 
 function render(){
   renderStats();
-  const wsFilter = document.getElementById('wsFilter').value;
-  const sort     = document.getElementById('sortSel').value;
-  let workshops  = WORKSHOPS[currentLevel]||[];
-  if(wsFilter) workshops = workshops.filter(w=>w.name===wsFilter);
+  const wsFilter=document.getElementById('wsFilter').value;
+  const sort=document.getElementById('sortSel').value;
+  const due=getDueThisWeek();
+  const levelsToRender=currentLevel==='ALL'?['LL','L1','L2','MS']:[currentLevel];
+  const lvlNames={LL:'Launch Level',L1:'Level 1',L2:'Level 2',MS:'Middle School'};
 
-  let students = (CFG.students||[]).filter(s=>s.l===currentLevel);
-  if(sort==='progress'){
-    students = students.sort((a,b)=>{
-      const pa=workshops.filter(w=>getFinal(a.n,w.name)==='Passed').length;
-      const pb=workshops.filter(w=>getFinal(b.n,w.name)==='Passed').length;
-      return pb-pa;
-    });
-  } else {
-    students = students.sort((a,b)=>a.n.localeCompare(b.n));
-  }
+  const townhalls=getTownhalls();
+  const thHtml=townhalls.length
+    ?townhalls.map(t=>`<div class="townhall-row"><span class="townhall-date">${t.date||''}</span><span class="townhall-topic">${t.topic||''}</span></div>`).join('')
+    :'<div class="extras-empty">No town halls recorded yet</div>';
+  const allBlocks=[`<div class="ws-block"><div class="ws-block-header" style="padding:12px 18px;"><div class="ws-info"><div class="ws-name" style="font-size:14px;">📢 Weekly Town Halls</div><div class="ws-guide-row">All levels · Full school</div></div></div><div class="extras-list">${thHtml}</div></div>`];
 
-  document.getElementById('count-pill').textContent=`${students.length} students · ${workshops.length} workshops`;
+  let totalStudents=0,totalWs=0;
 
-  if(!students.length){
-    document.getElementById('page').innerHTML='<div class="empty-msg">No students found for this level.</div>';
-    return;
-  }
-
-  const color = LEVEL_COLORS[currentLevel];
-  const bg    = LEVEL_BGS[currentLevel];
-
-  // Town halls section (global, not per workshop)
-  const townhalls = getTownhalls();
-  const townhallHtml = townhalls.length
-    ? townhalls.map(t=>`<div class="townhall-row"><span class="townhall-date">${t.date||''}</span><span class="townhall-topic">${t.topic||''}</span></div>`).join('')
-    : '<div class="extras-empty">No town halls recorded yet</div>';
-
-  const townhallBlock = `<div class="ws-block" style="margin-bottom:0;">
-    <div class="ws-block-header" style="padding:12px 18px;">
-      <div class="ws-info"><div class="ws-name" style="font-size:14px;">📢 Weekly Town Halls</div><div class="ws-guide-row">All levels · Full school</div></div>
-    </div>
-    <div class="extras-list">${townhallHtml}</div>
-  </div>`;
-
-  const due = getDueThisWeek();
-  document.getElementById('page').innerHTML = townhallBlock + workshops.map(ws=>{
-    const passCount = students.filter(s=>getFinal(s.n,ws.name)==='Passed').length;
-    const pct = Math.round(passCount/students.length*100);
-
-    const headerRow = `<th style="min-width:160px">Student</th>
-      ${CHECKPOINTS.map(c=>{
+  levelsToRender.forEach(lvl=>{
+    let workshops=WORKSHOPS[lvl]||[];
+    if(wsFilter) workshops=workshops.filter(w=>w.name===wsFilter);
+    let students=(CFG.students||[]).filter(s=>s.l===lvl);
+    if(sort==='progress'){
+      students=students.sort((a,b)=>{
+        const pa=workshops.filter(w=>getFinal(a.n,w.name)==='Passed').length;
+        const pb=workshops.filter(w=>getFinal(b.n,w.name)==='Passed').length;
+        return pb-pa;
+      });
+    } else {
+      students=students.sort((a,b)=>a.n.localeCompare(b.n));
+    }
+    if(!students.length||!workshops.length) return;
+    totalStudents+=students.length;
+    totalWs+=workshops.length;
+    const color=LEVEL_COLORS[lvl];
+    const bg=LEVEL_BGS[lvl];
+    if(currentLevel==='ALL'){
+      allBlocks.push(`<div class="lvl-section-head" style="color:${color};border-color:${color};">${lvl} — ${lvlNames[lvl]} · ${students.length} students</div>`);
+    }
+    workshops.forEach(ws=>{
+      const skipped=s5data.__skip__?.[ws.name];
+      const passCount=students.filter(s=>getFinal(s.n,ws.name)==='Passed').length;
+      const pct=students.length?Math.round(passCount/students.length*100):0;
+      const headerRow=`<th style="min-width:160px">Student</th>${CHECKPOINTS.map(c=>{
         const isDue=due&&due.type==='checkpoint'&&due.key===c.key;
-        return`<th class="chk-th${isDue?' chk-th-due':''}">${c.label}${isDue?'<span class="due-col-badge">DUE</span>':''}</th>`;
-      }).join('')}
-      <th>Status</th>`;
-
-    const bodyRows = students.map(s=>{
-      const chkCells = CHECKPOINTS.map(c=>`<td class="chk-td">${dotHtml(getChk(s.n,ws.name,c.key))}</td>`).join('');
-      return `<tr>
-        <td><span class="s-name">${s.n}</span>${s.note?`<span class="s-note">* ${s.note}</span>`:''}</td>
-        ${chkCells}
-        <td>${finalPill(getFinal(s.n,ws.name))}</td>
-      </tr>`;
-    }).join('');
-
-    // Deliverables
-    const deliverables = getDeliverables(ws.name);
-    const delHtml = deliverables.length
-      ? deliverables.map(d=>`<div class="deliverable-row"><span class="del-week">${d.week||''}</span><span class="del-text">${d.text||''}</span></div>`).join('')
-      : '<div class="extras-empty">No deliverables recorded yet</div>';
-
-    // Meetings
-    const meetings = getMeetings(ws.name);
-    const meetHtml = meetings.length
-      ? meetings.map(m=>`<div class="meeting-row"><span class="meeting-date">${m.date||''}</span><div class="meeting-text">${m.notes||''}<div class="meeting-sub">${m.type||''}</div></div></div>`).join('')
-      : '<div class="extras-empty">No meetings recorded yet</div>';
-
-    return `<div class="ws-block">
-      <div class="ws-block-header">
-        <span class="ws-code-badge" style="background:${bg};color:${color}">${ws.code}</span>
-        <div class="ws-info">
-          <div class="ws-name">${ws.name}</div>
-          <div class="ws-guide-row">${ws.guide} · ${ws.day}</div>
+        return`<th class="chk-th${isDue?' chk-th-due':''}">${c.label}${isDue?'<span class="due-col-badge">Due this Week</span>':''}</th>`;
+      }).join('')}<th>Status</th>`;
+      const bodyRows=students.map(s=>{
+        const chkCells=CHECKPOINTS.map(c=>{
+          const isDue=due&&due.type==='checkpoint'&&due.key===c.key;
+          return`<td class="chk-td${isDue?' due-col':''}">${dotHtml(getChk(s.n,ws.name,c.key))}</td>`;
+        }).join('');
+        return`<tr><td><span class="s-name">${s.n}</span>${s.note?`<span class="s-note">* ${s.note}</span>`:''}</td>${chkCells}<td>${finalPill(getFinal(s.n,ws.name))}</td></tr>`;
+      }).join('');
+      const deliverables=getDeliverables(ws.name);
+      const delHtml=deliverables.length?deliverables.map(d=>`<div class="deliverable-row"><span class="del-week">${d.week||''}</span><span class="del-text">${d.text||''}</span></div>`).join(''):'<div class="extras-empty">No deliverables recorded yet</div>';
+      const meetings=getMeetings(ws.name);
+      const meetHtml=meetings.length?meetings.map(m=>`<div class="meeting-row"><span class="meeting-date">${m.date||''}</span><div class="meeting-text">${m.notes||''}<div class="meeting-sub">${m.type||''}</div></div></div>`).join(''):'<div class="extras-empty">No meetings recorded yet</div>';
+      const skipBadge=skipped?`<span style="font-family:'DM Mono',monospace;font-size:9px;background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:2px 7px;border-radius:4px;margin-left:8px">data not collected</span>`:'';
+      allBlocks.push(`<div class="ws-block">
+        <div class="ws-block-header">
+          <span class="ws-code-badge" style="background:${bg};color:${color}">${ws.code}</span>
+          <div class="ws-info"><div class="ws-name">${ws.name}${skipBadge}</div><div class="ws-guide-row">${ws.guide} · ${ws.day}</div></div>
+          <span class="ws-skill-pill">${ws.skill}</span>
+          <div class="ws-pbar-wrap"><div class="ws-pbar"><div class="ws-pbar-fill" style="width:${pct}%"></div></div><span class="ws-pbar-label">${passCount}/${students.length} passed</span></div>
         </div>
-        <span class="ws-skill-pill">${ws.skill}</span>
-        <div class="ws-pbar-wrap">
-          <div class="ws-pbar"><div class="ws-pbar-fill" style="width:${pct}%"></div></div>
-          <span class="ws-pbar-label">${passCount}/${students.length} passed</span>
-        </div>
-      </div>
-      <div class="ican-row">
-        <span class="ican-tag">I can</span>
-        <span>${ws.ican}</span>
-      </div>
-      <div class="ws-table-wrap">
-        <table><thead><tr>${headerRow}</tr></thead><tbody>${bodyRows}</tbody></table>
-      </div>
-      <div class="ws-extras">
-        <div class="extras-row">
-          <div class="extras-block">
-            <div class="extras-title">Weekly Deliverables</div>
-            <div class="extras-list">${delHtml}</div>
-          </div>
-          <div class="extras-block">
-            <div class="extras-title">Meetings</div>
-            <div class="extras-list">${meetHtml}</div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+        <div class="ican-row"><span class="ican-tag">I can</span><span>${ws.ican}</span></div>
+        <div class="ws-table-wrap"><table><thead><tr>${headerRow}</tr></thead><tbody>${bodyRows}</tbody></table></div>
+        <div class="ws-extras"><div class="extras-row">
+          <div class="extras-block"><div class="extras-title">Weekly Deliverables</div><div class="extras-list">${delHtml}</div></div>
+          <div class="extras-block"><div class="extras-title">Meetings</div><div class="extras-list">${meetHtml}</div></div>
+        </div></div>
+      </div>`);
+    });
+  });
+
+  document.getElementById('count-pill').textContent=`${totalStudents} students · ${totalWs} workshops`;
+  document.getElementById('page').innerHTML=allBlocks.join('');
 }
 
 loadData();
