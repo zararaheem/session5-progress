@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>T2P — Session 5 Progress</title>
+<title>Session 5 Data Tracker — Alpha NYC</title>
 <script src="config.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f7f6f2;--card:#fff;--border:#e5e4e0;--text:#1a1a1a;--muted:#999;--radius:12px;
@@ -18,18 +18,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* PAGE HERO */
-.page-hero{background:white;border-bottom:1px solid var(--border);padding:32px 28px 0;}
-.ph-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:16px;}
-.ph-live{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#ef4444;background:#fff0f0;border:1px solid #fca5a5;padding:3px 9px;border-radius:20px;margin-bottom:10px;}
+.page-hero{background:white;border-bottom:1px solid var(--border);padding:44px 28px 0;text-align:center;}
+.s5-kicker{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#1a56db;margin-bottom:14px;display:inline-flex;align-items:center;gap:10px;}
+.s5-kicker::before,.s5-kicker::after{content:'';height:1px;width:28px;background:currentColor;opacity:.35;}
+.s5-h1{font-family:'Instrument Serif',serif;font-size:clamp(34px,5vw,58px);line-height:1.06;margin-bottom:10px;letter-spacing:-.4px;color:var(--text);}
+.s5-h1 em{color:#1a56db;font-style:italic;}
+.s5-sub{font-size:14px;color:var(--muted);line-height:1.6;max-width:480px;margin:0 auto 20px;}
+.s5-week-bar{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;}
+.ph-week-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:rgba(251,191,36,.1);color:#b45309;border:1px solid rgba(251,191,36,.4);padding:4px 12px;border-radius:4px;}
+.ph-due-label{font-size:12px;color:var(--muted);}
+.s5-enter-btn{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;background:#1a56db;color:white;border:none;padding:5px 14px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:background .15s;}
+.s5-enter-btn:hover{background:#1745c0;}
+.s5-hist-link{padding:12px 0 18px;text-align:center;}
+.s5-hist-link a{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:4px 12px;border-radius:20px;transition:all .15s;}
+.s5-hist-link a:hover{color:var(--text);border-color:#aaa;}
+.ph-live{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#ef4444;background:#fff0f0;border:1px solid #fca5a5;padding:3px 9px;border-radius:20px;margin-bottom:12px;}
 .ph-live::before{content:'';width:5px;height:5px;border-radius:50%;background:#ef4444;flex-shrink:0;animation:pulse 1.5s infinite;}
-.ph-title{font-size:clamp(26px,4vw,40px);font-weight:700;color:var(--text);line-height:1.1;margin-bottom:6px;}
-.ph-sub{font-size:13px;color:var(--muted);line-height:1.5;}
-.ph-week-info{text-align:right;flex-shrink:0;}
-.ph-week-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:rgba(251,191,36,.1);color:#b45309;border:1px solid rgba(251,191,36,.4);padding:4px 12px;border-radius:4px;display:inline-block;margin-bottom:4px;}
-.ph-due-label{font-size:11px;color:var(--muted);display:block;}
 
 /* CAMPUS STATS */
-.campus-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.campus-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;justify-content:center;}
 .cs{display:flex;flex-direction:column;align-items:center;padding:12px 18px;border-radius:10px;min-width:76px;text-align:center;}
 .cs-num{font-family:'DM Mono',monospace;font-size:28px;font-weight:700;line-height:1;}
 .cs-label{font-size:9px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;}
@@ -43,7 +50,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .cs.s-track .cs-num{color:#1d4ed8;}
 .cs.s-ahead{background:#f5f3ff;border:1px solid #c4b5fd;}
 .cs.s-ahead .cs-num{color:#6d28d9;}
-.cs-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;}
+.cs-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;justify-content:center;max-width:460px;margin-left:auto;margin-right:auto;}
 .cs-bar-track{flex:1;max-width:320px;height:6px;background:#f0ede8;border-radius:3px;overflow:hidden;}
 .cs-bar-fill{height:100%;background:#1a56db;border-radius:3px;transition:width .4s;}
 .cs-bar-label{font-family:'DM Mono',monospace;font-size:11px;color:#666;}
@@ -147,7 +154,7 @@ tr:hover td{background:#fafaf8;}
 @media(max-width:640px){
   .page,.controls,.page-hero{padding-left:14px;padding-right:14px;}
   .ws-name{font-size:13px;}
-  .ph-title{font-size:26px;}
+  .s5-h1{font-size:30px;}
   .cs-num{font-size:22px;}
 }
 
@@ -169,7 +176,6 @@ tr:hover td{background:#fafaf8;}
 <body>
 <div class="site-nav dark">
   <a href="https://session5-progress.vercel.app/" class="sn-link home">Home</a>
-  <a href="https://t2p-dashboard.vercel.app/tracker.html" class="sn-link" target="_blank" rel="noopener noreferrer">T2P Tracker</a>
   <a href="https://t2p-dashboard.vercel.app/workshops.html" class="sn-link" target="_blank" rel="noopener noreferrer">Workshop Directory</a>
   <a href="https://session5-progress.vercel.app/session5.html" class="sn-link active">Session 5 Data</a>
   <a href="https://session5-progress.vercel.app/editor.html" class="sn-link">Staff Login</a>
@@ -300,7 +306,7 @@ function renderStats(){
   if(!container)return;
   const weekNum=getCurrentSessionWeek();
   const due=getDueThisWeek();
-  const allStudents=CFG.students||[];
+  const allStudents=(CFG.students||[]).filter(s=>!s.inactive);
   const allLevels=['LL','L1','L2','MS'];
   const totalAll=allStudents.length;
   const lvlColors={LL:'var(--ll)',L1:'var(--l1)',L2:'var(--l2)',MS:'var(--ms)'};
@@ -359,13 +365,15 @@ function renderStats(){
     }
   }
 
-  // Week info block (top right of hero)
+  // Week info bar (centered, with Enter data CTA)
+  const dueLabel=campusStats.type==='checkpoint'?campusStats.ckLabel:campusStats.type==='3cs'?'3 Commitments':'';
   const weekInfoHtml=(weekNum>0&&weekNum<=7&&due)
-    ?`<div class="ph-week-info">
+    ?`<div class="s5-week-bar">
         <span class="ph-week-badge">Week ${weekNum}</span>
-        <span class="ph-due-label">Due: ${campusStats.type==='checkpoint'?campusStats.ckLabel:'3 Commitments'}</span>
+        ${dueLabel?`<span class="ph-due-label">Due: ${dueLabel}</span>`:''}
+        <a href="https://session5-progress.vercel.app/editor.html" class="s5-enter-btn">Enter data →</a>
       </div>`
-    :`<div class="ph-week-info"><span class="ph-week-badge">Session ${weekNum>7?'Complete':'Starting'}</span></div>`;
+    :`<div class="s5-week-bar"><span class="ph-week-badge">Session ${weekNum>7?'Complete':'Starting'}</span></div>`;
 
   // Campus stat numbers
   const pctAll=totalAll>0?Math.round(campusStats.withData/totalAll*100):0;
@@ -430,16 +438,14 @@ function renderStats(){
   }).join('');
 
   container.innerHTML=`<div class="page-hero">
-    <div class="ph-top">
-      <div>
-        <div class="ph-live">Live · Session 5</div>
-        <div class="ph-title">Session 5 Data Tracker</div>
-        <div class="ph-sub">Workshop progress, checkpoints &amp; 3 Commitments · Alpha NYC</div>
-      </div>
-      ${weekInfoHtml}
-    </div>
+    <div class="ph-live">Live · Session 5</div>
+    <div class="s5-kicker">Alpha NYC · Session 5 · 2026</div>
+    <h1 class="s5-h1">Session <em>5</em> Data <em>Tracker</em></h1>
+    <p class="s5-sub">Workshop progress, checkpoints &amp; 3 Commitments</p>
+    ${weekInfoHtml}
     ${campusStatsHtml}
     <div class="level-selector">${allCard}${lvlCardsHtml}</div>
+    <div class="s5-hist-link"><a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" rel="noopener noreferrer">S1–S4 T2P History ↗</a></div>
   </div>`;
 }
 
@@ -532,7 +538,7 @@ function render(){
   levelsToRender.forEach(lvl=>{
     let workshops=WORKSHOPS[lvl]||[];
     if(wsFilter) workshops=workshops.filter(w=>w.name===wsFilter);
-    let students=(CFG.students||[]).filter(s=>s.l===lvl);
+    let students=(CFG.students||[]).filter(s=>s.l===lvl&&!s.inactive);
     if(sort==='progress'){
       students=students.sort((a,b)=>{
         const pa=workshops.filter(w=>getFinal(a.n,w.name)==='Passed').length;
