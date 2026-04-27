@@ -658,8 +658,7 @@ function doLogin(){
   if(name===WS_DATA_EDITOR){
     document.getElementById('ws-data-tab').style.display='inline-block';
   }
-  // SEE_ALL users default to All students, others to My students
-  document.getElementById("assigneeFilter").value = "";
+  document.getElementById("assigneeFilter").value = "__mine__";
   loadData();
 }
 
@@ -826,10 +825,8 @@ function saveProfileBySlug(el){ saveProfile(nameFromSlug(el.dataset.sslug)); }
 // ── Toggle row ────────────────────────────────────────────────────
 function toggleRow(sl){
   const body=document.getElementById(`body-${sl}`);
-  const btn=document.getElementById(`toggle-${sl}`);
   if(!body)return;
-  const open=body.classList.toggle('open');
-  if(btn)btn.textContent=open?'▲ Collapse':'▼ Expand';
+  body.classList.toggle('open');
 }
 
 // ── Render tracker list ───────────────────────────────────────────
@@ -896,16 +893,15 @@ function renderList(){
     }).join('');
 
     return`<div class="student-row ${mine?'mine':''}">
-      <div class="row-top">
+      <div class="row-top" style="cursor:pointer" onclick="toggleRow('${sl}')">
         ${avatarHtml}
         <div class="row-info">
           <div class="row-name"><span class="row-level lv-${s.l}">${s.l}</span>${s.n}</div>
           <div class="row-meta"><span id="guides-${sl}">${guideTagsHtml}</span>${s.note?`<span style="color:var(--muted);font-style:italic">* ${s.note}</span>`:''}</div>
         </div>
-        <div class="row-actions">
-          <a target="_blank" rel="noopener noreferrer" href="${s.patchUrl||'https://t2p-dashboard.vercel.app/tracker.html'}" class="patch-link">T2P ↗</a>
+        <div class="row-actions" onclick="event.stopPropagation()">
+          <a target="_blank" rel="noopener noreferrer" href="${s.patchUrl||'https://t2p-dashboard.vercel.app/tracker.html'}" class="patch-link">Previous T2P data ↗</a>
           <button class="row-btn" data-sslug="${sl}" onclick="openAssignBySlug(this.dataset.sslug)">Guides</button>
-          <button class="row-btn" id="toggle-${sl}" data-sslug="${sl}" onclick="toggleRow(this.dataset.sslug)">▼ Expand</button>
         </div>
       </div>
       <div class="row-body" id="body-${sl}">
