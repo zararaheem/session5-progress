@@ -519,8 +519,8 @@ function dotHtml(val){
 }
 
 function finalPill(val){
-  if(val==='Passed')     return '<span class="st-pill pass">✓ Passed</span>';
-  if(val==='Not passed') return '<span class="st-pill fail">✗ Not passed</span>';
+  if(val==='Passed')     return '<span class="st-pill pass">✓ Earned</span>';
+  if(val==='Not passed'||val==='Not Yet') return '<span class="st-pill fail">Not yet</span>';
   if(val==='Absent')     return '<span class="st-pill absent">– Absent</span>';
   return '<span class="st-pill pending">— Pending</span>';
 }
@@ -575,8 +575,8 @@ function render(){
     workshops.forEach((ws,wsIdx)=>{
       const wsId=`ws-${lvl}-${wsIdx}`;
       const skipped=s5data.__skip__?.[ws.name];
-      const passCount=students.filter(s=>getFinal(s.n,ws.name)==='Passed').length;
-      const pct=students.length?Math.round(passCount/students.length*100):0;
+      const filledCount=students.filter(s=>CHECKPOINTS.some(c=>getChk(s.n,ws.name,c.key))||getFinal(s.n,ws.name)).length;
+      const pct=students.length?Math.round(filledCount/students.length*100):0;
       const skipBadge=skipped?`<span style="font-family:'DM Mono',monospace;font-size:9px;background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:2px 7px;border-radius:4px;margin-left:6px">data not collected</span>`:'';
       const headerRow=`<th style="min-width:160px">Student</th>${CHECKPOINTS.map(c=>{
         const isDue=due&&due.type==='checkpoint'&&due.key===c.key;
@@ -595,7 +595,7 @@ function render(){
           <span class="ws-code-badge" style="background:${bg};color:${color}">${ws.code}</span>
           <div class="ws-info"><div class="ws-name">${ws.name}${skipBadge}</div><div class="ws-guide-row">${ws.day}</div></div>
           <span class="ws-skill-pill">${ws.skill}</span>
-          <div class="ws-pbar-wrap"><div class="ws-pbar"><div class="ws-pbar-fill" style="width:${pct}%"></div></div><span class="ws-pbar-label">${passCount}/${students.length} passed</span></div>
+          <div class="ws-pbar-wrap"><div class="ws-pbar"><div class="ws-pbar-fill" style="width:${pct}%"></div></div><span class="ws-pbar-label">${filledCount}/${students.length} filled</span></div>
           <span class="ws-chevron">▼</span>
         </div>
         <div class="ws-body">
