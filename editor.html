@@ -168,6 +168,22 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .sp-no{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);}
 .sp-head{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 4px;}
 .sp-sep{color:var(--border2);font-size:16px;font-weight:200;line-height:1;}
+/* CAMPUS OVERVIEW GRID */
+.cov-section{padding:10px 28px 4px;}
+.cov-hdr{font-family:'DM Mono',monospace;font-size:9px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.cov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+@media(max-width:700px){.cov-grid{grid-template-columns:repeat(2,1fr);}}
+.cov-card{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;border-left:3px solid;}
+.cov-lvl-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.cov-lvl{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;}
+.cov-count{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);}
+.cov-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);margin-bottom:6px;}
+.cov-bar-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.cov-bar{flex:1;height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;}
+.cov-bar-fill{height:100%;border-radius:2px;transition:width .4s;}
+.cov-bar-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);white-space:nowrap;}
+.cov-pills{display:flex;gap:3px;flex-wrap:wrap;margin-top:2px;}
+.cov-pill{font-family:'DM Mono',monospace;font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;}
 .dash-grid{padding:16px 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
 .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;}
 .dash-card:hover{border-color:var(--border2);transform:translateY(-2px);}
@@ -417,6 +433,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
       <span class="count-pill" id="dash-count"></span>
     </div>
     <div id="dash-stats"></div>
+    <div id="dash-campus-overview"></div>
     <div class="dash-grid" id="dash-grid"></div>
   </div>
 
@@ -1018,6 +1035,83 @@ function renderDashboardStats(students){
   container.innerHTML=html;
 }
 
+// ── Campus overview grid ──────────────────────────────────────────
+function renderCampusOverview(){
+  const container=document.getElementById('dash-campus-overview');
+  if(!container)return;
+  const due=getDueThisWeek();
+  const weekNum=getCurrentSessionWeek();
+  const allLevels=['LL','L1','L2','MS'];
+  const lvlColors={LL:'#3b82f6',L1:'#a78bfa',L2:'#34d399',MS:'#fbbf24'};
+  const lvlNames={LL:'Launch Level',L1:'Level 1',L2:'Level 2',MS:'Middle School'};
+
+  const cards=allLevels.map(lvl=>{
+    const sts=STUDENTS.filter(s=>s.l===lvl);
+    const tot=sts.length;
+    const color=lvlColors[lvl];
+    let barPct=0,barLbl='',pillsHtml='';
+
+    if(due&&weekNum>0&&weekNum<=7){
+      if(due.type==='checkpoint'){
+        const ck=due.key;
+        const ckLabel=CHECKPOINTS.find(c=>c.key===ck)?.label||ck;
+        let behind=0,onTrack=0,ahead=0,withData=0;
+        sts.forEach(s=>{
+          const sc=s5data[s.n]||{};
+          const ws=S5_WORKSHOPS[s.l]||[];
+          let hasBehind=false,hasTrack=false,hasAhead=false,hasAny=false;
+          ws.forEach(w=>{
+            const v=sc[chkKey(w.name,ck)];
+            if(v){hasAny=true;if(v==='Behind')hasBehind=true;else if(v==='On Track')hasTrack=true;else if(v==='Ahead')hasAhead=true;}
+          });
+          if(hasAny)withData++;
+          if(hasBehind)behind++;else if(hasTrack)onTrack++;else if(hasAhead)ahead++;
+        });
+        barPct=tot>0?Math.round(withData/tot*100):0;
+        barLbl=`${withData}/${tot} in`;
+        pillsHtml=(behind>0?`<span class="cov-pill" style="background:rgba(248,113,113,.12);color:#f87171;">${behind}B</span>`:'')+
+          (onTrack>0?`<span class="cov-pill" style="background:rgba(96,165,250,.12);color:#60a5fa;">${onTrack}T</span>`:'')+
+          (ahead>0?`<span class="cov-pill" style="background:rgba(167,139,250,.12);color:#a78bfa;">${ahead}A</span>`:'')+
+          ((tot-withData)>0?`<span class="cov-pill" style="background:var(--surface3);color:var(--muted2);">${tot-withData} missing</span>`:'');
+      } else {
+        const wk=due.key;
+        let entered=0,lovesY=0,l2xGood=0,t2pY=0;
+        sts.forEach(s=>{
+          const d=s5data.__3cs__?.[s.n]?.[wk]||{};
+          if(d.lovesSchool||d.learning2x||d.onTrack){entered++;
+            if(d.lovesSchool==='Yes')lovesY++;
+            if(d.learning2x==='All at 2x'||d.learning2x==='Some at 2x')l2xGood++;
+            if(d.onTrack==='Yes')t2pY++;
+          }
+        });
+        barPct=tot>0?Math.round(entered/tot*100):0;
+        barLbl=`${entered}/${tot} 3Cs`;
+        pillsHtml=`<span class="cov-pill" style="background:rgba(52,211,153,.1);color:#34d399;">♥${lovesY}</span>`+
+          `<span class="cov-pill" style="background:rgba(96,165,250,.1);color:#60a5fa;">2×${l2xGood}</span>`+
+          `<span class="cov-pill" style="background:rgba(96,165,250,.1);color:#60a5fa;">T2P${t2pY}</span>`;
+      }
+    }
+
+    const dueLabel=due?(due.type==='checkpoint'?(CHECKPOINTS.find(c=>c.key===due.key)?.label||due.key):'3 Commitments'):'—';
+    return`<div class="cov-card" style="border-left-color:${color}">
+      <div class="cov-lvl-row"><span class="cov-lvl" style="color:${color}">${lvl}</span><span class="cov-count">${tot} students</span></div>
+      <div class="cov-sub">${lvlNames[lvl]}</div>
+      <div class="cov-bar-row"><div class="cov-bar"><div class="cov-bar-fill" style="width:${barPct}%;background:${color}"></div></div><span class="cov-bar-lbl">${barLbl||`0/${tot}`}</span></div>
+      <div class="cov-pills">${pillsHtml||`<span class="cov-pill" style="background:var(--surface3);color:var(--muted2);">No data yet</span>`}</div>
+    </div>`;
+  }).join('');
+
+  const wkLabel=weekNum>0&&weekNum<=7?`Week ${weekNum}`:(weekNum>7?'Session Complete':'Pre-Session');
+  const dueLabel=due?(due.type==='checkpoint'?(CHECKPOINTS.find(c=>c.key===due.key)?.label||due.key):'3 Commitments'):'';
+  container.innerHTML=`<div class="cov-section">
+    <div class="cov-hdr">
+      <span>Campus Overview · All Levels</span>
+      <span style="color:var(--accent2);font-size:9px;">${wkLabel}${dueLabel?' · '+dueLabel:''}</span>
+    </div>
+    <div class="cov-grid">${cards}</div>
+  </div>`;
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────
 function renderDashboard(){
   const lf=document.getElementById('dash-level').value;
@@ -1025,6 +1119,7 @@ function renderDashboard(){
   if(lf)students=students.filter(s=>s.l===lf);
   document.getElementById('dash-count').textContent=`${students.length} students`;
   renderDashboardStats(students);
+  renderCampusOverview();
 
   document.getElementById('dash-grid').innerHTML=students.map(s=>{
     const photo=s5data.__photos__?.[s.n];
