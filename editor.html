@@ -834,7 +834,8 @@ function renderList(){
         const isDue=due&&due.type==='checkpoint'&&due.key===chk.key;
         const dueBadge=isDue?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:600;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.05em">DUE THIS WEEK</span>`:'';
         const coaching=s5data.__coaching__?.[s.n]?.[wsKey]?.[chk.key]||'';
-        const coachDiv=chk.key!=='w7'?`<div id="coach-${sl}-${wsSlug}-${chk.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:36px;font-size:11px;" placeholder="Coaching / action plan to get back on track…" onchange="saveCoaching('${sl}','${wsSlug}','${chk.key}',this.value)">${coaching}</textarea></div>`:'';
+        const coachPlaceholder=isDue?`${chk.label} is Behind — what's the coaching plan to get back on track? (Due this week)`:`Coaching / action plan to get back on track…`;
+        const coachDiv=chk.key!=='w7'?`<div id="coach-${sl}-${wsSlug}-${chk.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:36px;font-size:11px;" placeholder="${coachPlaceholder}" onchange="saveCoaching('${sl}','${wsSlug}','${chk.key}',this.value)">${coaching}</textarea></div>`:'';
         return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${coachDiv}`;
       }).join('');
       const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
