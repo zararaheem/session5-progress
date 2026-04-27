@@ -55,10 +55,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .login-divider{width:40px;height:1px;background:var(--border2);margin:8px auto 20px;}
 .login-sub{font-size:12px;color:var(--muted2);margin-bottom:28px;}
 .login-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;display:block;text-align:left;margin-bottom:6px;}
-.login-box input,.login-box select{width:100%;padding:12px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:14px;outline:none;transition:border-color .2s,box-shadow .2s;}
-.login-box select option{background:var(--surface2);}
-.login-box input[type="password"]{font-family:'DM Mono',monospace;letter-spacing:.15em;text-align:center;}
-.login-box input:focus,.login-box select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow);}
+.login-box input{width:100%;padding:12px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:0;outline:none;transition:border-color .2s,box-shadow .2s;}
+.login-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow);}
+.name-search-wrap{position:relative;margin-bottom:14px;}
+.name-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;max-height:200px;overflow-y:auto;z-index:200;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.name-dropdown.open{display:block;}
+.name-opt{padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text);transition:background .1s;}
+.name-opt:hover{background:rgba(59,130,246,.12);color:var(--accent2);}
 .login-btn{width:100%;padding:12px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:4px;box-shadow:0 4px 16px rgba(59,130,246,.3);}
 .login-btn:hover{background:var(--accent2);transform:translateY(-1px);}
 .login-error{color:var(--fail);font-size:12px;margin-top:12px;min-height:18px;font-family:'DM Mono',monospace;}
@@ -361,7 +364,12 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
     <div class="login-divider"></div>
     <div class="login-sub">Session 5 Data · Guide access only</div>
     <label class="login-label">Guide</label>
-    <select id="login-name"></select>
+    <div class="name-search-wrap">
+      <input type="text" id="login-name-input" placeholder="Type to search your name..." autocomplete="off"
+        oninput="filterNames()" onfocus="showNameDrop()" onblur="hideNameDrop()">
+      <div id="name-dropdown" class="name-dropdown"></div>
+    </div>
+    <input type="hidden" id="login-name">
     <button class="login-btn" onclick="doLogin()">Initiate session →</button>
     <div class="login-error" id="login-error"></div>
   </div>
@@ -611,18 +619,28 @@ function toggleSkipWs(wsSlug,checked){
   saveAll();
 }
 
-// ── Login ────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  const ns = document.getElementById('login-name');
-  const bo = document.createElement('option');
-  bo.value=''; bo.textContent='— Select your name —'; bo.disabled=true; bo.selected=true;
-  ns.appendChild(bo);
-  STAFF_SORTED.forEach(s => {
-    const o = document.createElement('option');
-    o.value = s; o.textContent = s;
-    ns.appendChild(o);
-  });
-});
+// ── Login search dropdown ─────────────────────────────────────────
+function renderNameDrop(list){
+  const dd=document.getElementById('name-dropdown');
+  dd.innerHTML=list.length
+    ? list.map(s=>`<div class="name-opt" onmousedown="selectName('${s.replace(/'/g,"\\'")}')"> ${s}</div>`).join('')
+    : '<div class="name-opt" style="color:var(--muted2);cursor:default">No matches</div>';
+}
+function showNameDrop(){
+  const q=document.getElementById('login-name-input').value.toLowerCase();
+  renderNameDrop(STAFF_SORTED.filter(s=>s.toLowerCase().includes(q)));
+  document.getElementById('name-dropdown').classList.add('open');
+}
+function hideNameDrop(){setTimeout(()=>document.getElementById('name-dropdown').classList.remove('open'),150);}
+function filterNames(){
+  document.getElementById('login-name').value='';
+  showNameDrop();
+}
+function selectName(name){
+  document.getElementById('login-name-input').value=name;
+  document.getElementById('login-name').value=name;
+  document.getElementById('name-dropdown').classList.remove('open');
+}
 
 function doLogin(){
   const name=document.getElementById('login-name').value;
