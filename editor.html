@@ -668,6 +668,11 @@ async function loadData(){
       if(!s5data.__coaching__)s5data.__coaching__={};
     }
   }catch(e){}
+  // Apply ?level= URL param from session5.html "Enter data" link
+  const urlLevel=new URLSearchParams(window.location.search).get('level');
+  if(urlLevel&&['LL','L1','L2','MS'].includes(urlLevel)){
+    document.getElementById('levelFilter').value=urlLevel;
+  }
   renderList();
   renderDashboard();
 }

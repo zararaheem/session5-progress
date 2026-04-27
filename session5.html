@@ -371,7 +371,7 @@ function renderStats(){
     ?`<div class="s5-week-bar">
         <span class="ph-week-badge">Week ${weekNum}</span>
         ${dueLabel?`<span class="ph-due-label">Due: ${dueLabel}</span>`:''}
-        <a href="https://session5-progress.vercel.app/editor.html" class="s5-enter-btn">Enter data →</a>
+        <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
       </div>`
     :`<div class="s5-week-bar"><span class="ph-week-badge">Session ${weekNum>7?'Complete':'Starting'}</span></div>`;
 
