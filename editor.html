@@ -189,6 +189,13 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .dot-absent{background:rgba(251,191,36,.2);color:var(--absent);border:1px solid rgba(251,191,36,.4);}
 .dot-empty{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
 .dash-notes-preview{padding:8px 14px 12px;font-size:11px;color:var(--muted2);font-style:italic;border-top:1px solid var(--border);line-height:1.5;}
+.dash-week-row{padding:6px 14px 8px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
+.card-wk-pill{font-family:'DM Mono',monospace;font-size:8px;font-weight:600;padding:2px 7px;border-radius:4px;white-space:nowrap;}
+.pill-beh{background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3);}
+.pill-ot{background:rgba(96,165,250,.15);color:var(--accent2);border:1px solid rgba(96,165,250,.3);}
+.pill-ah{background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3);}
+.pill-pass{background:rgba(52,211,153,.15);color:#34d399;border:1px solid rgba(52,211,153,.3);}
+.pill-mt{background:rgba(74,96,128,.1);color:var(--muted2);border:1px solid rgba(74,96,128,.2);}
 
 /* ── STUDENT DETAIL MODAL ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,10,.85);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);}
@@ -848,7 +855,7 @@ function renderList(){
           <div class="row-meta"><span id="guides-${sl}">${guideTagsHtml}</span>${s.note?`<span style="color:var(--muted);font-style:italic">* ${s.note}</span>`:''}</div>
         </div>
         <div class="row-actions">
-          ${s.patchUrl?`<a target="_blank" href="${s.patchUrl}" class="patch-link">Patches ↗</a>`:''}
+          <a target="_blank" rel="noopener noreferrer" href="${s.patchUrl||'https://t2p-dashboard.vercel.app/tracker.html'}" class="patch-link">T2P ↗</a>
           <button class="row-btn" data-sslug="${sl}" onclick="openAssignBySlug(this.dataset.sslug)">Guides</button>
           <button class="row-btn" id="toggle-${sl}" data-sslug="${sl}" onclick="toggleRow(this.dataset.sslug)">▼ Expand</button>
         </div>
@@ -993,6 +1000,29 @@ function renderDashboard(){
 
     const notesPreview=profile.notes?`<div class="dash-notes-preview">${profile.notes.substring(0,80)}${profile.notes.length>80?'…':''}</div>`:'';
 
+    // Week status row
+    const due=getDueThisWeek();const weekNum=getCurrentSessionWeek();
+    let weekHtml='';
+    if(due&&weekNum>0&&weekNum<=7){
+      if(due.type==='checkpoint'){
+        const ck=due.key;let beh=0,ot=0,ah=0,filled=0;
+        levelWs.forEach(ws=>{const v=scores[chkKey(ws.name,ck)];if(v){filled++;if(v==='Behind')beh++;else if(v==='On Track')ot++;else if(v==='Ahead')ah++;}});
+        const tot=levelWs.length;
+        if(filled>0){
+          weekHtml=`<div class="dash-week-row">${beh>0?`<span class="card-wk-pill pill-beh">${beh} Behind</span>`:''}${ot>0?`<span class="card-wk-pill pill-ot">${ot} On Track</span>`:''}${ah>0?`<span class="card-wk-pill pill-ah">${ah} Ahead</span>`:''}${filled<tot?`<span class="card-wk-pill pill-mt">${tot-filled} missing</span>`:''}</div>`;
+        } else {
+          weekHtml=`<div class="dash-week-row"><span class="card-wk-pill pill-mt">W${weekNum} not entered</span></div>`;
+        }
+      } else {
+        const d=s5data.__3cs__?.[s.n]?.[due.key]||{};
+        if(d.lovesSchool||d.learning2x||d.onTrack){
+          weekHtml=`<div class="dash-week-row">${d.lovesSchool?`<span class="card-wk-pill ${d.lovesSchool==='Yes'?'pill-ot':'pill-beh'}">School: ${d.lovesSchool}</span>`:''} ${d.onTrack?`<span class="card-wk-pill ${d.onTrack==='Yes'?'pill-ot':'pill-beh'}">T2P: ${d.onTrack}</span>`:''} ${d.learning2x?`<span class="card-wk-pill pill-ot">2x: ${d.learning2x.split(' ')[0]}</span>`:''}</div>`;
+        } else {
+          weekHtml=`<div class="dash-week-row"><span class="card-wk-pill pill-mt">W${weekNum} 3C not entered</span></div>`;
+        }
+      }
+    }
+
     return`<div class="dash-card" onclick="openDetail('${safeN}')">
       <div class="dash-card-hdr">
         ${avatarHtml}
@@ -1005,6 +1035,7 @@ function renderDashboard(){
         <div class="dash-s5-label">S5 Workshops</div>
         <div class="dash-progress">${dots}</div>
       </div>
+      ${weekHtml}
       ${notesPreview}
     </div>`;
   }).join('');

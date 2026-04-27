@@ -93,6 +93,25 @@ tr:hover td{background:#fafaf8;}
 .chk-dot.st-fail{background:#fef2f2;border-color:#fca5a5;color:#dc2626;}
 .chk-dot.st-absent{background:#fffbeb;border-color:#fde68a;color:#d97706;}
 .chk-dot.st-empty{background:#f7f6f2;border-color:#e0dedd;color:#ddd;}
+.chk-dot.st-behind{background:#fef2f2;border-color:#fca5a5;color:#dc2626;}
+.chk-dot.st-track{background:#eff6ff;border-color:#93c5fd;color:#2563eb;}
+.chk-dot.st-ahead{background:#f5f3ff;border-color:#c4b5fd;color:#6d28d9;}
+
+/* WEEK STATS BAR */
+.week-stats-bar{display:flex;align-items:center;gap:10px;padding:10px 28px;background:white;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.ws-week-badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;background:rgba(251,191,36,.1);color:#b45309;border:1px solid rgba(251,191,36,.4);padding:3px 9px;border-radius:4px;white-space:nowrap;}
+.ws-due-label{font-family:'DM Mono',monospace;font-size:10px;color:#666;white-space:nowrap;}
+.ws-fill-track{flex:1;min-width:80px;max-width:160px;height:5px;background:#f0ede8;border-radius:3px;overflow:hidden;}
+.ws-fill-bar{height:100%;background:#1a56db;border-radius:3px;transition:width .4s;}
+.ws-fill-label{font-family:'DM Mono',monospace;font-size:10px;color:#999;white-space:nowrap;}
+.ws-stat-pills{display:flex;gap:5px;flex-wrap:wrap;}
+.ws-stat-pill{font-family:'DM Mono',monospace;font-size:9px;font-weight:600;padding:3px 8px;border-radius:5px;white-space:nowrap;}
+.wsp-behind{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;}
+.wsp-track{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;}
+.wsp-ahead{background:#f5f3ff;color:#6d28d9;border:1px solid #c4b5fd;}
+.wsp-empty{background:#f7f6f2;color:#999;border:1px solid #e2e0db;}
+.chk-th-due{background:rgba(251,191,36,.06)!important;}
+.due-col-badge{display:block;font-size:8px;font-weight:700;color:#d97706;margin-top:2px;letter-spacing:.06em;text-align:center;}
 
 /* FINAL STATUS */
 .st-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;}
@@ -142,6 +161,7 @@ tr:hover td{background:#fafaf8;}
   </div>
 </header>
 
+<div id="week-stats"></div>
 <div class="controls">
   <div class="level-tabs" id="level-tabs">
     <button class="lvl-btn aLL" data-l="LL" onclick="setLevel('LL',this)">LL</button>
@@ -250,6 +270,87 @@ const CHECKPOINTS = CFG.checkpoints || [
 let currentLevel = 'LL';
 let s5data = {};
 
+function getCurrentSessionWeek(){
+  const start=new Date('2026-04-27');
+  const now=new Date();
+  const diff=Math.floor((now-start)/(1000*60*60*24));
+  if(diff<0)return 0;
+  const w=Math.floor(diff/7)+1;
+  return w>7?8:w;
+}
+function getDueThisWeek(){
+  const w=getCurrentSessionWeek();
+  if(w===1)return{type:'checkpoint',key:'w1'};
+  if(w===2)return{type:'3cs',key:'w2'};
+  if(w===3)return{type:'checkpoint',key:'w3'};
+  if(w===4)return{type:'3cs',key:'w4'};
+  if(w===5)return{type:'checkpoint',key:'w5'};
+  if(w===6)return{type:'3cs',key:'w6'};
+  if(w===7)return{type:'checkpoint',key:'w7'};
+  return null;
+}
+function renderStats(){
+  const container=document.getElementById('week-stats');
+  if(!container)return;
+  const weekNum=getCurrentSessionWeek();
+  const due=getDueThisWeek();
+  if(weekNum<=0||weekNum>7||!due){container.innerHTML='';return;}
+  const students=(CFG.students||[]).filter(s=>s.l===currentLevel);
+  const workshops=WORKSHOPS[currentLevel]||[];
+  const total=students.length;
+  let html='';
+  if(due.type==='checkpoint'){
+    const ck=due.key;
+    const ckLabel=CHECKPOINTS.find(c=>c.key===ck)?.label||ck;
+    let behind=0,onTrack=0,ahead=0,withData=0;
+    students.forEach(s=>{
+      let hasBehind=false,hasTrack=false,hasAhead=false,hasAny=false;
+      workshops.forEach(ws=>{
+        const v=getChk(s.n,ws.name,ck);
+        if(v){hasAny=true;if(v==='Behind')hasBehind=true;else if(v==='On Track')hasTrack=true;else if(v==='Ahead')hasAhead=true;}
+      });
+      if(hasAny)withData++;
+      if(hasBehind)behind++;else if(hasTrack)onTrack++;else if(hasAhead)ahead++;
+    });
+    const pct=total>0?Math.round(withData/total*100):0;
+    html=`<div class="week-stats-bar">
+      <span class="ws-week-badge">Week ${weekNum}</span>
+      <span class="ws-due-label">Due: ${ckLabel}</span>
+      <div class="ws-fill-track"><div class="ws-fill-bar" style="width:${pct}%"></div></div>
+      <span class="ws-fill-label">${withData}/${total} have data</span>
+      <div class="ws-stat-pills">
+        <span class="ws-stat-pill wsp-behind">${behind} Behind</span>
+        <span class="ws-stat-pill wsp-track">${onTrack} On Track</span>
+        <span class="ws-stat-pill wsp-ahead">${ahead} Ahead</span>
+        ${total-withData>0?`<span class="ws-stat-pill wsp-empty">${total-withData} no data</span>`:''}
+      </div>
+    </div>`;
+  } else {
+    const wk=due.key;
+    let withData=0,lovesY=0,lovesN=0,l2xAll=0,l2xSome=0,l2xNone=0,t2pY=0,t2pN=0;
+    students.forEach(s=>{
+      const d=s5data.__3cs__?.[s.n]?.[wk]||{};
+      if(d.lovesSchool||d.learning2x||d.onTrack)withData++;
+      if(d.lovesSchool==='Yes')lovesY++;else if(d.lovesSchool==='No')lovesN++;
+      if(d.learning2x==='All at 2x')l2xAll++;else if(d.learning2x==='Some at 2x')l2xSome++;else if(d.learning2x==='None at 2x')l2xNone++;
+      if(d.onTrack==='Yes')t2pY++;else if(d.onTrack==='No')t2pN++;
+    });
+    const pct=total>0?Math.round(withData/total*100):0;
+    html=`<div class="week-stats-bar">
+      <span class="ws-week-badge">Week ${weekNum}</span>
+      <span class="ws-due-label">Due: 3 Commitments</span>
+      <div class="ws-fill-track"><div class="ws-fill-bar" style="width:${pct}%"></div></div>
+      <span class="ws-fill-label">${withData}/${total} have data</span>
+      <div class="ws-stat-pills">
+        <span class="ws-stat-pill wsp-track">Love School: ${lovesY}✓ ${lovesN}✗</span>
+        <span class="ws-stat-pill wsp-track">Learning 2x: ${l2xAll+l2xSome}/${total}</span>
+        <span class="ws-stat-pill ${t2pN>0?'wsp-behind':'wsp-track'}">T2P on track: ${t2pY}✓ ${t2pN}✗</span>
+      </div>
+    </div>`;
+  }
+  container.innerHTML=html;
+}
+
 async function loadData(){
   try{
     const r = await window.storage.get('s5data');
@@ -287,9 +388,13 @@ function getFinal(studentName,wsName){
 }
 
 function dotHtml(val){
-  const cls = val==='Passed'?'st-pass':val==='Not passed'?'st-fail':val==='Absent'?'st-absent':'st-empty';
-  const icon = val==='Passed'?'✓':val==='Not passed'?'✗':val==='Absent'?'–':'';
-  return `<span class="chk-dot ${cls}">${icon}</span>`;
+  if(val==='Passed')return'<span class="chk-dot st-pass">✓</span>';
+  if(val==='Not passed'||val==='Not Yet')return'<span class="chk-dot st-fail">✗</span>';
+  if(val==='Behind')return'<span class="chk-dot st-behind">B</span>';
+  if(val==='On Track')return'<span class="chk-dot st-track">T</span>';
+  if(val==='Ahead')return'<span class="chk-dot st-ahead">A</span>';
+  if(val==='Absent')return'<span class="chk-dot st-absent">–</span>';
+  return'<span class="chk-dot st-empty"></span>';
 }
 
 function finalPill(val){
@@ -310,6 +415,7 @@ function getTownhalls() {
 }
 
 function render(){
+  renderStats();
   const wsFilter = document.getElementById('wsFilter').value;
   const sort     = document.getElementById('sortSel').value;
   let workshops  = WORKSHOPS[currentLevel]||[];
@@ -349,12 +455,16 @@ function render(){
     <div class="extras-list">${townhallHtml}</div>
   </div>`;
 
+  const due = getDueThisWeek();
   document.getElementById('page').innerHTML = townhallBlock + workshops.map(ws=>{
     const passCount = students.filter(s=>getFinal(s.n,ws.name)==='Passed').length;
     const pct = Math.round(passCount/students.length*100);
 
     const headerRow = `<th style="min-width:160px">Student</th>
-      ${CHECKPOINTS.map(c=>`<th class="chk-th">${c.label}</th>`).join('')}
+      ${CHECKPOINTS.map(c=>{
+        const isDue=due&&due.type==='checkpoint'&&due.key===c.key;
+        return`<th class="chk-th${isDue?' chk-th-due':''}">${c.label}${isDue?'<span class="due-col-badge">DUE</span>':''}</th>`;
+      }).join('')}
       <th>Status</th>`;
 
     const bodyRows = students.map(s=>{
