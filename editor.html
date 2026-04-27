@@ -149,6 +149,25 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .score-btn.active-ahead{background:rgba(167,139,250,.15);color:var(--ahead);}
 
 /* ── DASHBOARD TAB ── */
+.dash-stats-card{margin:14px 28px 0;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 18px;}
+.dash-stats-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.dash-stats-week{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:2px 8px;border-radius:4px;letter-spacing:.07em;}
+.dash-stats-due{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:.04em;}
+.dash-stats-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.dash-stats-bar-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);white-space:nowrap;min-width:160px;}
+.dash-stats-bar{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
+.dash-stats-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s;}
+.stat-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.stat-pill{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;padding:3px 9px;border-radius:5px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.sp-n{font-size:13px;font-weight:700;}
+.sp-behind{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);}
+.sp-track{background:rgba(96,165,250,.12);color:var(--accent2);border:1px solid rgba(96,165,250,.25);}
+.sp-ahead{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.25);}
+.sp-empty{background:rgba(74,96,128,.08);color:var(--muted2);border:1px solid rgba(74,96,128,.2);}
+.sp-yes{background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.25);}
+.sp-no{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);}
+.sp-head{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 4px;}
+.sp-sep{color:var(--border2);font-size:16px;font-weight:200;line-height:1;}
 .dash-grid{padding:16px 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
 .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;}
 .dash-card:hover{border-color:var(--border2);transform:translateY(-2px);}
@@ -170,6 +189,13 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .dot-absent{background:rgba(251,191,36,.2);color:var(--absent);border:1px solid rgba(251,191,36,.4);}
 .dot-empty{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
 .dash-notes-preview{padding:8px 14px 12px;font-size:11px;color:var(--muted2);font-style:italic;border-top:1px solid var(--border);line-height:1.5;}
+.dash-week-row{padding:6px 14px 8px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
+.card-wk-pill{font-family:'DM Mono',monospace;font-size:8px;font-weight:600;padding:2px 7px;border-radius:4px;white-space:nowrap;}
+.pill-beh{background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3);}
+.pill-ot{background:rgba(96,165,250,.15);color:var(--accent2);border:1px solid rgba(96,165,250,.3);}
+.pill-ah{background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3);}
+.pill-pass{background:rgba(52,211,153,.15);color:#34d399;border:1px solid rgba(52,211,153,.3);}
+.pill-mt{background:rgba(74,96,128,.1);color:var(--muted2);border:1px solid rgba(74,96,128,.2);}
 
 /* ── STUDENT DETAIL MODAL ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,10,.85);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);}
@@ -307,10 +333,10 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 </head>
 <body>
 <div class="site-nav dark">
-  <a href="https://session5-progress.vercel.app/index.html" class="sn-link home">Home</a>
+  <a href="https://session5-progress.vercel.app/" class="sn-link home">Home</a>
   <a href="https://t2p-dashboard.vercel.app/tracker.html" class="sn-link" target="_blank" rel="noopener noreferrer">T2P Tracker</a>
   <a href="https://t2p-dashboard.vercel.app/workshops.html" class="sn-link" target="_blank" rel="noopener noreferrer">Workshop Directory</a>
-  <a href="https://session5-progress.vercel.app/session5.html" class="sn-link">Session 5</a>
+  <a href="https://session5-progress.vercel.app/session5.html" class="sn-link">Session 5 Data</a>
   <a href="https://session5-progress.vercel.app/editor.html" class="sn-link active">Staff Login</a>
 </div><!-- LOGIN -->
 <div id="login-screen">
@@ -382,7 +408,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
     <div class="toolbar" style="border-top:none;">
       <span class="tlbl">Level</span>
       <select id="dash-level" onchange="renderDashboard()">
-        <option value="">All</option>
+        <option value="">All levels</option>
         <option value="LL">LL</option>
         <option value="L1">L1</option>
         <option value="L2">L2</option>
@@ -390,6 +416,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
       </select>
       <span class="count-pill" id="dash-count"></span>
     </div>
+    <div id="dash-stats"></div>
     <div class="dash-grid" id="dash-grid"></div>
   </div>
 
@@ -531,6 +558,36 @@ function chkMiniClass(val){
   if(!val)return'chk-e';if(val==='Passed')return'chk-p';if(val==='On Track')return'chk-t';
   if(val==='Ahead')return'chk-a-h';if(val==='Behind')return'chk-b';return'chk-ab';
 }
+function getCurrentSessionWeek(){
+  const start=new Date('2026-04-27');
+  const now=new Date();
+  const diff=Math.floor((now-start)/(1000*60*60*24));
+  if(diff<0)return 0;
+  const w=Math.floor(diff/7)+1;
+  return w>7?8:w;
+}
+function getDueThisWeek(){
+  const w=getCurrentSessionWeek();
+  if(w===1)return{type:'checkpoint',key:'w1'};
+  if(w===2)return{type:'3cs',key:'w2'};
+  if(w===3)return{type:'checkpoint',key:'w3'};
+  if(w===4)return{type:'3cs',key:'w4'};
+  if(w===5)return{type:'checkpoint',key:'w5'};
+  if(w===6)return{type:'3cs',key:'w6'};
+  if(w===7)return{type:'checkpoint',key:'w7'};
+  return null;
+}
+function saveCoaching(sSlug,wsSlug,ck,val){
+  const sName=nameFromSlug(sSlug);
+  const s=STUDENTS.find(s=>slug(s.n)===sSlug);
+  const ws=(S5_WORKSHOPS[s?.l]||[]).find(w=>slug(w.name)===wsSlug);
+  const wsKey=ws?ws.name:wsSlug;
+  if(!s5data.__coaching__)s5data.__coaching__={};
+  if(!s5data.__coaching__[sName])s5data.__coaching__[sName]={};
+  if(!s5data.__coaching__[sName][wsKey])s5data.__coaching__[sName][wsKey]={};
+  s5data.__coaching__[sName][wsKey][ck]=val;
+  saveAll();
+}
 
 // ── Login ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -584,6 +641,7 @@ async function loadData(){
       if(!s5data.__deliverables__)s5data.__deliverables__={};
       if(!s5data.__wsmeetings__)s5data.__wsmeetings__={};
       if(!s5data.__townhalls__)s5data.__townhalls__=[];
+      if(!s5data.__coaching__)s5data.__coaching__={};
     }
   }catch(e){}
   renderList();
@@ -708,6 +766,13 @@ function setCheckpointBySlug(btn){
   const ws=(S5_WORKSHOPS[s?.l]||[]).find(w=>slug(w.name)===btn.dataset.wsslug);
   const wsKey=ws?ws.name:btn.dataset.wsslug;
   setCheckpoint(sName,wsKey,btn.dataset.ck,btn.dataset.val,btn);
+  if(btn.dataset.ck!=='w7'){
+    const coachDiv=document.getElementById(`coach-${btn.dataset.sslug}-${btn.dataset.wsslug}-${btn.dataset.ck}`);
+    if(coachDiv){
+      const isNowBehind=s5data[sName]?.[chkKey(wsKey,btn.dataset.ck)]==='Behind';
+      coachDiv.style.display=isNowBehind?'block':'none';
+    }
+  }
 }
 function openAssignBySlug(sl){ openAssign(nameFromSlug(sl)); }
 function clearPhotoBySlug(sl,ev){ clearPhoto(nameFromSlug(sl),ev); }
@@ -760,11 +825,16 @@ function renderList(){
       const wsKey=ws.name;const cur=scores[wsKey];
       // Use data attributes instead of inline string escaping
       const wsSlug=slug(wsKey);
+      const due=getDueThisWeek();
       const chkRows=CHECKPOINTS.map(chk=>{
         const kv=scores[chkKey(wsKey,chk.key)];
         const opts=getChkOptions(chk.key);
         const btns=opts.map(opt=>`<button class="score-btn ${kv===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" data-ck="${chk.key}" onclick="setCheckpointBySlug(this)">${opt.label}</button>`).join('');
-        return`<div class="score-line" style="padding-left:12px;opacity:.85;"><span class="score-ws-name" style="color:var(--muted);font-size:11px">↳ ${chk.label}</span><div class="score-btns">${btns}</div></div>`;
+        const isDue=due&&due.type==='checkpoint'&&due.key===chk.key;
+        const dueBadge=isDue?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:600;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.05em">DUE THIS WEEK</span>`:'';
+        const coaching=s5data.__coaching__?.[s.n]?.[wsKey]?.[chk.key]||'';
+        const coachDiv=chk.key!=='w7'?`<div id="coach-${sl}-${wsSlug}-${chk.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:36px;font-size:11px;" placeholder="Coaching / action plan to get back on track…" onchange="saveCoaching('${sl}','${wsSlug}','${chk.key}',this.value)">${coaching}</textarea></div>`:'';
+        return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${coachDiv}`;
       }).join('');
       const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
       const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" onclick="setScoreBySlug(this)">${opt.label}</button>`).join('');
@@ -785,7 +855,7 @@ function renderList(){
           <div class="row-meta"><span id="guides-${sl}">${guideTagsHtml}</span>${s.note?`<span style="color:var(--muted);font-style:italic">* ${s.note}</span>`:''}</div>
         </div>
         <div class="row-actions">
-          ${s.patchUrl?`<a target="_blank" href="${s.patchUrl}" class="patch-link">Patches ↗</a>`:''}
+          <a target="_blank" rel="noopener noreferrer" href="${s.patchUrl||'https://t2p-dashboard.vercel.app/tracker.html'}" class="patch-link">T2P ↗</a>
           <button class="row-btn" data-sslug="${sl}" onclick="openAssignBySlug(this.dataset.sslug)">Guides</button>
           <button class="row-btn" id="toggle-${sl}" data-sslug="${sl}" onclick="toggleRow(this.dataset.sslug)">▼ Expand</button>
         </div>
@@ -816,12 +886,94 @@ function saveProfile(sName){
   logAudit('profile',sName,'notes','updated');
 }
 
+// ── Dashboard stats ───────────────────────────────────────────────
+function renderDashboardStats(students){
+  const container=document.getElementById('dash-stats');
+  if(!container)return;
+  const due=getDueThisWeek();
+  const weekNum=getCurrentSessionWeek();
+  if(weekNum<=0||weekNum>7||!due){container.innerHTML='';return;}
+  const total=students.length;
+  let html='';
+
+  if(due.type==='checkpoint'){
+    const ck=due.key;
+    const ckLabel=CHECKPOINTS.find(c=>c.key===ck)?.label||ck;
+    let behind=0,onTrack=0,ahead=0,withData=0;
+    students.forEach(s=>{
+      const sc=s5data[s.n]||{};
+      const ws=S5_WORKSHOPS[s.l]||[];
+      let hasBehind=false,hasTrack=false,hasAhead=false,hasAny=false;
+      ws.forEach(w=>{
+        const v=sc[chkKey(w.name,ck)];
+        if(v){hasAny=true;if(v==='Behind')hasBehind=true;else if(v==='On Track')hasTrack=true;else if(v==='Ahead')hasAhead=true;}
+      });
+      if(hasAny)withData++;
+      if(hasBehind)behind++;else if(hasTrack)onTrack++;else if(hasAhead)ahead++;
+    });
+    const pct=total>0?Math.round(withData/total*100):0;
+    html=`<div class="dash-stats-card">
+      <div class="dash-stats-hdr">
+        <span class="dash-stats-week">Week ${weekNum}</span>
+        <span class="dash-stats-due">Due this week · ${ckLabel}</span>
+      </div>
+      <div class="dash-stats-bar-row">
+        <span class="dash-stats-bar-lbl">${withData} / ${total} students have data</span>
+        <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="stat-pills">
+        <span class="stat-pill sp-behind"><span class="sp-n">${behind}</span>Behind</span>
+        <span class="stat-pill sp-track"><span class="sp-n">${onTrack}</span>On Track</span>
+        <span class="stat-pill sp-ahead"><span class="sp-n">${ahead}</span>Ahead</span>
+        <span class="stat-pill sp-empty"><span class="sp-n">${total-withData}</span>No data yet</span>
+      </div>
+    </div>`;
+  } else {
+    const wk=due.key;
+    let withData=0,lovesY=0,lovesN=0,l2xAll=0,l2xSome=0,l2xNone=0,t2pY=0,t2pN=0;
+    students.forEach(s=>{
+      const d=s5data.__3cs__?.[s.n]?.[wk]||{};
+      if(d.lovesSchool||d.learning2x||d.onTrack)withData++;
+      if(d.lovesSchool==='Yes')lovesY++;else if(d.lovesSchool==='No')lovesN++;
+      if(d.learning2x==='All at 2x')l2xAll++;else if(d.learning2x==='Some at 2x')l2xSome++;else if(d.learning2x==='None at 2x')l2xNone++;
+      if(d.onTrack==='Yes')t2pY++;else if(d.onTrack==='No')t2pN++;
+    });
+    const pct=total>0?Math.round(withData/total*100):0;
+    html=`<div class="dash-stats-card">
+      <div class="dash-stats-hdr">
+        <span class="dash-stats-week">Week ${weekNum}</span>
+        <span class="dash-stats-due">Due this week · 3 Commitments</span>
+      </div>
+      <div class="dash-stats-bar-row">
+        <span class="dash-stats-bar-lbl">${withData} / ${total} students have data</span>
+        <div class="dash-stats-bar"><div class="dash-stats-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="stat-pills">
+        <span class="sp-head">Love School</span>
+        <span class="stat-pill sp-yes"><span class="sp-n">${lovesY}</span>Yes</span>
+        <span class="stat-pill sp-no"><span class="sp-n">${lovesN}</span>No</span>
+        <span class="sp-sep">|</span>
+        <span class="sp-head">Learning 2x</span>
+        <span class="stat-pill sp-track"><span class="sp-n">${l2xAll}</span>All at 2x</span>
+        <span class="stat-pill sp-track" style="opacity:.65"><span class="sp-n">${l2xSome}</span>Some</span>
+        <span class="stat-pill sp-no"><span class="sp-n">${l2xNone}</span>None</span>
+        <span class="sp-sep">|</span>
+        <span class="sp-head">T2P</span>
+        <span class="stat-pill sp-yes"><span class="sp-n">${t2pY}</span>On track</span>
+        <span class="stat-pill sp-no"><span class="sp-n">${t2pN}</span>Behind</span>
+      </div>
+    </div>`;
+  }
+  container.innerHTML=html;
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────
 function renderDashboard(){
   const lf=document.getElementById('dash-level').value;
   let students=[...STUDENTS].sort((a,b)=>{const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l);return d||a.n.localeCompare(b.n);});
   if(lf)students=students.filter(s=>s.l===lf);
   document.getElementById('dash-count').textContent=`${students.length} students`;
+  renderDashboardStats(students);
 
   document.getElementById('dash-grid').innerHTML=students.map(s=>{
     const photo=s5data.__photos__?.[s.n];
@@ -848,6 +1000,29 @@ function renderDashboard(){
 
     const notesPreview=profile.notes?`<div class="dash-notes-preview">${profile.notes.substring(0,80)}${profile.notes.length>80?'…':''}</div>`:'';
 
+    // Week status row
+    const due=getDueThisWeek();const weekNum=getCurrentSessionWeek();
+    let weekHtml='';
+    if(due&&weekNum>0&&weekNum<=7){
+      if(due.type==='checkpoint'){
+        const ck=due.key;let beh=0,ot=0,ah=0,filled=0;
+        levelWs.forEach(ws=>{const v=scores[chkKey(ws.name,ck)];if(v){filled++;if(v==='Behind')beh++;else if(v==='On Track')ot++;else if(v==='Ahead')ah++;}});
+        const tot=levelWs.length;
+        if(filled>0){
+          weekHtml=`<div class="dash-week-row">${beh>0?`<span class="card-wk-pill pill-beh">${beh} Behind</span>`:''}${ot>0?`<span class="card-wk-pill pill-ot">${ot} On Track</span>`:''}${ah>0?`<span class="card-wk-pill pill-ah">${ah} Ahead</span>`:''}${filled<tot?`<span class="card-wk-pill pill-mt">${tot-filled} missing</span>`:''}</div>`;
+        } else {
+          weekHtml=`<div class="dash-week-row"><span class="card-wk-pill pill-mt">W${weekNum} not entered</span></div>`;
+        }
+      } else {
+        const d=s5data.__3cs__?.[s.n]?.[due.key]||{};
+        if(d.lovesSchool||d.learning2x||d.onTrack){
+          weekHtml=`<div class="dash-week-row">${d.lovesSchool?`<span class="card-wk-pill ${d.lovesSchool==='Yes'?'pill-ot':'pill-beh'}">School: ${d.lovesSchool}</span>`:''} ${d.onTrack?`<span class="card-wk-pill ${d.onTrack==='Yes'?'pill-ot':'pill-beh'}">T2P: ${d.onTrack}</span>`:''} ${d.learning2x?`<span class="card-wk-pill pill-ot">2x: ${d.learning2x.split(' ')[0]}</span>`:''}</div>`;
+        } else {
+          weekHtml=`<div class="dash-week-row"><span class="card-wk-pill pill-mt">W${weekNum} 3C not entered</span></div>`;
+        }
+      }
+    }
+
     return`<div class="dash-card" onclick="openDetail('${safeN}')">
       <div class="dash-card-hdr">
         ${avatarHtml}
@@ -860,6 +1035,7 @@ function renderDashboard(){
         <div class="dash-s5-label">S5 Workshops</div>
         <div class="dash-progress">${dots}</div>
       </div>
+      ${weekHtml}
       ${notesPreview}
     </div>`;
   }).join('');
@@ -905,8 +1081,15 @@ function renderDmBody(){
   let html='';
 
   if(currentDmTab==='progress'){
+    const due=getDueThisWeek();
+    const weekNum=getCurrentSessionWeek();
+    let weekBanner='';
+    if(weekNum>0&&weekNum<=7){
+      const dueLabel=due?due.type==='checkpoint'?CHECKPOINTS.find(c=>c.key===due.key)?.label:'3 Commitments check-in':'—';
+      weekBanner=`<div style="font-family:'DM Mono',monospace;font-size:10px;padding:7px 12px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:6px;color:#fbbf24;margin-bottom:12px;letter-spacing:.04em">Week ${weekNum} · Due this week: ${dueLabel}</div>`;
+    }
     // S5 workshops with checkpoint dots
-    html=`<div style="display:flex;flex-direction:column;gap:6px">`;
+    html=weekBanner+`<div style="display:flex;flex-direction:column;gap:6px">`;
     levelWs.forEach(ws=>{
       const final=scores[ws.name];
       const finalCls=final==='Passed'?'st-pass':final==='Not passed'?'st-fail':final==='Absent'?'st-absent':'st-na';
@@ -938,10 +1121,12 @@ function renderDmBody(){
     const wkLabels = {w2:'Week 2',w4:'Week 4',w6:'Week 6'};
     const threeCs=s5data.__3cs__?.[name]||{};
 
+    const due=getDueThisWeek();
     const weekForms = wks.map(wk => {
       const d = threeCs[wk]||{};
-      return `<div style="margin-bottom:20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
-        <div style="padding:8px 14px;background:var(--surface3);border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);font-weight:600;letter-spacing:.07em;text-transform:uppercase;">${wkLabels[wk]}</div>
+      const isDue3c=due&&due.type==='3cs'&&due.key===wk;
+      return `<div style="margin-bottom:20px;background:var(--surface2);border:1px solid ${isDue3c?'rgba(251,191,36,.35)':'var(--border)'};border-radius:10px;overflow:hidden;">
+        <div style="padding:8px 14px;background:${isDue3c?'rgba(251,191,36,.08)':'var(--surface3)'};border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;color:${isDue3c?'#fbbf24':'var(--accent2)'};font-weight:600;letter-spacing:.07em;text-transform:uppercase;">${wkLabels[wk]}${isDue3c?`<span style="margin-left:8px;font-size:8px;background:rgba(251,191,36,.15);padding:2px 6px;border-radius:4px;border:1px solid rgba(251,191,36,.3)">DUE THIS WEEK</span>`:''}</div>
         <div style="padding:12px 14px;display:flex;flex-direction:column;gap:12px;">
 
           <div>
