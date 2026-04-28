@@ -659,18 +659,7 @@ function toggleSkipWs(wsSlug,checked){
   saveAll();
 }
 
-// ── Who picker ───────────────────────────────────────────────────
-function buildWhoDrop(){
-  const dd=document.getElementById('who-dropdown');
-  dd.innerHTML=`<div class="who-opt who-opt-admin" onmousedown="selectWho('Admin')">★ Admin</div>`
-    +STAFF_SORTED.map(s=>`<div class="who-opt" onmousedown="selectWho('${s.replace(/'/g,"\\'")}')"> ${s}</div>`).join('');
-}
-function toggleWhoDrop(){
-  const dd=document.getElementById('who-dropdown');
-  if(!dd.classList.contains('open')){buildWhoDrop();dd.classList.add('open');}
-  else dd.classList.remove('open');
-}
-function hideWhoDrop(){setTimeout(()=>document.getElementById('who-dropdown').classList.remove('open'),150);}
+
 
 const GUIDE_INITIALS={
   'Chauncey':'CN','Emily':'EL','Eric Salgado':'ES','Fiadh Hogan':'FH',
@@ -702,7 +691,6 @@ function updateChipStates(){
 }
 
 function selectWho(name){
-  document.getElementById('who-dropdown').classList.remove('open');
   if(name==='Admin'){
     document.getElementById('admin-pass-input').value='';
     document.getElementById('admin-pass-err').textContent='';
