@@ -31,7 +31,7 @@ body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50
 .s5-week-bar{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;}
 .ph-week-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:4px 12px;border-radius:4px;}
 .ph-due-now{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.4);padding:4px 12px;border-radius:4px;}
-.ph-due-next{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);padding:4px 10px;border-radius:4px;border:1px solid var(--border2);background:var(--surface2);}
+.ph-due-next{font-family:'DM Mono',monospace;font-size:10px;color:#7dd3fc;padding:4px 10px;border-radius:4px;border:1px solid rgba(125,211,252,.3);background:rgba(125,211,252,.07);}
 .s5-enter-btn{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;background:#1a56db;color:white;border:none;padding:5px 14px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:background .15s;}
 .s5-enter-btn:hover{background:#1745c0;}
 .s5-hist-link{padding:12px 0 18px;text-align:center;}
@@ -379,7 +379,7 @@ function renderStats(){
     ?`<div class="s5-week-bar">
         <span class="ph-week-badge">Week ${weekNum} · ${weekDateRange(weekNum)}</span>
         ${dueLabel?`<span class="ph-due-now">Due this week: ${dueLabel}</span>`:''}
-        ${nextDueLabel?`<span class="ph-due-next">Up next W${getCurrentSessionWeek()+1}: ${nextDueLabel}</span>`:''}
+        ${nextDueLabel?`<span class="ph-due-next">Due next week: ${nextDueLabel}</span>`:''}
         <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
       </div>`
     :`<div class="s5-week-bar"><span class="ph-week-badge">Session ${weekNum>7?'Complete':'Starting'}</span></div>`;
