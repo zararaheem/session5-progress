@@ -999,13 +999,15 @@ function renderList(){
       const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
       const finalWho=isSuperAdmin&&cur&&s5data.__who__?.[s.n]?.[ws]?`<span class="by-tag">${initials(s5data.__who__[s.n][ws])}</span>`:'';
       const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" onclick="setScoreBySlug(this)">${opt.label}</button>`).join('')+finalWho;
+      const finalStatusDot=cur?`<span class="score-btn ${cur==='Passed'?'active-pass':cur==='Not passed'?'active-fail':'active-absent'}" style="pointer-events:none;font-size:9px;padding:2px 7px;">${cur==='Passed'?'✓ P':cur==='Not passed'?'✗':'–'}</span>`:'';
+      const finalRow=`<div class="score-line" style="padding:6px 12px;border-top:1px solid var(--border);background:rgba(0,0,0,.06)"><span class="score-ws-name" style="font-size:11px;color:var(--muted)">T2P Final</span><div class="score-btns">${finalBtns}</div></div>`;
       return`<div style="border:1px solid ${wsSkipped?'rgba(251,191,36,.3)':'var(--border)'};border-radius:7px;overflow:hidden;margin-bottom:4px;${wsSkipped?'opacity:.6;':''}">
         <div class="score-line" style="background:var(--surface2);padding:7px 12px;">
           <div style="flex:1"><span style="font-weight:600;color:var(--text);font-size:12px">${ws.code} · ${ws.name}</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-left:8px">${ws.guide} · ${ws.day}</span></div>
           <label style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);cursor:pointer;display:flex;align-items:center;gap:4px;margin-right:10px;white-space:nowrap;" title="Mark this workshop as not collecting data this session"><input type="checkbox" ${wsSkipped?'checked':''} onchange="toggleSkipWs('${wsSlug}',this.checked)"> Skip data</label>
-          <div class="score-btns">${finalBtns}</div>
+          ${finalStatusDot}
         </div>
-        <div style="padding:4px 0 2px">${chkRows||`<div style="padding:5px 14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);opacity:.6">${wsSkipped?'Data collection skipped for this workshop':'No data due yet — check back when this checkpoint week arrives'}</div>`}</div>
+        <div style="padding:4px 0 2px">${chkRows||`<div style="padding:5px 14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);opacity:.6">${wsSkipped?'Data collection skipped for this workshop':'No data due yet — check back when this checkpoint week arrives'}</div>`}${finalRow}</div>
       </div>`;
     }).join('');
 
