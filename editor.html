@@ -138,7 +138,10 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .student-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .15s;}
 .student-row.mine{border-color:rgba(59,130,246,.35);}
 .student-row:hover{border-color:var(--border2);}
-.row-top{padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.row-top{padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);user-select:none;}
+.row-top:active{background:rgba(59,130,246,.07);}
+.row-top .row-chevron{font-size:10px;color:var(--muted);margin-left:auto;transition:transform .2s;}
+.row-top.expanded .row-chevron{transform:rotate(90deg);}
 .student-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--border2);overflow:hidden;}
 .student-avatar img{width:100%;height:100%;object-fit:cover;}
 .student-avatar-initials{width:36px;height:36px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--accent2);flex-shrink:0;}
@@ -942,6 +945,8 @@ function toggleRow(sl){
   const body=document.getElementById(`body-${sl}`);
   if(!body)return;
   body.classList.toggle('open');
+  const top=body.closest('.student-row')?.querySelector('.row-top');
+  if(top)top.classList.toggle('expanded',body.classList.contains('open'));
 }
 
 // ── Render tracker list ───────────────────────────────────────────
@@ -1015,6 +1020,7 @@ function renderList(){
           <a target="_blank" rel="noopener noreferrer" href="${s.patchUrl||'https://t2p-dashboard.vercel.app/tracker.html'}" class="patch-link">Previous T2P data ↗</a>
           <button class="row-btn" data-sslug="${sl}" onclick="openAssignBySlug(this.dataset.sslug)">Guides</button>
         </div>
+        <span class="row-chevron">▶</span>
       </div>
       <div class="row-body" id="body-${sl}">
         <div class="profile-section">
