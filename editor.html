@@ -326,6 +326,13 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .staff-opt.selected{background:rgba(59,130,246,.1);border-color:var(--accent);color:var(--accent2);}
 .staff-check{opacity:0;font-size:13px;}
 .staff-opt.selected .staff-check{opacity:1;}
+.gap-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);}
+.gap-row-name{font-size:12px;font-weight:600;color:var(--text);min-width:130px;flex-shrink:0;}
+.gap-row-guides{display:flex;flex-wrap:wrap;gap:4px;flex:1;}
+.gap-guide-chip{font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:12px;border:1px solid var(--border2);background:var(--surface3);color:var(--muted2);cursor:pointer;transition:all .15s;}
+.gap-guide-chip:hover{border-color:var(--accent);color:var(--accent2);}
+.gap-guide-chip.on{background:rgba(59,130,246,.12);border-color:var(--accent);color:var(--accent2);}
+.gap-level-hdr{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--muted);padding:6px 2px 3px;}
 .assign-cancel{margin-top:8px;width:100%;padding:9px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;}
 .assign-cancel:hover{border-color:var(--muted2);color:var(--text);}
 
@@ -441,6 +448,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
       <option value="MS">MS</option>
     </select>
     <span class="count-pill" id="count-pill"></span>
+    <button class="hdr-btn" style="margin-left:auto;font-size:11px;" onclick="openGuideAssignPanel()">Assign guides</button>
   </div>
 
   <!-- TRACKER TAB -->
@@ -519,6 +527,17 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
     <p>Select all guides for this student</p>
     <div class="staff-grid" id="staff-grid"></div>
     <button class="assign-cancel" onclick="closeAssign()">Done</button>
+  </div>
+</div>
+
+<!-- GUIDE ASSIGN PANEL -->
+<div class="assign-overlay" id="guide-assign-panel" onclick="if(event.target===this)closeGuideAssignPanel()">
+  <div class="assign-box" style="max-width:480px;max-height:80vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <h3 style="margin:0">Assign guides</h3>
+      <button class="assign-cancel" style="margin:0;width:auto;padding:5px 14px;" onclick="closeGuideAssignPanel()">Done</button>
+    </div>
+    <div id="gap-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
   </div>
 </div>
 
@@ -889,6 +908,36 @@ function toggleGuide(staff){
 }
 function closeAssign(){document.getElementById('assign-overlay').classList.remove('open');assigningStudent=null;}
 
+// ── Bulk guide assignment panel ───────────────────────────────────
+function openGuideAssignPanel(){
+  const container=document.getElementById('gap-list');
+  let html='';
+  LEVEL_ORDER.forEach(lvl=>{
+    const lvlStudents=STUDENTS.filter(s=>s.l===lvl&&!s.inactive);
+    if(!lvlStudents.length)return;
+    html+=`<div class="gap-level-hdr">${lvl}</div>`;
+    lvlStudents.forEach(s=>{
+      const guides=getGuides(s);
+      const chips=STAFF_SORTED.map(st=>`<button class="gap-guide-chip ${guides.includes(st)?'on':''}" data-sn="${s.n.replace(/"/g,'&quot;')}" data-staff="${st.replace(/"/g,'&quot;')}" onclick="toggleGapGuide(this)">${chipLabel(st)}</button>`).join('');
+      html+=`<div class="gap-row"><span class="gap-row-name">${s.n}</span><div class="gap-row-guides" id="gap-guides-${slug(s.n)}">${chips}</div></div>`;
+    });
+  });
+  container.innerHTML=html;
+  document.getElementById('guide-assign-panel').classList.add('open');
+}
+function toggleGapGuide(btn){
+  const sName=btn.dataset.sn;const staff=btn.dataset.staff;
+  const stu=STUDENTS.find(s=>s.n===sName);
+  if(!s5data.__guides__[sName])s5data.__guides__[sName]=[...(CFG.levelGuides[stu?.l]||[])];
+  const arr=s5data.__guides__[sName];
+  const idx=arr.indexOf(staff);if(idx===-1)arr.push(staff);else arr.splice(idx,1);
+  document.querySelectorAll(`[data-sn="${sName.replace(/"/g,'\\"')}"].gap-guide-chip`).forEach(c=>c.classList.toggle('on',arr.includes(c.dataset.staff)));
+  const metaEl=document.getElementById(`guides-${slug(sName)}`);
+  if(metaEl)metaEl.innerHTML=arr.map(g=>`<span class="guide-tag">${g}</span>`).join('');
+  logAudit('guide',sName,'guides',arr.join(', '));
+}
+function closeGuideAssignPanel(){document.getElementById('guide-assign-panel').classList.remove('open');}
+
 // ── Photo ──────────────────────────────────────────────────────────
 function handlePhotoUpload(sName,input){
   const file=input.files[0];if(!file)return;
@@ -1024,7 +1073,6 @@ function renderList(){
         </div>
         <div class="row-actions" onclick="event.stopPropagation()">
           <a target="_blank" rel="noopener noreferrer" href="${s.patchUrl||'https://t2p-dashboard.vercel.app/tracker.html'}" class="patch-link">Previous T2P data ↗</a>
-          <button class="row-btn" data-sslug="${sl}" onclick="openAssignBySlug(this.dataset.sslug)">Guides</button>
         </div>
         <span class="row-chevron">▶</span>
       </div>
@@ -1747,7 +1795,7 @@ function openAudit(){
 function closeAudit(){document.getElementById('audit-overlay').classList.remove('open');document.body.style.overflow='';}
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeAssign();closeAudit();closeDetail();closeAdminPass();}
+  if(e.key==='Escape'){closeAssign();closeAudit();closeDetail();closeAdminPass();closeGuideAssignPanel();}
 });
 </script>
 </body>
