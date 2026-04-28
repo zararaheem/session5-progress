@@ -11,8 +11,8 @@ const T2P_CONFIG = {
   // Staff list (auto-sorted alphabetically)
   staff: [
     "Chauncey", "Emily", "Jenna K.", "Jenna P.",
-    "Jesse", "Julianne", "Liam", "Nancy", "Nathan",
-    "Parthvi", "Tasha", "Zara"
+    "Jesse", "Liam", "Nathan",
+    "Parthvi"
   ].sort(),
 
   // ── Level → Guide assignments ─────────────────────────────────
@@ -31,7 +31,7 @@ const T2P_CONFIG = {
     emailjsServiceId:  "YOUR_SERVICE_ID",
     emailjsTemplateId: "YOUR_TEMPLATE_ID",
     emailjsPublicKey:  "YOUR_PUBLIC_KEY",
-    notifyEmail: "zara@alpha.school",
+    notifyEmail: "zara.raheem@alpha.school",
     notifyName:  "Zara",
   },
 
