@@ -408,7 +408,7 @@ function renderStats(){
   // "All" card
   function levelPills(ls){
     if(ls.type==='checkpoint')return(ls.behind>0?`<span class="lvc-pill" style="background:rgba(220,38,38,.12);color:#f87171;border:1px solid rgba(252,165,165,.25);">${ls.behind} Behind</span>`:'')+
-      (ls.track>0?`<span class="lvc-pill" style="background:rgba(29,78,216,.12);color:#60a5fa;border:1px solid rgba(147,197,253,.25);">${ls.track} On Track</span>`:'')+
+      (ls.track>0?`<span class="lvc-pill" style="background:rgba(22,163,74,.12);color:#4ade80;border:1px solid rgba(134,239,172,.25);">${ls.track} On Track</span>`:'')+
       (ls.ahead>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">${ls.ahead} Ahead</span>`:'');
     if(ls.type==='3cs')return`<span class="lvc-pill" style="background:rgba(29,78,216,.12);color:#60a5fa;border:1px solid rgba(147,197,253,.25);">${ls.lovesY||0} Love</span>`+
       `<span class="lvc-pill" style="background:rgba(29,78,216,.12);color:#60a5fa;border:1px solid rgba(147,197,253,.25);">${ls.l2xGood||0} 2×</span>`+
