@@ -64,6 +64,7 @@ const T2P_CONFIG = {
 
     // ── LL ──────────────────────────────────────────────────────
     { n: "Colm Bowen",               l: "LL" },
+    { n: "Fiadh Hogan",              l: "LL", note: "Joined S5" },
     { n: "Harper Lembo",             l: "LL" },
     { n: "Hildy (Alice) Grimm",      l: "LL" },
     { n: "Oliver McLeod",            l: "LL", note: "Joined S4" },

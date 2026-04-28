@@ -16,7 +16,7 @@ const T2P_CONFIG = {
     {key:"w5",label:"Week 5: Checkpoint 2"},{key:"w7",label:"Week 7: T2P"},
   ],
   students: [
-    {n:"Colm Bowen",l:"LL"},{n:"Harper Lembo",l:"LL"},{n:"Hildy (Alice) Grimm",l:"LL"},{n:"Oliver McLeod",l:"LL",note:"Joined S4"},
+    {n:"Colm Bowen",l:"LL"},{n:"Fiadh Hogan",l:"LL",note:"Joined S5"},{n:"Harper Lembo",l:"LL"},{n:"Hildy (Alice) Grimm",l:"LL"},{n:"Oliver McLeod",l:"LL",note:"Joined S4"},
     {n:"Ada Cone",l:"L1"},{n:"Blake Richheimer",l:"L1"},{n:"Conan Hogan",l:"L1"},{n:"Harvey Caulin",l:"L1",note:"Joined S4"},
     {n:"Lola Propp",l:"L1"},{n:"London Politi",l:"L1"},{n:"Oleander Poulson",l:"L1",note:"Joined S4"},
     {n:"Raika Ackman",l:"L1"},{n:"Van McDavid",l:"L1"},{n:"Vasilios Giannopoulos",l:"L1",note:"Joined S2"},
@@ -62,11 +62,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 /* GUIDE BANNER */
 .guide-banner{padding:10px 28px;background:rgba(59,130,246,.05);border-bottom:1px solid rgba(59,130,246,.12);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .guide-chips{display:flex;flex-wrap:wrap;gap:6px;}
-.guide-chip{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border2);background:var(--surface2);color:var(--muted2);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;padding:0;letter-spacing:.02em;}
+.guide-chip{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:5px 13px;border-radius:20px;border:1.5px solid var(--border2);background:var(--surface2);color:var(--muted2);cursor:pointer;transition:all .2s;}
 .guide-chip:hover{border-color:var(--accent);color:var(--accent2);background:rgba(59,130,246,.1);}
 .guide-chip.selected{border-color:var(--accent);background:rgba(59,130,246,.18);color:var(--accent2);box-shadow:0 0 0 2px rgba(59,130,246,.2);}
 .guide-chip.dimmed{opacity:0.28;}
-.guide-chip.admin-chip{width:auto;padding:0 12px;border-radius:20px;border-color:rgba(129,140,248,.35);color:#818cf8;font-size:12px;}
+.guide-chip.admin-chip{border-color:rgba(129,140,248,.35);color:#818cf8;}
 .guide-chip.admin-chip:hover{background:rgba(129,140,248,.12);color:#a5b4fc;}
 .guide-chip.admin-chip.selected{border-color:#818cf8;background:rgba(129,140,248,.18);color:#a5b4fc;box-shadow:0 0 0 2px rgba(129,140,248,.2);}
 .by-tag{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:4px;margin-left:4px;}
@@ -601,7 +601,7 @@ let currentDetailStudent=null, currentDmTab='progress';
 
 // ── Helpers ──────────────────────────────────────────────────────
 function slug(n){return n.replace(/[^a-zA-Z0-9]/g,'_');}
-function initials(n){return n.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase();}
+
 function getGuides(s){
   const ov=s5data.__guides__?.[s.n];
   if(ov&&ov.length)return ov;
@@ -678,15 +678,23 @@ function toggleWhoDrop(){
 }
 function hideWhoDrop(){setTimeout(()=>document.getElementById('who-dropdown').classList.remove('open'),150);}
 
+const GUIDE_INITIALS={
+  'Chauncey':'CN','Emily':'EL','Eric Salgado':'ES','Fiadh Hogan':'FH',
+  'Jenna K.':'JK','Jenna P.':'JP','Jesse':'JE','Julianne':'JU',
+  'Liam':'LS','Nancy':'NA','Nathan':'NW','Parthvi':'PH','Sam McDonald':'SM','Admin':'★'
+};
 function initials(name){
-  const parts=name.trim().split(/[\s.]+/).filter(Boolean);
-  if(parts.length>=2)return(parts[0][0]+parts[parts.length-1][0]).toUpperCase();
-  return name.slice(0,2).toUpperCase();
+  return GUIDE_INITIALS[name]||(name.trim().split(/[\s.]+/).filter(Boolean).length>=2
+    ?(name[0]+name.trim().split(/[\s.]+/).filter(Boolean).pop()[0]).toUpperCase()
+    :name.slice(0,2).toUpperCase());
+}
+function chipLabel(name){
+  return name==='Admin'?'★ Admin':name;
 }
 function buildGuideBanner(){
   document.getElementById('guide-chips').innerHTML=
-    `<button class="guide-chip admin-chip" data-who="Admin" onclick="selectWho('Admin')">★</button>`
-    +STAFF_SORTED.map(s=>`<button class="guide-chip" data-who="${s.replace(/"/g,'&quot;')}" onclick="selectWho('${s.replace(/'/g,"\\'")}')"> ${initials(s)}</button>`).join('');
+    `<button class="guide-chip admin-chip" data-who="Admin" onclick="selectWho('Admin')">★ Admin</button>`
+    +STAFF_SORTED.map(s=>`<button class="guide-chip" data-who="${s.replace(/"/g,'&quot;')}" onclick="selectWho('${s.replace(/'/g,"\\'")}'">${chipLabel(s)}</button>`).join('');
 }
 function updateGuideBanner(){
   document.getElementById('guide-banner').style.display=currentUser?'none':'flex';
