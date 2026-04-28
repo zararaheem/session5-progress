@@ -725,9 +725,6 @@ function closeAdminPass(){document.getElementById('admin-pass-overlay').classLis
 function completeSelectWho(name){
   currentUser=name;
   isSuperAdmin=CFG.superadmins.includes(name);
-  const btn=document.getElementById('who-btn');
-  document.getElementById('who-label').textContent=name==='Admin'?'★ Admin':'👤 '+name;
-  btn.className='who-btn '+(name==='Admin'?'set-admin':'set');
   document.getElementById('superadmin-pill').style.display=isSuperAdmin?'inline-flex':'none';
   document.getElementById('audit-btn').style.display=isSuperAdmin?'inline-flex':'none';
   document.getElementById('activity-tab').style.display=isSuperAdmin?'inline-block':'none';
