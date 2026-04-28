@@ -326,16 +326,25 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .staff-opt.selected{background:rgba(59,130,246,.1);border-color:var(--accent);color:var(--accent2);}
 .staff-check{opacity:0;font-size:13px;}
 .staff-opt.selected .staff-check{opacity:1;}
+.gap-section-hdr{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 2px 4px;}
 .gap-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);}
 .gap-row.lvl-LL{border-color:rgba(232,160,32,.3);background:rgba(232,160,32,.06);}
 .gap-row.lvl-L1{border-color:rgba(232,82,42,.3);background:rgba(232,82,42,.06);}
 .gap-row.lvl-L2{border-color:rgba(42,181,160,.3);background:rgba(42,181,160,.06);}
 .gap-row.lvl-MS{border-color:rgba(224,61,124,.3);background:rgba(224,61,124,.06);}
-.gap-row-level{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;min-width:36px;flex-shrink:0;}
+.gap-row.gap-lead{border-color:rgba(129,140,248,.3);background:rgba(129,140,248,.06);}
+.gap-row.gap-unassigned{border-style:dashed;border-color:var(--border2);}
+.gap-row-level{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;min-width:52px;flex-shrink:0;}
 .gap-row-guides{display:flex;flex-wrap:wrap;gap:6px;flex:1;}
 .gap-guide-chip{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--surface3);color:var(--muted2);cursor:pointer;transition:all .15s;}
-.gap-guide-chip:hover{border-color:var(--accent);color:var(--accent2);}
-.gap-guide-chip.on{background:rgba(59,130,246,.15);border-color:var(--accent);color:var(--accent2);}
+.gap-guide-chip:hover{opacity:.85;}
+.gap-guide-chip.on{font-weight:600;}
+.gap-row.lvl-LL .gap-guide-chip.on{background:rgba(232,160,32,.18);border-color:rgba(232,160,32,.6);color:#f5c55a;}
+.gap-row.lvl-L1 .gap-guide-chip.on{background:rgba(232,82,42,.18);border-color:rgba(232,82,42,.6);color:#f4896a;}
+.gap-row.lvl-L2 .gap-guide-chip.on{background:rgba(42,181,160,.18);border-color:rgba(42,181,160,.6);color:#5dd6c6;}
+.gap-row.lvl-MS .gap-guide-chip.on{background:rgba(224,61,124,.18);border-color:rgba(224,61,124,.6);color:#f07ab0;}
+.gap-row.gap-lead .gap-guide-chip.on{background:rgba(129,140,248,.18);border-color:rgba(129,140,248,.6);color:#a5b4fc;}
+.gap-lvl-chip{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;transition:all .15s;}
 .assign-cancel{margin-top:8px;width:100%;padding:9px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;}
 .assign-cancel:hover{border-color:var(--muted2);color:var(--text);}
 
@@ -917,19 +926,39 @@ function toggleGuide(staff){
 function closeAssign(){document.getElementById('assign-overlay').classList.remove('open');assigningStudent=null;}
 
 // ── Level guide assignment panel ──────────────────────────────────
+const LVL_COLORS={LL:'#f5c55a',L1:'#f4896a',L2:'#5dd6c6',MS:'#f07ab0'};
 function getLevelGuides(lvl){
   if(!s5data.__levelguides__)s5data.__levelguides__={};
   return s5data.__levelguides__[lvl]?[...s5data.__levelguides__[lvl]]:[...(CFG.levelGuides[lvl]||[])];
 }
-function openGuideAssignPanel(){
+function applyLevelGuides(lvl,arr){
+  STUDENTS.filter(s=>s.l===lvl&&!s.inactive).forEach(s=>{
+    s5data.__guides__[s.n]=[...arr];
+    const el=document.getElementById(`guides-${slug(s.n)}`);
+    if(el)el.innerHTML=arr.map(g=>`<span class="guide-tag">${g}</span>`).join('');
+  });
+}
+function renderGuideAssignPanel(){
   if(!s5data.__levelguides__)s5data.__levelguides__={};
-  const container=document.getElementById('gap-list');
-  const lvlTextColors={LL:'#f5c55a',L1:'#f4896a',L2:'#5dd6c6',MS:'#f07ab0'};
-  container.innerHTML=LEVEL_ORDER.map(lvl=>{
+  const allAssigned=new Set(LEVEL_ORDER.flatMap(l=>getLevelGuides(l)));
+  const unassigned=STAFF_SORTED.filter(s=>s!=='Liam'&&!allAssigned.has(s));
+  const unassignedHtml=unassigned.length
+    ?`<div class="gap-section-hdr">Unassigned guides</div>`
+      +unassigned.map(g=>`<div class="gap-row gap-unassigned"><span class="gap-row-level" style="color:var(--muted2)">${chipLabel(g)}</span><div class="gap-row-guides">${LEVEL_ORDER.map(lvl=>`<button class="gap-lvl-chip" style="color:${LVL_COLORS[lvl]};border-color:${LVL_COLORS[lvl]}66" data-guide="${g.replace(/"/g,'&quot;')}" data-lvl="${lvl}" onclick="assignUnassignedToLevel(this)">${lvl}</button>`).join('')}</div></div>`).join('')
+    :'';
+  const liamChips=LEVEL_ORDER.map(lvl=>`<button class="gap-guide-chip ${getLevelGuides(lvl).includes('Liam')?'on':''}" data-staff="Liam" data-lvl="${lvl}" onclick="toggleLevelGuide(this)" style="color:${LVL_COLORS[lvl]}">${lvl}</button>`).join('');
+  const levelRows=LEVEL_ORDER.map(lvl=>{
     const assigned=getLevelGuides(lvl);
-    const chips=STAFF_SORTED.map(st=>`<button class="gap-guide-chip ${assigned.includes(st)?'on':''}" data-lvl="${lvl}" data-staff="${st.replace(/"/g,'&quot;')}" onclick="toggleLevelGuide(this)">${chipLabel(st)}</button>`).join('');
-    return`<div class="gap-row lvl-${lvl}"><span class="gap-row-level" style="color:${lvlTextColors[lvl]||'var(--text)'}">${lvl}</span><div class="gap-row-guides" id="gap-guides-lvl-${lvl}">${chips}</div></div>`;
+    const chips=STAFF_SORTED.filter(s=>s!=='Liam').map(st=>`<button class="gap-guide-chip ${assigned.includes(st)?'on':''}" data-lvl="${lvl}" data-staff="${st.replace(/"/g,'&quot;')}" onclick="toggleLevelGuide(this)">${chipLabel(st)}</button>`).join('');
+    return`<div class="gap-row lvl-${lvl}"><span class="gap-row-level" style="color:${LVL_COLORS[lvl]}">${lvl}</span><div class="gap-row-guides" id="gap-guides-lvl-${lvl}">${chips}</div></div>`;
   }).join('');
+  document.getElementById('gap-list').innerHTML=
+    unassignedHtml
+    +`<div class="gap-section-hdr">Lead Guide</div><div class="gap-row gap-lead"><span class="gap-row-level" style="color:#a5b4fc">Liam</span><div class="gap-row-guides">${liamChips}</div></div>`
+    +`<div class="gap-section-hdr">By Level</div>`+levelRows;
+}
+function openGuideAssignPanel(){
+  renderGuideAssignPanel();
   document.getElementById('guide-assign-panel').classList.add('open');
 }
 function toggleLevelGuide(btn){
@@ -938,14 +967,19 @@ function toggleLevelGuide(btn){
   if(!s5data.__levelguides__[lvl])s5data.__levelguides__[lvl]=[...(CFG.levelGuides[lvl]||[])];
   const arr=s5data.__levelguides__[lvl];
   const idx=arr.indexOf(staff);if(idx===-1)arr.push(staff);else arr.splice(idx,1);
-  // Update all students in this level
-  STUDENTS.filter(s=>s.l===lvl&&!s.inactive).forEach(s=>{
-    s5data.__guides__[s.n]=[...arr];
-    const metaEl=document.getElementById(`guides-${slug(s.n)}`);
-    if(metaEl)metaEl.innerHTML=arr.map(g=>`<span class="guide-tag">${g}</span>`).join('');
-  });
-  document.querySelectorAll(`.gap-guide-chip[data-lvl="${lvl}"]`).forEach(c=>c.classList.toggle('on',arr.includes(c.dataset.staff)));
+  applyLevelGuides(lvl,arr);
   logAudit('guide',lvl,'level guides',arr.join(', '));
+  renderGuideAssignPanel();
+}
+function assignUnassignedToLevel(btn){
+  const guide=btn.dataset.guide;const lvl=btn.dataset.lvl;
+  if(!s5data.__levelguides__)s5data.__levelguides__={};
+  if(!s5data.__levelguides__[lvl])s5data.__levelguides__[lvl]=[...(CFG.levelGuides[lvl]||[])];
+  const arr=s5data.__levelguides__[lvl];
+  if(!arr.includes(guide))arr.push(guide);
+  applyLevelGuides(lvl,arr);
+  logAudit('guide',lvl,'level guides',arr.join(', '));
+  renderGuideAssignPanel();
 }
 function closeGuideAssignPanel(){document.getElementById('guide-assign-panel').classList.remove('open');}
 
