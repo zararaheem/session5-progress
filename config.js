@@ -10,9 +10,9 @@ const T2P_CONFIG = {
 
   // Staff list (auto-sorted alphabetically)
   staff: [
-    "Chauncey", "Emily", "Jenna K.", "Jenna P.",
+    "Chauncey", "Emily", "Eric Salgado", "Jenna K.", "Jenna P.",
     "Jesse", "Liam", "Nathan",
-    "Parthvi"
+    "Parthvi", "Sam McDonald"
   ].sort(),
 
   // ── Level → Guide assignments ─────────────────────────────────

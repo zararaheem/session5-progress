@@ -9,7 +9,7 @@
 const T2P_CONFIG = {
   password: "nyc2025",
   superadmins: ["Admin","Liam"],
-  staff: ["Chauncey","Emily","Eric Salgado","Jenna K.","Jenna P.","Jesse","Julianne","Liam","Nancy","Nathan","Parthvi","Sam McDonald"].sort(),
+  staff: ["Chauncey","Emily","Eric Salgado","Jenna K.","Jenna P.","Jesse","Liam","Nathan","Parthvi","Sam McDonald"].sort(),
   levelGuides: { LL:["Jenna K.","Jesse"], L1:["Parthvi","Nathan"], L2:["Jenna P."], MS:["Emily","Chauncey"] },
   checkpoints: [
     {key:"w1",label:"Week 1 Baseline"},{key:"w3",label:"Week 3: Checkpoint 1"},
@@ -414,7 +414,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
   <!-- TAB BAR -->
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('tracker',this)">Tracker</button>
-    <button class="tab-btn" onclick="switchTab('dashboard',this)">Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('dashboard',this)">Data Tracker</button>
     <button class="tab-btn" id="ws-data-tab" style="display:none" onclick="switchTab('wsdata',this)">Workshop Data</button>
     <button class="tab-btn" id="activity-tab" style="display:none" onclick="switchTab('activity',this)">Activity<span class="tab-badge" id="activity-badge" style="display:none">0</span></button>
   </div>
@@ -503,7 +503,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
     </div>
     <div class="dm-tabs">
       <button class="dm-tab active" onclick="switchDmTab('progress',this)">S5 Progress</button>
-      <button class="dm-tab" onclick="switchDmTab('3cs',this)">3 Commitments</button>
+      <button class="dm-tab" onclick="switchDmTab('3cs',this)">3Cs</button>
       <button class="dm-tab" onclick="switchDmTab('meetings',this)">Meetings</button>
       <button class="dm-tab" onclick="switchDmTab('notes',this)">Notes</button>
       <button class="dm-tab" id="ws-tab" style="display:none" onclick="switchDmTab('wsdelivery',this)">Workshops</button>
@@ -558,7 +558,7 @@ if(!CFG.superadmins)CFG.superadmins=[];
 if(!CFG.levelGuides)CFG.levelGuides={};
 
 // Users who see ALL students by default (no filter)
-const SEE_ALL = ['Admin','Liam','Julianne'];
+const SEE_ALL = ['Admin','Liam'];
 const WS_DATA_EDITOR = 'Admin';
 
 const STAFF_SORTED = [...(CFG.staff||[])].sort();
@@ -667,7 +667,7 @@ function toggleSkipWs(wsSlug,checked){
 const GUIDE_INITIALS={
   'Chauncey':'CN','Emily':'EL','Eric Salgado':'ES','Fiadh Hogan':'FH',
   'Jenna K.':'JK','Jenna P.':'JP','Jesse':'JE','Julianne':'JU',
-  'Liam':'LS','Nancy':'NA','Nathan':'NW','Parthvi':'PH','Sam McDonald':'SM','Admin':'★'
+  'Liam':'LS','Nathan':'NW','Parthvi':'PH','Sam McDonald':'SM','Admin':'★'
 };
 function initials(name){
   return GUIDE_INITIALS[name]||(name.trim().split(/[\s.]+/).filter(Boolean).length>=2
@@ -675,7 +675,10 @@ function initials(name){
     :name.slice(0,2).toUpperCase());
 }
 function chipLabel(name){
-  return name==='Admin'?'★ Admin':name;
+  if(name==='Admin')return'★ Admin';
+  if(name==='Eric Salgado')return'Eric';
+  if(name==='Sam McDonald')return'Sam';
+  return name;
 }
 function buildGuideBanner(){
   document.getElementById('guide-chips').innerHTML=
@@ -996,11 +999,12 @@ function renderList(){
         const coachDiv=chk.key!=='w7'?`<div id="coach-${sl}-${wsSlug}-${chk.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:36px;font-size:11px;" placeholder="${coachPlaceholder}" onchange="saveCoaching('${sl}','${wsSlug}','${chk.key}',this.value)">${coaching}</textarea></div>`:'';
         return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${coachDiv}`;
       }).join('');
+      const isWeek7Plus=getCurrentSessionWeek()>=7;
       const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
       const finalWho=isSuperAdmin&&cur&&s5data.__who__?.[s.n]?.[ws]?`<span class="by-tag">${initials(s5data.__who__[s.n][ws])}</span>`:'';
       const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" onclick="setScoreBySlug(this)">${opt.label}</button>`).join('')+finalWho;
-      const finalStatusDot=cur?`<span class="score-btn ${cur==='Passed'?'active-pass':cur==='Not passed'?'active-fail':'active-absent'}" style="pointer-events:none;font-size:9px;padding:2px 7px;">${cur==='Passed'?'✓ P':cur==='Not passed'?'✗':'–'}</span>`:'';
-      const finalRow=`<div class="score-line" style="padding:6px 12px;border-top:1px solid var(--border);background:rgba(0,0,0,.06)"><span class="score-ws-name" style="font-size:11px;color:var(--muted)">T2P Final</span><div class="score-btns">${finalBtns}</div></div>`;
+      const finalStatusDot=isWeek7Plus&&cur?`<span class="score-btn ${cur==='Passed'?'active-pass':cur==='Not passed'?'active-fail':'active-absent'}" style="pointer-events:none;font-size:9px;padding:2px 7px;">${cur==='Passed'?'✓ P':cur==='Not passed'?'✗':'–'}</span>`:'';
+      const finalRow=isWeek7Plus?`<div class="score-line" style="padding:6px 12px;border-top:1px solid var(--border);background:rgba(0,0,0,.06)"><span class="score-ws-name" style="font-size:11px;color:var(--muted)">T2P Final</span><div class="score-btns">${finalBtns}</div></div>`:'';
       return`<div style="border:1px solid ${wsSkipped?'rgba(251,191,36,.3)':'var(--border)'};border-radius:7px;overflow:hidden;margin-bottom:4px;${wsSkipped?'opacity:.6;':''}">
         <div class="score-line" style="background:var(--surface2);padding:7px 12px;">
           <div style="flex:1"><span style="font-weight:600;color:var(--text);font-size:12px">${ws.code} · ${ws.name}</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-left:8px">${ws.guide} · ${ws.day}</span></div>
@@ -1107,7 +1111,7 @@ function renderDashboardStats(students){
       html+=`<div class="dash-stats-card">
         <div class="dash-stats-hdr">
           <span class="dash-stats-week">Week ${weekNum}</span>
-          <span class="dash-stats-due">Due this week · 3 Commitments</span>
+          <span class="dash-stats-due">Due this week · 3Cs</span>
         </div>
         <div class="dash-stats-bar-row">
           <span class="dash-stats-bar-lbl">${withData} / ${total} have data</span>
@@ -1148,7 +1152,7 @@ function renderDashboardStats(students){
   const n=withData3c||1;
   html+=`<div class="dash-stats-card" style="margin-top:8px;">
     <div class="dash-stats-hdr">
-      <span class="dash-stats-week" style="background:rgba(52,211,153,.12);color:#34d399;border-color:rgba(52,211,153,.3)">3 Commitments</span>
+      <span class="dash-stats-week" style="background:rgba(52,211,153,.12);color:#34d399;border-color:rgba(52,211,153,.3)">3Cs</span>
       <span class="dash-stats-due">Most recent check-in · ${withData3c}/${total} entered</span>
     </div>
     <div class="dash-stats-bar-row">
@@ -1225,7 +1229,7 @@ function renderCampusOverview(){
       }
     }
 
-    const dueLabel=due?(due.type==='checkpoint'?(CHECKPOINTS.find(c=>c.key===due.key)?.label||due.key):'3 Commitments'):'—';
+    const dueLabel=due?(due.type==='checkpoint'?(CHECKPOINTS.find(c=>c.key===due.key)?.label||due.key):'3Cs'):'—';
     return`<div class="cov-card" style="border-left-color:${color}">
       <div class="cov-lvl-row"><span class="cov-lvl" style="color:${color}">${lvl}</span><span class="cov-count">${tot} students</span></div>
       <div class="cov-sub">${lvlNames[lvl]}</div>
@@ -1235,7 +1239,7 @@ function renderCampusOverview(){
   }).join('');
 
   const wkLabel=weekNum>0&&weekNum<=7?`Week ${weekNum}`:(weekNum>7?'Session Complete':'Pre-Session');
-  const dueLabel=due?(due.type==='checkpoint'?(CHECKPOINTS.find(c=>c.key===due.key)?.label||due.key):'3 Commitments'):'';
+  const dueLabel=due?(due.type==='checkpoint'?(CHECKPOINTS.find(c=>c.key===due.key)?.label||due.key):'3Cs'):'';
   container.innerHTML=`<div class="cov-section">
     <div class="cov-hdr">
       <span>Campus Overview · All Levels</span>
@@ -1364,7 +1368,7 @@ function renderDmBody(){
     const weekNum=getCurrentSessionWeek();
     let weekBanner='';
     if(weekNum>0&&weekNum<=7){
-      const dueLabel=due?due.type==='checkpoint'?CHECKPOINTS.find(c=>c.key===due.key)?.label:'3 Commitments check-in':'—';
+      const dueLabel=due?due.type==='checkpoint'?CHECKPOINTS.find(c=>c.key===due.key)?.label:'3Cs check-in':'—';
       weekBanner=`<div style="font-family:'DM Mono',monospace;font-size:10px;padding:7px 12px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:6px;color:#fbbf24;margin-bottom:12px;letter-spacing:.04em">Week ${weekNum} · Due this week: ${dueLabel}</div>`;
     }
     // S5 workshops with checkpoint dots
@@ -1446,7 +1450,7 @@ function renderDmBody(){
     }).join('');
 
     html = `<div class="ds-section">
-      <div class="ds-title">Alpha's 3 Commitments</div>
+      <div class="ds-title">Alpha's 3Cs</div>
       <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-bottom:16px;line-height:1.5;">
         Loves School · Learning 2x · Lifeskills — tracked at Weeks 2, 4, and 6.
       </div>
@@ -1617,7 +1621,7 @@ function save3Cs(name) {
     if (learnnote) d.learnNote = learnnote.value;
     if (tracknote) d.trackNote = tracknote.value;
   });
-  logAudit('profile', name, '3 Commitments', 'updated');
+  logAudit('profile', name, '3Cs', 'updated');
   saveAll(); showToast('✓ Commitments saved');
 }
 

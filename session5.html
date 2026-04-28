@@ -367,7 +367,7 @@ function renderStats(){
   function dueItemLabel(d){
     if(!d)return'';
     if(d.type==='checkpoint'){const ck=(CFG.checkpoints||[]).find(c=>c.key===d.key);return ck?ck.label:d.key;}
-    if(d.type==='3cs')return'3 Commitments';
+    if(d.type==='3cs')return'3Cs';
     return'';
   }
 
@@ -442,7 +442,7 @@ function renderStats(){
     <div class="ph-live">Live · Session 5</div>
     <div class="s5-kicker">Alpha NYC · Session 5 · 2026</div>
     <h1 class="s5-h1">Session <em>5</em> Data <em>Tracker</em></h1>
-    <p class="s5-sub">Workshop progress, checkpoints &amp; 3 Commitments</p>
+    <p class="s5-sub">Workshop progress, checkpoints &amp; 3Cs</p>
     ${weekInfoHtml}
     ${campusStatsHtml}
     <div class="level-selector">${allCard}${lvlCardsHtml}</div>
