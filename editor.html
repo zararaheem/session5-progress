@@ -691,7 +691,7 @@ function buildGuideBanner(){
     +STAFF_SORTED.map(s=>`<button class="guide-chip" data-who="${s.replace(/"/g,'&quot;')}" onclick="selectWho('${s.replace(/'/g,"\\'")}')"> ${chipLabel(s)}</button>`).join('');
 }
 function updateGuideBanner(){
-  document.getElementById('guide-banner').style.display=currentUser?'none':'flex';
+  document.getElementById('guide-banner').style.display=currentTab==='tracker'?'flex':'none';
 }
 function updateChipStates(){
   document.querySelectorAll('.guide-chip').forEach(chip=>{
@@ -842,6 +842,7 @@ function switchTab(tab,btn){
     if(el)el.style.display=t===tab?'block':'none';
   });
   document.getElementById('tracker-toolbar').style.display=tab==='tracker'?'flex':'none';
+  document.getElementById('guide-banner').style.display=tab==='tracker'?'flex':'none';
   if(tab==='wsdata')renderWsData();
   if(tab==='dashboard')renderDashboard();
   if(tab==='activity')renderActivity();
