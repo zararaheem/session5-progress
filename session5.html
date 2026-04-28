@@ -416,10 +416,10 @@ function renderStats(){
     return'';
   }
   const allActive=currentLevel==='ALL';
-  const allCard=`<div class="lvc" onclick="setLevelCard('ALL')" style="${allActive?'background:rgba(59,130,246,.15);border-color:var(--ll);':''}">
-    <div class="lvc-top"><span class="lvc-label" style="color:${allActive?'var(--ll)':'var(--muted2)'}">All</span><span class="lvc-count">${totalAll}</span></div>
+  const allCard=`<div class="lvc" onclick="setLevelCard('ALL')" style="${allActive?'background:rgba(148,163,184,.1);border-color:#94a3b8;':''}">
+    <div class="lvc-top"><span class="lvc-label" style="color:${allActive?'#cbd5e1':'var(--muted2)'}">All</span><span class="lvc-count">${totalAll}</span></div>
     <div class="lvc-pills">${levelPills(campusStats)}</div>
-    <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${pctAll}%;background:var(--ll);"></div></div><span class="lvc-bar-label">${pctAll}%</span></div>
+    <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${pctAll}%;background:#94a3b8;"></div></div><span class="lvc-bar-label">${pctAll}%</span></div>
   </div>`;
 
   const lvlCardsHtml=allLevels.map(lvl=>{
