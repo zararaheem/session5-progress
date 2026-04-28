@@ -58,6 +58,44 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .who-opt:hover{background:rgba(59,130,246,.1);color:var(--accent2);}
 .who-opt-admin{color:#818cf8;font-weight:600;border-bottom:1px solid var(--border);padding-bottom:10px;}
 .who-opt-admin:hover{background:rgba(129,140,248,.1);color:#a5b4fc;}
+
+/* GUIDE BANNER */
+.guide-banner{padding:12px 28px;background:rgba(59,130,246,.05);border-bottom:1px solid rgba(59,130,246,.12);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.guide-banner-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;flex-shrink:0;}
+.guide-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.guide-chip{font-family:'DM Mono',monospace;font-size:11px;padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;transition:all .15s;}
+.guide-chip:hover{border-color:var(--accent);color:var(--accent2);background:rgba(59,130,246,.1);}
+.guide-chip.admin-chip{border-color:rgba(129,140,248,.35);color:#818cf8;}
+.guide-chip.admin-chip:hover{background:rgba(129,140,248,.12);color:#a5b4fc;}
+
+/* ADMIN PASSWORD MODAL */
+.admin-pass-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.admin-pass-overlay.open{display:flex;}
+.admin-pass-box{background:var(--surface);border:1px solid rgba(129,140,248,.35);border-radius:16px;padding:36px 32px;width:100%;max-width:320px;text-align:center;box-shadow:0 0 0 1px rgba(129,140,248,.1),0 20px 50px rgba(0,0,0,.6);}
+.admin-pass-title{font-size:20px;font-weight:600;color:#a5b4fc;margin-bottom:4px;}
+.admin-pass-sub{font-size:12px;color:var(--muted2);margin-bottom:22px;}
+.admin-pass-box input[type=password]{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:16px;letter-spacing:.2em;text-align:center;outline:none;margin-bottom:6px;transition:border-color .2s;}
+.admin-pass-box input[type=password]:focus{border-color:rgba(129,140,248,.5);}
+.admin-pass-err{color:var(--fail);font-size:12px;min-height:18px;margin-bottom:12px;font-family:'DM Mono',monospace;}
+.admin-pass-actions{display:flex;gap:8px;justify-content:center;}
+.admin-pass-actions button{padding:8px 20px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;}
+.admin-pass-actions button.primary{background:#818cf8;border-color:#818cf8;color:white;font-weight:600;}
+.admin-pass-actions button.primary:hover{background:#a5b4fc;}
+
+/* ACTIVITY TAB */
+.tab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;background:#ef4444;color:white;border-radius:8px;font-size:9px;font-weight:700;padding:0 4px;margin-left:4px;line-height:1;}
+.act-header{display:flex;align-items:center;justify-content:space-between;padding:14px 28px 8px;max-width:900px;margin:0 auto;}
+.act-new-badge{font-family:'DM Mono',monospace;font-size:11px;background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.3);padding:3px 10px;border-radius:20px;}
+.act-list{padding:0 28px 28px;display:flex;flex-direction:column;gap:6px;max-width:900px;margin:0 auto;}
+.act-entry{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 16px;display:flex;align-items:center;gap:12px;transition:border-color .15s;}
+.act-entry.act-new{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.04);}
+.act-who{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;color:var(--accent2);background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);padding:3px 8px;border-radius:4px;white-space:nowrap;min-width:70px;text-align:center;}
+.act-detail{flex:1;min-width:0;}
+.act-student{font-size:13px;font-weight:500;color:var(--text);}
+.act-info{font-size:11px;color:var(--muted2);margin-top:1px;}
+.act-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;}
+.act-val{font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border2);color:var(--muted2);white-space:nowrap;margin-left:4px;}
+.act-empty{padding:60px;text-align:center;color:var(--muted2);font-style:italic;font-size:13px;}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}60%{transform:translateX(5px)}}
 
 /* APP */
@@ -378,6 +416,13 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
     <button class="tab-btn active" onclick="switchTab('tracker',this)">Tracker</button>
     <button class="tab-btn" onclick="switchTab('dashboard',this)">Dashboard</button>
     <button class="tab-btn" id="ws-data-tab" style="display:none" onclick="switchTab('wsdata',this)">Workshop Data</button>
+    <button class="tab-btn" id="activity-tab" style="display:none" onclick="switchTab('activity',this)">Activity<span class="tab-badge" id="activity-badge" style="display:none">0</span></button>
+  </div>
+
+  <!-- GUIDE BANNER -->
+  <div class="guide-banner" id="guide-banner">
+    <span class="guide-banner-label">Who's entering data?</span>
+    <div class="guide-chips" id="guide-chips"></div>
   </div>
 
   <!-- TOOLBAR (tracker tab) -->
@@ -420,6 +465,12 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
     <div id="dash-stats"></div>
     <div id="dash-campus-overview"></div>
     <div class="dash-grid" id="dash-grid"></div>
+  </div>
+
+  <!-- ACTIVITY TAB (admin only) -->
+  <div id="tab-activity" style="display:none">
+    <div class="act-header" id="act-header"></div>
+    <div class="act-list" id="act-list"></div>
   </div>
 
   <!-- WORKSHOP DATA TAB (Zara only) -->
@@ -484,6 +535,20 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ADMIN PASSWORD MODAL -->
+<div class="admin-pass-overlay" id="admin-pass-overlay" onclick="if(event.target===this)closeAdminPass()">
+  <div class="admin-pass-box">
+    <div class="admin-pass-title">★ Admin Access</div>
+    <div class="admin-pass-sub">Enter the admin password to continue</div>
+    <input type="password" id="admin-pass-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkAdminPass()">
+    <div class="admin-pass-err" id="admin-pass-err"></div>
+    <div class="admin-pass-actions">
+      <button onclick="closeAdminPass()">Cancel</button>
+      <button class="primary" onclick="checkAdminPass()">Continue →</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
@@ -610,26 +675,98 @@ function toggleWhoDrop(){
   else dd.classList.remove('open');
 }
 function hideWhoDrop(){setTimeout(()=>document.getElementById('who-dropdown').classList.remove('open'),150);}
+
+function buildGuideBanner(){
+  document.getElementById('guide-chips').innerHTML=
+    `<button class="guide-chip admin-chip" onclick="selectWho('Admin')">★ Admin</button>`
+    +STAFF_SORTED.map(s=>`<button class="guide-chip" onclick="selectWho('${s.replace(/'/g,"\\'")}')"> ${s}</button>`).join('');
+}
+function updateGuideBanner(){
+  document.getElementById('guide-banner').style.display=currentUser?'none':'flex';
+}
+
 function selectWho(name){
+  document.getElementById('who-dropdown').classList.remove('open');
+  if(name==='Admin'){
+    document.getElementById('admin-pass-input').value='';
+    document.getElementById('admin-pass-err').textContent='';
+    document.getElementById('admin-pass-overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('admin-pass-input').focus(),60);
+    return;
+  }
+  completeSelectWho(name);
+}
+function checkAdminPass(){
+  if(document.getElementById('admin-pass-input').value!=='nyc2025'){
+    document.getElementById('admin-pass-err').textContent='Incorrect password.';
+    return;
+  }
+  document.getElementById('admin-pass-overlay').classList.remove('open');
+  completeSelectWho('Admin');
+}
+function closeAdminPass(){document.getElementById('admin-pass-overlay').classList.remove('open');}
+
+function completeSelectWho(name){
   currentUser=name;
   isSuperAdmin=CFG.superadmins.includes(name);
   const btn=document.getElementById('who-btn');
   document.getElementById('who-label').textContent=name==='Admin'?'★ Admin':'👤 '+name;
   btn.className='who-btn '+(name==='Admin'?'set-admin':'set');
-  document.getElementById('who-dropdown').classList.remove('open');
   document.getElementById('superadmin-pill').style.display=isSuperAdmin?'inline-flex':'none';
   document.getElementById('audit-btn').style.display=isSuperAdmin?'inline-flex':'none';
+  document.getElementById('activity-tab').style.display=isSuperAdmin?'inline-block':'none';
   document.getElementById('ws-data-tab').style.display=name===WS_DATA_EDITOR?'inline-block':'none';
   document.getElementById('assigneeFilter').value=SEE_ALL.includes(name)?'':'__mine__';
+  updateGuideBanner();
   renderList();
+  if(isSuperAdmin){updateActivityBadge();startActivityPoll();}
 }
 function requireUser(){
   if(currentUser)return true;
-  const btn=document.getElementById('who-btn');
-  btn.style.animation='shake .35s';setTimeout(()=>btn.style.animation='',400);
-  buildWhoDrop();document.getElementById('who-dropdown').classList.add('open');
+  const banner=document.getElementById('guide-banner');
+  banner.style.animation='shake .35s';setTimeout(()=>banner.style.animation='',400);
   showToast('Select your name first →');
   return false;
+}
+
+// ── Activity tab ──────────────────────────────────────────────────
+function renderActivity(){
+  const entries=s5data.__audit__||[];
+  const lastSeen=localStorage.getItem('alphaAdminLastSeen')||'1970-01-01';
+  const newCount=entries.filter(e=>e.ts>lastSeen).length;
+  document.getElementById('act-header').innerHTML=
+    `<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2)">${entries.length} entries</span>`
+    +(newCount>0?`<span class="act-new-badge">${newCount} new since last visit</span>`:'');
+  document.getElementById('act-list').innerHTML=entries.length
+    ?entries.map(e=>{
+        const isNew=e.ts>lastSeen;
+        const d=new Date(e.ts);
+        const time=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        return`<div class="act-entry${isNew?' act-new':''}"><span class="act-who">${e.who||'?'}</span><div class="act-detail"><div class="act-student">${e.student}</div><div class="act-info">${e.detail}</div></div><span class="act-time">${time}</span>${e.value?`<span class="act-val">${e.value}</span>`:''}</div>`;
+      }).join('')
+    :'<div class="act-empty">No activity yet.</div>';
+  localStorage.setItem('alphaAdminLastSeen',new Date().toISOString());
+  document.getElementById('activity-badge').style.display='none';
+}
+function updateActivityBadge(){
+  if(!isSuperAdmin)return;
+  const entries=s5data.__audit__||[];
+  const lastSeen=localStorage.getItem('alphaAdminLastSeen')||'1970-01-01';
+  const n=entries.filter(e=>e.ts>lastSeen).length;
+  const badge=document.getElementById('activity-badge');
+  badge.textContent=n>99?'99+':String(n);
+  badge.style.display=n>0?'inline-flex':'none';
+}
+let _pollTimer=null;
+function startActivityPoll(){
+  if(_pollTimer)return;
+  _pollTimer=setInterval(async()=>{
+    if(!isSuperAdmin)return;
+    try{
+      const r=await window.storage.get('s5data');
+      if(r?.value){const fresh=JSON.parse(r.value);s5data.__audit__=fresh.__audit__||s5data.__audit__;updateActivityBadge();}
+    }catch(e){}
+  },30000);
 }
 
 // ── Storage ──────────────────────────────────────────────────────
@@ -656,6 +793,8 @@ async function loadData(){
   if(urlLevel&&['LL','L1','L2','MS'].includes(urlLevel)){
     document.getElementById('levelFilter').value=urlLevel;
   }
+  buildGuideBanner();
+  updateGuideBanner();
   renderList();
   renderDashboard();
 }
@@ -685,13 +824,14 @@ function switchTab(tab,btn){
   currentTab=tab;
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  ['tracker','dashboard','wsdata'].forEach(t=>{
+  ['tracker','dashboard','wsdata','activity'].forEach(t=>{
     const el=document.getElementById('tab-'+t);
     if(el)el.style.display=t===tab?'block':'none';
   });
   document.getElementById('tracker-toolbar').style.display=tab==='tracker'?'flex':'none';
   if(tab==='wsdata')renderWsData();
   if(tab==='dashboard')renderDashboard();
+  if(tab==='activity')renderActivity();
 }
 
 // ── Score ─────────────────────────────────────────────────────────
@@ -1597,7 +1737,7 @@ function openAudit(){
 function closeAudit(){document.getElementById('audit-overlay').classList.remove('open');document.body.style.overflow='';}
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeAssign();closeAudit();closeDetail();}
+  if(e.key==='Escape'){closeAssign();closeAudit();closeDetail();closeAdminPass();}
 });
 </script>
 </body>
