@@ -421,7 +421,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
   <!-- TAB BAR -->
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('tracker',this)">Tracker</button>
-    <button class="tab-btn" onclick="switchTab('dashboard',this)">Data Tracker</button>
+    <button class="tab-btn" id="dashboard-tab" style="display:none" onclick="switchTab('dashboard',this)">Data Tracker</button>
     <button class="tab-btn" id="ws-data-tab" style="display:none" onclick="switchTab('wsdata',this)">Workshop Data</button>
     <button class="tab-btn" id="activity-tab" style="display:none" onclick="switchTab('activity',this)">Activity<span class="tab-badge" id="activity-badge" style="display:none">0</span></button>
   </div>
@@ -741,6 +741,7 @@ function completeSelectWho(name){
   document.getElementById('superadmin-pill').style.display=isSuperAdmin?'inline-flex':'none';
   document.getElementById('audit-btn').style.display=isSuperAdmin?'inline-flex':'none';
   document.getElementById('activity-tab').style.display=isSuperAdmin?'inline-block':'none';
+  document.getElementById('dashboard-tab').style.display=isSuperAdmin?'inline-block':'none';
   document.getElementById('ws-data-tab').style.display=name===WS_DATA_EDITOR?'inline-block':'none';
   document.getElementById('assigneeFilter').value=SEE_ALL.includes(name)?'':'__mine__';
   updateChipStates();
@@ -1060,7 +1061,7 @@ function renderList(){
           <label style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);cursor:pointer;display:flex;align-items:center;gap:4px;margin-right:10px;white-space:nowrap;" title="Mark this workshop as not collecting data this session"><input type="checkbox" ${wsSkipped?'checked':''} onchange="toggleSkipWs('${wsSlug}',this.checked)"> Skip data</label>
           ${finalStatusDot}
         </div>
-        <div style="padding:4px 0 2px">${chkRows||`<div style="padding:5px 14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);opacity:.6">${wsSkipped?'Data collection skipped for this workshop':'No data due yet — check back when this checkpoint week arrives'}</div>`}${finalRow}</div>
+        <div style="padding:4px 0 2px">${chkRows||`<div style="padding:5px 14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);opacity:.6">${wsSkipped?'Data collection skipped for this workshop':'No checkpoints due yet for this workshop'}</div>`}${finalRow}</div>
       </div>`;
     }).join('');
 
