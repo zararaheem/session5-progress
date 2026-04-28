@@ -955,7 +955,7 @@ function renderList(){
   const lf=document.getElementById('levelFilter').value;
   let students=[...STUDENTS].sort((a,b)=>{const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l);return d||a.n.localeCompare(b.n);});
   if(lf)students=students.filter(s=>s.l===lf);
-  if(af==='__mine__')students=students.filter(s=>isMine(s));
+  if(af==='__mine__'&&currentUser)students=students.filter(s=>isMine(s));
   document.getElementById('count-pill').textContent=`${students.length} students`;
 
   // Build a lookup so we can find name from slug safely
