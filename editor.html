@@ -812,6 +812,7 @@ async function loadData(){
       if(!s5data.__wsmeetings__)s5data.__wsmeetings__={};
       if(!s5data.__townhalls__)s5data.__townhalls__=[];
       if(!s5data.__coaching__)s5data.__coaching__={};
+      if(!s5data.__levelguides__)s5data.__levelguides__={};
     }
   }catch(e){}
   // Apply ?level= URL param from session5.html "Enter data" link
@@ -825,6 +826,9 @@ async function loadData(){
   renderDashboard();
 }
 
+// Render immediately so students are visible before storage resolves
+buildGuideBanner();
+renderList();
 loadData();
 
 async function saveAll(){
