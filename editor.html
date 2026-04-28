@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>T2P Data Tracker — Session 5</title>
+<title>Workshop Data Tracker — Session 5</title>
 <script>
 // ── Inlined config (keeps editor self-contained) ──────────────────
 const T2P_CONFIG = {
   password: "nyc2025",
   superadmins: ["Admin","Liam"],
-  staff: ["Chauncey","Emily","Jenna K.","Jenna P.","Jesse","Julianne","Liam","Nancy","Nathan","Parthvi"].sort(),
+  staff: ["Chauncey","Emily","Eric Salgado","Jenna K.","Jenna P.","Jesse","Julianne","Liam","Nancy","Nathan","Parthvi","Sam McDonald"].sort(),
   levelGuides: { LL:["Jenna K.","Jesse"], L1:["Parthvi","Nathan"], L2:["Jenna P."], MS:["Emily","Chauncey"] },
   checkpoints: [
     {key:"w1",label:"Week 1 Baseline"},{key:"w3",label:"Week 3: Checkpoint 1"},
@@ -60,13 +60,16 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .who-opt-admin:hover{background:rgba(129,140,248,.1);color:#a5b4fc;}
 
 /* GUIDE BANNER */
-.guide-banner{padding:12px 28px;background:rgba(59,130,246,.05);border-bottom:1px solid rgba(59,130,246,.12);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-.guide-banner-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;flex-shrink:0;}
+.guide-banner{padding:10px 28px;background:rgba(59,130,246,.05);border-bottom:1px solid rgba(59,130,246,.12);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .guide-chips{display:flex;flex-wrap:wrap;gap:6px;}
-.guide-chip{font-family:'DM Mono',monospace;font-size:11px;padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;transition:all .15s;}
+.guide-chip{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border2);background:var(--surface2);color:var(--muted2);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;padding:0;letter-spacing:.02em;}
 .guide-chip:hover{border-color:var(--accent);color:var(--accent2);background:rgba(59,130,246,.1);}
-.guide-chip.admin-chip{border-color:rgba(129,140,248,.35);color:#818cf8;}
+.guide-chip.selected{border-color:var(--accent);background:rgba(59,130,246,.18);color:var(--accent2);box-shadow:0 0 0 2px rgba(59,130,246,.2);}
+.guide-chip.dimmed{opacity:0.28;}
+.guide-chip.admin-chip{width:auto;padding:0 12px;border-radius:20px;border-color:rgba(129,140,248,.35);color:#818cf8;font-size:12px;}
 .guide-chip.admin-chip:hover{background:rgba(129,140,248,.12);color:#a5b4fc;}
+.guide-chip.admin-chip.selected{border-color:#818cf8;background:rgba(129,140,248,.18);color:#a5b4fc;box-shadow:0 0 0 2px rgba(129,140,248,.2);}
+.by-tag{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:4px;margin-left:4px;}
 
 /* ADMIN PASSWORD MODAL */
 .admin-pass-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
@@ -393,7 +396,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
   <header>
     <div class="header-left">
       <span class="header-wordmark">Alpha · NYC</span>
-      <span class="header-title">T2P Data Tracker</span>
+      <span class="header-title">Workshop Data Tracker</span>
       <span class="s5-badge">S5</span>
     </div>
     <div class="header-right">
@@ -421,7 +424,6 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 
   <!-- GUIDE BANNER -->
   <div class="guide-banner" id="guide-banner">
-    <span class="guide-banner-label">Who's entering data?</span>
     <div class="guide-chips" id="guide-chips"></div>
   </div>
 
@@ -676,13 +678,25 @@ function toggleWhoDrop(){
 }
 function hideWhoDrop(){setTimeout(()=>document.getElementById('who-dropdown').classList.remove('open'),150);}
 
+function initials(name){
+  const parts=name.trim().split(/[\s.]+/).filter(Boolean);
+  if(parts.length>=2)return(parts[0][0]+parts[parts.length-1][0]).toUpperCase();
+  return name.slice(0,2).toUpperCase();
+}
 function buildGuideBanner(){
   document.getElementById('guide-chips').innerHTML=
-    `<button class="guide-chip admin-chip" onclick="selectWho('Admin')">★ Admin</button>`
-    +STAFF_SORTED.map(s=>`<button class="guide-chip" onclick="selectWho('${s.replace(/'/g,"\\'")}')"> ${s}</button>`).join('');
+    `<button class="guide-chip admin-chip" data-who="Admin" onclick="selectWho('Admin')">★</button>`
+    +STAFF_SORTED.map(s=>`<button class="guide-chip" data-who="${s.replace(/"/g,'&quot;')}" onclick="selectWho('${s.replace(/'/g,"\\'")}')"> ${initials(s)}</button>`).join('');
 }
 function updateGuideBanner(){
   document.getElementById('guide-banner').style.display=currentUser?'none':'flex';
+}
+function updateChipStates(){
+  document.querySelectorAll('.guide-chip').forEach(chip=>{
+    if(!currentUser){chip.classList.remove('selected','dimmed');return;}
+    if(chip.dataset.who===currentUser){chip.classList.add('selected');chip.classList.remove('dimmed');}
+    else{chip.classList.add('dimmed');chip.classList.remove('selected');}
+  });
 }
 
 function selectWho(name){
@@ -717,7 +731,7 @@ function completeSelectWho(name){
   document.getElementById('activity-tab').style.display=isSuperAdmin?'inline-block':'none';
   document.getElementById('ws-data-tab').style.display=name===WS_DATA_EDITOR?'inline-block':'none';
   document.getElementById('assigneeFilter').value=SEE_ALL.includes(name)?'':'__mine__';
-  updateGuideBanner();
+  updateChipStates();
   renderList();
   if(isSuperAdmin){updateActivityBadge();startActivityPoll();}
 }
@@ -837,15 +851,15 @@ function switchTab(tab,btn){
 // ── Score ─────────────────────────────────────────────────────────
 function setScore(sName,ws,val,btn){
   if(!s5data[sName])s5data[sName]={};
-  if(s5data[sName][ws]===val){delete s5data[sName][ws];logAudit('score',sName,ws,null);btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');return;}
-  s5data[sName][ws]=val;logAudit('score',sName,ws,val);
+  if(s5data[sName][ws]===val){delete s5data[sName][ws];if(s5data.__who__?.[sName])delete s5data.__who__[sName][ws];logAudit('score',sName,ws,null);btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');return;}
+  s5data[sName][ws]=val;if(!s5data.__who__)s5data.__who__={};if(!s5data.__who__[sName])s5data.__who__[sName]={};s5data.__who__[sName][ws]=currentUser;logAudit('score',sName,ws,val);
   btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>{b.className='score-btn';if(b.dataset.val===val)b.classList.add(val==='Passed'?'active-pass':val==='Not Yet'?'active-fail':val==='Absent'?'active-absent':'active-pass');});
 }
 function setCheckpoint(sName,ws,ck,val,btn){
   if(!s5data[sName])s5data[sName]={};
   const key=chkKey(ws,ck);const prev=s5data[sName][key];
-  if(prev===val){delete s5data[sName][key];btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');return;}
-  s5data[sName][key]=val;logAudit('score',sName,`${ws} [${ck}]`,val);
+  if(prev===val){delete s5data[sName][key];if(s5data.__who__?.[sName])delete s5data.__who__[sName][key];btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');return;}
+  s5data[sName][key]=val;if(!s5data.__who__)s5data.__who__={};if(!s5data.__who__[sName])s5data.__who__[sName]={};s5data.__who__[sName][key]=currentUser;logAudit('score',sName,`${ws} [${ck}]`,val);
   btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>{
     b.className='score-btn';
     const opt=getChkOptions(ck).find(o=>o.val===val);
@@ -994,7 +1008,8 @@ function renderList(){
         return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${coachDiv}`;
       }).join('');
       const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
-      const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" onclick="setScoreBySlug(this)">${opt.label}</button>`).join('');
+      const finalWho=isSuperAdmin&&cur&&s5data.__who__?.[s.n]?.[ws]?`<span class="by-tag">${initials(s5data.__who__[s.n][ws])}</span>`:'';
+      const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" onclick="setScoreBySlug(this)">${opt.label}</button>`).join('')+finalWho;
       return`<div style="border:1px solid ${wsSkipped?'rgba(251,191,36,.3)':'var(--border)'};border-radius:7px;overflow:hidden;margin-bottom:4px;${wsSkipped?'opacity:.6;':''}">
         <div class="score-line" style="background:var(--surface2);padding:7px 12px;">
           <div style="flex:1"><span style="font-weight:600;color:var(--text);font-size:12px">${ws.code} · ${ws.name}</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-left:8px">${ws.guide} · ${ws.day}</span></div>
