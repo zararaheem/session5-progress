@@ -327,6 +327,10 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .staff-check{opacity:0;font-size:13px;}
 .staff-opt.selected .staff-check{opacity:1;}
 .gap-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);}
+.gap-row.lvl-LL{border-color:rgba(232,160,32,.3);background:rgba(232,160,32,.06);}
+.gap-row.lvl-L1{border-color:rgba(232,82,42,.3);background:rgba(232,82,42,.06);}
+.gap-row.lvl-L2{border-color:rgba(42,181,160,.3);background:rgba(42,181,160,.06);}
+.gap-row.lvl-MS{border-color:rgba(224,61,124,.3);background:rgba(224,61,124,.06);}
 .gap-row-level{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;min-width:36px;flex-shrink:0;}
 .gap-row-guides{display:flex;flex-wrap:wrap;gap:6px;flex:1;}
 .gap-guide-chip{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--surface3);color:var(--muted2);cursor:pointer;transition:all .15s;}
@@ -447,7 +451,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
       <option value="MS">MS</option>
     </select>
     <span class="count-pill" id="count-pill"></span>
-    <button class="hdr-btn" style="margin-left:auto;font-size:11px;" onclick="openGuideAssignPanel()">Assign guides</button>
+    <button class="hdr-btn" style="margin-left:auto;font-size:11px;" onclick="openGuideAssignPanel()">Guide Assignment</button>
   </div>
 
   <!-- TRACKER TAB -->
@@ -533,7 +537,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 <div class="assign-overlay" id="guide-assign-panel" onclick="if(event.target===this)closeGuideAssignPanel()">
   <div class="assign-box" style="max-width:480px;max-height:80vh;display:flex;flex-direction:column;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <h3 style="margin:0">Guides by level</h3>
+      <h3 style="margin:0">Guide Assignment, by Level</h3>
       <button class="assign-cancel" style="margin:0;width:auto;padding:5px 14px;" onclick="closeGuideAssignPanel()">Done</button>
     </div>
     <div id="gap-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
@@ -920,11 +924,11 @@ function getLevelGuides(lvl){
 function openGuideAssignPanel(){
   if(!s5data.__levelguides__)s5data.__levelguides__={};
   const container=document.getElementById('gap-list');
-  const lvlColors={LL:'var(--ll)',L1:'var(--l1)',L2:'var(--l2)',MS:'var(--ms)'};
+  const lvlTextColors={LL:'#f5c55a',L1:'#f4896a',L2:'#5dd6c6',MS:'#f07ab0'};
   container.innerHTML=LEVEL_ORDER.map(lvl=>{
     const assigned=getLevelGuides(lvl);
     const chips=STAFF_SORTED.map(st=>`<button class="gap-guide-chip ${assigned.includes(st)?'on':''}" data-lvl="${lvl}" data-staff="${st.replace(/"/g,'&quot;')}" onclick="toggleLevelGuide(this)">${chipLabel(st)}</button>`).join('');
-    return`<div class="gap-row"><span class="gap-row-level" style="color:${lvlColors[lvl]||'var(--text)'}">${lvl}</span><div class="gap-row-guides" id="gap-guides-lvl-${lvl}">${chips}</div></div>`;
+    return`<div class="gap-row lvl-${lvl}"><span class="gap-row-level" style="color:${lvlTextColors[lvl]||'var(--text)'}">${lvl}</span><div class="gap-row-guides" id="gap-guides-lvl-${lvl}">${chips}</div></div>`;
   }).join('');
   document.getElementById('guide-assign-panel').classList.add('open');
 }
