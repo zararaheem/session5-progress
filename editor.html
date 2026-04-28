@@ -326,13 +326,12 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .staff-opt.selected{background:rgba(59,130,246,.1);border-color:var(--accent);color:var(--accent2);}
 .staff-check{opacity:0;font-size:13px;}
 .staff-opt.selected .staff-check{opacity:1;}
-.gap-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);}
-.gap-row-name{font-size:12px;font-weight:600;color:var(--text);min-width:130px;flex-shrink:0;}
-.gap-row-guides{display:flex;flex-wrap:wrap;gap:4px;flex:1;}
-.gap-guide-chip{font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:12px;border:1px solid var(--border2);background:var(--surface3);color:var(--muted2);cursor:pointer;transition:all .15s;}
+.gap-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);}
+.gap-row-level{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;min-width:36px;flex-shrink:0;}
+.gap-row-guides{display:flex;flex-wrap:wrap;gap:6px;flex:1;}
+.gap-guide-chip{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);background:var(--surface3);color:var(--muted2);cursor:pointer;transition:all .15s;}
 .gap-guide-chip:hover{border-color:var(--accent);color:var(--accent2);}
-.gap-guide-chip.on{background:rgba(59,130,246,.12);border-color:var(--accent);color:var(--accent2);}
-.gap-level-hdr{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--muted);padding:6px 2px 3px;}
+.gap-guide-chip.on{background:rgba(59,130,246,.15);border-color:var(--accent);color:var(--accent2);}
 .assign-cancel{margin-top:8px;width:100%;padding:9px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;}
 .assign-cancel:hover{border-color:var(--muted2);color:var(--text);}
 
@@ -534,7 +533,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 <div class="assign-overlay" id="guide-assign-panel" onclick="if(event.target===this)closeGuideAssignPanel()">
   <div class="assign-box" style="max-width:480px;max-height:80vh;display:flex;flex-direction:column;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <h3 style="margin:0">Assign guides</h3>
+      <h3 style="margin:0">Guides by level</h3>
       <button class="assign-cancel" style="margin:0;width:auto;padding:5px 14px;" onclick="closeGuideAssignPanel()">Done</button>
     </div>
     <div id="gap-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
@@ -909,33 +908,36 @@ function toggleGuide(staff){
 }
 function closeAssign(){document.getElementById('assign-overlay').classList.remove('open');assigningStudent=null;}
 
-// ── Bulk guide assignment panel ───────────────────────────────────
+// ── Level guide assignment panel ──────────────────────────────────
+function getLevelGuides(lvl){
+  if(!s5data.__levelguides__)s5data.__levelguides__={};
+  return s5data.__levelguides__[lvl]?[...s5data.__levelguides__[lvl]]:[...(CFG.levelGuides[lvl]||[])];
+}
 function openGuideAssignPanel(){
+  if(!s5data.__levelguides__)s5data.__levelguides__={};
   const container=document.getElementById('gap-list');
-  let html='';
-  LEVEL_ORDER.forEach(lvl=>{
-    const lvlStudents=STUDENTS.filter(s=>s.l===lvl&&!s.inactive);
-    if(!lvlStudents.length)return;
-    html+=`<div class="gap-level-hdr">${lvl}</div>`;
-    lvlStudents.forEach(s=>{
-      const guides=getGuides(s);
-      const chips=STAFF_SORTED.map(st=>`<button class="gap-guide-chip ${guides.includes(st)?'on':''}" data-sn="${s.n.replace(/"/g,'&quot;')}" data-staff="${st.replace(/"/g,'&quot;')}" onclick="toggleGapGuide(this)">${chipLabel(st)}</button>`).join('');
-      html+=`<div class="gap-row"><span class="gap-row-name">${s.n}</span><div class="gap-row-guides" id="gap-guides-${slug(s.n)}">${chips}</div></div>`;
-    });
-  });
-  container.innerHTML=html;
+  const lvlColors={LL:'var(--ll)',L1:'var(--l1)',L2:'var(--l2)',MS:'var(--ms)'};
+  container.innerHTML=LEVEL_ORDER.map(lvl=>{
+    const assigned=getLevelGuides(lvl);
+    const chips=STAFF_SORTED.map(st=>`<button class="gap-guide-chip ${assigned.includes(st)?'on':''}" data-lvl="${lvl}" data-staff="${st.replace(/"/g,'&quot;')}" onclick="toggleLevelGuide(this)">${chipLabel(st)}</button>`).join('');
+    return`<div class="gap-row"><span class="gap-row-level" style="color:${lvlColors[lvl]||'var(--text)'}">${lvl}</span><div class="gap-row-guides" id="gap-guides-lvl-${lvl}">${chips}</div></div>`;
+  }).join('');
   document.getElementById('guide-assign-panel').classList.add('open');
 }
-function toggleGapGuide(btn){
-  const sName=btn.dataset.sn;const staff=btn.dataset.staff;
-  const stu=STUDENTS.find(s=>s.n===sName);
-  if(!s5data.__guides__[sName])s5data.__guides__[sName]=[...(CFG.levelGuides[stu?.l]||[])];
-  const arr=s5data.__guides__[sName];
+function toggleLevelGuide(btn){
+  const lvl=btn.dataset.lvl;const staff=btn.dataset.staff;
+  if(!s5data.__levelguides__)s5data.__levelguides__={};
+  if(!s5data.__levelguides__[lvl])s5data.__levelguides__[lvl]=[...(CFG.levelGuides[lvl]||[])];
+  const arr=s5data.__levelguides__[lvl];
   const idx=arr.indexOf(staff);if(idx===-1)arr.push(staff);else arr.splice(idx,1);
-  document.querySelectorAll(`[data-sn="${sName.replace(/"/g,'\\"')}"].gap-guide-chip`).forEach(c=>c.classList.toggle('on',arr.includes(c.dataset.staff)));
-  const metaEl=document.getElementById(`guides-${slug(sName)}`);
-  if(metaEl)metaEl.innerHTML=arr.map(g=>`<span class="guide-tag">${g}</span>`).join('');
-  logAudit('guide',sName,'guides',arr.join(', '));
+  // Update all students in this level
+  STUDENTS.filter(s=>s.l===lvl&&!s.inactive).forEach(s=>{
+    s5data.__guides__[s.n]=[...arr];
+    const metaEl=document.getElementById(`guides-${slug(s.n)}`);
+    if(metaEl)metaEl.innerHTML=arr.map(g=>`<span class="guide-tag">${g}</span>`).join('');
+  });
+  document.querySelectorAll(`.gap-guide-chip[data-lvl="${lvl}"]`).forEach(c=>c.classList.toggle('on',arr.includes(c.dataset.staff)));
+  logAudit('guide',lvl,'level guides',arr.join(', '));
 }
 function closeGuideAssignPanel(){document.getElementById('guide-assign-panel').classList.remove('open');}
 
