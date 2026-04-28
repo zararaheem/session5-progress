@@ -160,7 +160,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .row-body.open{display:block;}
 
 /* PROFILE SECTION */
-.profile-section{padding:12px 14px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:100px 1fr 1fr;gap:12px;}
+.profile-section{padding:12px 14px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .profile-col{display:flex;flex-direction:column;gap:8px;}
 .field-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
 .field-textarea{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;resize:vertical;min-height:70px;outline:none;transition:border-color .2s;}
@@ -402,12 +402,6 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
     <div class="header-right">
       <a href="home.html" class="hdr-btn">← Home</a>
       <a target="_blank" href="https://session5-progress.vercel.app/tracker.html" class="hdr-btn" style="color:#fbbf24;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06);">T2P Tracker ↗</a>
-      <div class="who-wrap" id="who-wrap">
-        <button class="who-btn" id="who-btn" onclick="toggleWhoDrop()" onblur="hideWhoDrop()">
-          <span id="who-label">Who are you?</span><span style="opacity:.6">▾</span>
-        </button>
-        <div id="who-dropdown" class="who-dropdown"></div>
-      </div>
       <span class="superadmin-pill" id="superadmin-pill" style="display:none">★ Admin</span>
       <button class="hdr-btn audit" id="audit-btn" style="display:none" onclick="openAudit()">Audit log</button>
       <button class="hdr-btn primary" id="save-btn" onclick="saveAll()">↑ Save</button>
@@ -694,7 +688,7 @@ function chipLabel(name){
 function buildGuideBanner(){
   document.getElementById('guide-chips').innerHTML=
     `<button class="guide-chip admin-chip" data-who="Admin" onclick="selectWho('Admin')">★ Admin</button>`
-    +STAFF_SORTED.map(s=>`<button class="guide-chip" data-who="${s.replace(/"/g,'&quot;')}" onclick="selectWho('${s.replace(/'/g,"\\'")}'">${chipLabel(s)}</button>`).join('');
+    +STAFF_SORTED.map(s=>`<button class="guide-chip" data-who="${s.replace(/"/g,'&quot;')}" onclick="selectWho('${s.replace(/'/g,"\\'")}')"> ${chipLabel(s)}</button>`).join('');
 }
 function updateGuideBanner(){
   document.getElementById('guide-banner').style.display=currentUser?'none':'flex';
@@ -993,10 +987,6 @@ function renderList(){
       ?guides.map(g=>`<span class="guide-tag">${g}</span>`).join('')
       :'<span style="color:var(--muted);font-size:10px">No guides</span>';
 
-    const photoAreaHtml=photo
-      ?`<div class="photo-area has-photo" onclick="document.getElementById('phi-${sl}').click()"><img class="photo-preview" src="${photo}"><button class="photo-clear" onclick="clearPhotoBySlug('${sl}',event)">✕ Remove</button></div>`
-      :`<div class="photo-area" onclick="document.getElementById('phi-${sl}').click()"><div class="photo-hint"><div style="font-size:18px;margin-bottom:4px">📷</div><div>Upload</div><div style="color:var(--muted);font-size:8px">max 500KB</div></div></div>`;
-
     const scoreLines=levelWs.map(ws=>{
       const wsKey=ws.name;const cur=scores[wsKey];
       const wsSlug=slug(wsKey);
@@ -1042,7 +1032,6 @@ function renderList(){
       </div>
       <div class="row-body" id="body-${sl}">
         <div class="profile-section">
-          <div>${photoAreaHtml}<input type="file" id="phi-${sl}" accept="image/*" style="display:none" data-sslug="${sl}" onchange="handlePhotoBySlug(this)"></div>
           <div class="profile-col">
             <div><div class="field-label">Motivational model</div><textarea class="field-textarea" id="mot-${sl}" data-sslug="${sl}" onchange="saveProfileBySlug(this)" placeholder="What drives them, how they work best…">${profile.motivation||''}</textarea></div>
           </div>
