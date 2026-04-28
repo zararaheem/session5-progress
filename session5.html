@@ -407,17 +407,17 @@ function renderStats(){
 
   // "All" card
   function levelPills(ls){
-    if(ls.type==='checkpoint')return(ls.behind>0?`<span class="lvc-pill" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;">${ls.behind} Behind</span>`:'')+
-      (ls.track>0?`<span class="lvc-pill" style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;">${ls.track} On Track</span>`:'')+
-      (ls.ahead>0?`<span class="lvc-pill" style="background:#f5f3ff;color:#6d28d9;border:1px solid #c4b5fd;">${ls.ahead} Ahead</span>`:'');
-    if(ls.type==='3cs')return`<span class="lvc-pill" style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;">${ls.lovesY||0} Love</span>`+
-      `<span class="lvc-pill" style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;">${ls.l2xGood||0} 2×</span>`+
-      `<span class="lvc-pill" style="${(ls.t2pN||0)>0?'background:#fef2f2;color:#dc2626;border:1px solid #fca5a5':'background:#ecfdf5;color:#16a34a;border:1px solid #86efac'}">${ls.t2pY||0} T2P✓</span>`;
+    if(ls.type==='checkpoint')return(ls.behind>0?`<span class="lvc-pill" style="background:rgba(220,38,38,.12);color:#f87171;border:1px solid rgba(252,165,165,.25);">${ls.behind} Behind</span>`:'')+
+      (ls.track>0?`<span class="lvc-pill" style="background:rgba(29,78,216,.12);color:#60a5fa;border:1px solid rgba(147,197,253,.25);">${ls.track} On Track</span>`:'')+
+      (ls.ahead>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">${ls.ahead} Ahead</span>`:'');
+    if(ls.type==='3cs')return`<span class="lvc-pill" style="background:rgba(29,78,216,.12);color:#60a5fa;border:1px solid rgba(147,197,253,.25);">${ls.lovesY||0} Love</span>`+
+      `<span class="lvc-pill" style="background:rgba(29,78,216,.12);color:#60a5fa;border:1px solid rgba(147,197,253,.25);">${ls.l2xGood||0} 2×</span>`+
+      `<span class="lvc-pill" style="${(ls.t2pN||0)>0?'background:rgba(220,38,38,.12);color:#f87171;border:1px solid rgba(252,165,165,.25)':'background:rgba(22,163,74,.12);color:#4ade80;border:1px solid rgba(134,239,172,.25)'}">${ls.t2pY||0} T2P✓</span>`;
     return'';
   }
   const allActive=currentLevel==='ALL';
-  const allCard=`<div class="lvc" onclick="setLevelCard('ALL')" style="${allActive?'background:#eff6ff;border-color:var(--ll);':''}">
-    <div class="lvc-top"><span class="lvc-label" style="color:${allActive?'var(--ll)':'#555'}">All</span><span class="lvc-count">${totalAll}</span></div>
+  const allCard=`<div class="lvc" onclick="setLevelCard('ALL')" style="${allActive?'background:rgba(59,130,246,.15);border-color:var(--ll);':''}">
+    <div class="lvc-top"><span class="lvc-label" style="color:${allActive?'var(--ll)':'var(--muted2)'}">All</span><span class="lvc-count">${totalAll}</span></div>
     <div class="lvc-pills">${levelPills(campusStats)}</div>
     <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${pctAll}%;background:var(--ll);"></div></div><span class="lvc-bar-label">${pctAll}%</span></div>
   </div>`;
