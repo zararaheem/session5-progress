@@ -30,7 +30,8 @@ body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50
 .s5-sub{font-size:14px;color:var(--muted2);line-height:1.6;max-width:480px;margin:0 auto 20px;}
 .s5-week-bar{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;}
 .ph-week-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:4px 12px;border-radius:4px;}
-.ph-due-label{font-size:12px;color:var(--muted2);}
+.ph-due-now{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.4);padding:4px 12px;border-radius:4px;}
+.ph-due-next{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);padding:4px 10px;border-radius:4px;border:1px solid var(--border2);background:var(--surface2);}
 .s5-enter-btn{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;background:#1a56db;color:white;border:none;padding:5px 14px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:background .15s;}
 .s5-enter-btn:hover{background:#1745c0;}
 .s5-hist-link{padding:12px 0 18px;text-align:center;}
@@ -272,15 +273,14 @@ let currentLevel = 'ALL';
 let s5data = {};
 
 function getCurrentSessionWeek(){
-  const start=new Date('2026-04-27');
+  const start=new Date(2026,3,27);
   const now=new Date();
   const diff=Math.floor((now-start)/(1000*60*60*24));
   if(diff<0)return 0;
   const w=Math.floor(diff/7)+1;
   return w>7?8:w;
 }
-function getDueThisWeek(){
-  const w=getCurrentSessionWeek();
+function getDueForWeek(w){
   if(w===1)return{type:'checkpoint',key:'w1'};
   if(w===2)return{type:'3cs',key:'w2'};
   if(w===3)return{type:'checkpoint',key:'w3'};
@@ -290,6 +290,8 @@ function getDueThisWeek(){
   if(w===7)return{type:'checkpoint',key:'w7'};
   return null;
 }
+function getDueThisWeek(){return getDueForWeek(getCurrentSessionWeek());}
+function getDueNextWeek(){return getDueForWeek(getCurrentSessionWeek()+1);}
 function renderStats(){
   const container=document.getElementById('stats-hero');
   if(!container)return;
@@ -356,19 +358,28 @@ function renderStats(){
 
   // Week date range helper
   function weekDateRange(w){
-    const s=new Date('2026-04-27');
+    const s=new Date(2026,3,27);
     const mon=new Date(s.getTime()+(w-1)*7*24*60*60*1000);
     const fri=new Date(mon.getTime()+4*24*60*60*1000);
-    const fmt=d=>`${d.getMonth()+1}/${String(d.getDate()).padStart(2,'0')}`;
+    const fmt=d=>`${d.getMonth()+1}/${d.getDate()}`;
     return`${fmt(mon)}–${fmt(fri)}`;
+  }
+  function dueItemLabel(d){
+    if(!d)return'';
+    if(d.type==='checkpoint'){const ck=(CFG.checkpoints||[]).find(c=>c.key===d.key);return ck?ck.label:d.key;}
+    if(d.type==='3cs')return'3 Commitments';
+    return'';
   }
 
   // Week info bar (centered, with Enter data CTA)
-  const dueLabel=campusStats.type==='checkpoint'?campusStats.ckLabel:campusStats.type==='3cs'?'3 Commitments':'';
+  const dueLabel=dueItemLabel(due);
+  const nextWeekDue=getDueNextWeek();
+  const nextDueLabel=dueItemLabel(nextWeekDue);
   const weekInfoHtml=(weekNum>0&&weekNum<=7&&due)
     ?`<div class="s5-week-bar">
         <span class="ph-week-badge">Week ${weekNum} · ${weekDateRange(weekNum)}</span>
-        ${dueLabel?`<span class="ph-due-label">Due: ${dueLabel}</span>`:''}
+        ${dueLabel?`<span class="ph-due-now">Due this week: ${dueLabel}</span>`:''}
+        ${nextDueLabel?`<span class="ph-due-next">Up next W${getCurrentSessionWeek()+1}: ${nextDueLabel}</span>`:''}
         <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
       </div>`
     :`<div class="s5-week-bar"><span class="ph-week-badge">Session ${weekNum>7?'Complete':'Starting'}</span></div>`;
@@ -383,10 +394,7 @@ function renderStats(){
       <div class="cs s-track"><span class="cs-num">${campusStats.track}</span><span class="cs-label">On Track</span></div>
       <div class="cs s-ahead"><span class="cs-num">${campusStats.ahead}</span><span class="cs-label">Ahead</span></div>
     </div>
-    <div class="cs-bar-row">
-      <div class="cs-bar-track"><div class="cs-bar-fill" style="width:${pctAll}%"></div></div>
-      <span class="cs-bar-label">${pctAll}% entered · ${campusStats.withData}/${totalAll} students</span>
-    </div>`;
+`;
   } else if(campusStats.type==='3cs'){
     campusStatsHtml=`<div class="campus-stats">
       <div class="cs s-total"><span class="cs-num">${totalAll}</span><span class="cs-label">Students</span></div>
@@ -395,10 +403,7 @@ function renderStats(){
       <div class="cs s-track"><span class="cs-num">${campusStats.l2xGood}</span><span class="cs-label">Learning 2×</span></div>
       <div class="cs s-${campusStats.t2pN>0?'behind':'track'}"><span class="cs-num">${campusStats.t2pY}</span><span class="cs-label">T2P On Track</span></div>
     </div>
-    <div class="cs-bar-row">
-      <div class="cs-bar-track"><div class="cs-bar-fill" style="width:${pctAll}%"></div></div>
-      <span class="cs-bar-label">${campusStats.withData}/${totalAll} students have 3 Commitments data</span>
-    </div>`;
+`;
   } else {
     campusStatsHtml=`<div class="campus-stats">
       <div class="cs s-total"><span class="cs-num">${totalAll}</span><span class="cs-label">Students</span></div>
