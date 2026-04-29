@@ -948,8 +948,10 @@ function renderGuideAssignPanel(){
     :'';
   const liamChips=LEVEL_ORDER.map(lvl=>`<button class="gap-guide-chip ${getLevelGuides(lvl).includes('Liam')?'on':''}" data-staff="Liam" data-lvl="${lvl}" onclick="toggleLevelGuide(this)" style="color:${LVL_COLORS[lvl]}">${lvl}</button>`).join('');
   const levelRows=LEVEL_ORDER.map(lvl=>{
-    const assigned=getLevelGuides(lvl);
-    const chips=STAFF_SORTED.filter(s=>s!=='Liam').map(st=>`<button class="gap-guide-chip ${assigned.includes(st)?'on':''}" data-lvl="${lvl}" data-staff="${st.replace(/"/g,'&quot;')}" onclick="toggleLevelGuide(this)">${chipLabel(st)}</button>`).join('');
+    const assigned=getLevelGuides(lvl).filter(s=>s!=='Liam');
+    const chips=assigned.length
+      ?assigned.map(st=>`<button class="gap-guide-chip on" data-lvl="${lvl}" data-staff="${st.replace(/"/g,'&quot;')}" onclick="toggleLevelGuide(this)" title="Click to remove">${chipLabel(st)} ✕</button>`).join('')
+      :`<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);opacity:.5">No guides assigned</span>`;
     return`<div class="gap-row lvl-${lvl}"><span class="gap-row-level" style="color:${LVL_COLORS[lvl]}">${lvl}</span><div class="gap-row-guides" id="gap-guides-lvl-${lvl}">${chips}</div></div>`;
   }).join('');
   document.getElementById('gap-list').innerHTML=
@@ -1468,8 +1470,9 @@ function renderDmBody(){
     html=weekBanner+`<div style="display:flex;flex-direction:column;gap:6px">`;
     levelWs.forEach(ws=>{
       const final=scores[ws.name];
+      const hasChkData=CHECKPOINTS.some(chk=>scores[chkKey(ws.name,chk.key)]);
       const finalCls=final==='Passed'?'st-pass':final==='Not passed'?'st-fail':final==='Absent'?'st-absent':'st-na';
-      const finalLbl=final||'Pending';
+      const finalLbl=final||(hasChkData?'In Progress':'Pending');
       const chkMinis=CHECKPOINTS.map(chk=>{
         const v=scores[chkKey(ws.name,chk.key)];
         return`<span class="chk-mini ${chkMiniClass(v)}" title="${chk.label}: ${v||'—'}">${v?v.slice(0,2):'·'}</span>`;
@@ -1478,7 +1481,7 @@ function renderDmBody(){
         <span class="ws-code-badge">${ws.code}</span>
         <span class="ws-prog-name">${ws.name}</span>
         <div class="chk-pills">${chkMinis}</div>
-        <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:${final?'rgba(52,211,153,.12)':'var(--surface2)'};color:${final==='Passed'?'var(--pass)':final?'var(--fail)':'var(--muted)'};">${finalLbl}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:${final?'rgba(52,211,153,.12)':hasChkData?'rgba(52,211,153,.08)':'var(--surface2)'};color:${final==='Passed'?'var(--pass)':final?'var(--fail)':hasChkData?'var(--pass)':'var(--muted)'};">${finalLbl}</span>
       </div>`;
     });
     html+='</div>';
