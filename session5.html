@@ -185,6 +185,24 @@ tr:hover td{background:rgba(59,130,246,.04);}
 <div class="page" id="page"><div class="loading">Loading…</div></div>
 
 <script>
+// ── Storage shim ──────────────────────────────────────────────────
+window.storage = {
+  get: async (key) => {
+    const r = await fetch(`/api/storage?key=${encodeURIComponent(key)}`);
+    if (!r.ok) throw new Error(`storage GET ${r.status}`);
+    return r.json();
+  },
+  set: async (key, value) => {
+    const r = await fetch('/api/storage', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({key, value})
+    });
+    if (!r.ok) throw new Error(`storage POST ${r.status}`);
+  }
+};
+</script>
+<script>
 // ── Full workshop data with I-Can statements ──────────────────────────────
 const WORKSHOPS = {
   LL:[

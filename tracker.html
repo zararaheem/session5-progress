@@ -488,6 +488,24 @@ select:focus{border-color:#3b82f6;}
 </div>
 
 <script>
+// ── Storage shim ──────────────────────────────────────────────────
+window.storage = {
+  get: async (key) => {
+    const r = await fetch(`/api/storage?key=${encodeURIComponent(key)}`);
+    if (!r.ok) throw new Error(`storage GET ${r.status}`);
+    return r.json();
+  },
+  set: async (key, value) => {
+    const r = await fetch('/api/storage', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({key, value})
+    });
+    if (!r.ok) throw new Error(`storage POST ${r.status}`);
+  }
+};
+</script>
+<script>
 // ── Config ──────────────────────────────────────────────────────
 const EDIT_PASSWORD = 't2p2025';
 const SC = {S1:'#3b82f6',S2:'#8b5cf6',S3:'#10b981',S4:'#f59e0b',S5:'#ef4444'};
