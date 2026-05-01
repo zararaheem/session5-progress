@@ -810,9 +810,13 @@ function startActivityPoll(){
 }
 
 // ── Storage ──────────────────────────────────────────────────────
+let _resolveDataReady, _storageOk=false;
+const _dataReady=new Promise(r=>{_resolveDataReady=r;});
+
 async function loadData(){
   try{
     const r=await window.storage.get('s5data');
+    _storageOk=true;
     if(r?.value){
       s5data=JSON.parse(r.value);
       if(!s5data.__guides__)s5data.__guides__={};
@@ -828,7 +832,8 @@ async function loadData(){
       if(!s5data.__coaching__)s5data.__coaching__={};
       if(!s5data.__levelguides__)s5data.__levelguides__={};
     }
-  }catch(e){}
+  }catch(e){console.error('loadData failed:',e);}
+  _resolveDataReady();
   // Apply ?level= URL param from session5.html "Enter data" link
   const urlLevel=new URLSearchParams(window.location.search).get('level');
   if(urlLevel&&['LL','L1','L2','MS'].includes(urlLevel)){
@@ -847,10 +852,12 @@ loadData();
 
 async function saveAll(){
   if(!requireUser())return;
+  await _dataReady;
+  if(!_storageOk){showToast('⚠ Storage unavailable — reload page');return;}
   const btn=document.getElementById('save-btn');
   btn.classList.add('saving');btn.textContent='Saving…';
   try{await window.storage.set('s5data',JSON.stringify(s5data));showToast('✓ Saved');}
-  catch(e){showToast('⚠ Save failed');}
+  catch(e){console.error('saveAll failed:',e);showToast('⚠ Save failed: '+(e?.message||'unknown error'));}
   btn.classList.remove('saving');btn.innerHTML='↑ Save';
 }
 
@@ -965,8 +972,10 @@ function openGuideAssignPanel(){
   document.getElementById('guide-assign-panel').classList.add('open');
 }
 async function saveGuideAssignment(){
+  await _dataReady;
+  if(!_storageOk){showToast('⚠ Storage unavailable — reload page');return;}
   try{await window.storage.set('s5data',JSON.stringify(s5data));showToast('✓ Guide assignment saved');}
-  catch(e){showToast('⚠ Save failed — check connection');}
+  catch(e){console.error('saveGuideAssignment failed:',e);showToast('⚠ Save failed: '+(e?.message||'unknown error'));}
 }
 function toggleLevelGuide(btn){
   const lvl=btn.dataset.lvl;const staff=btn.dataset.staff;
