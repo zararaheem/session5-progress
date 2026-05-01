@@ -964,6 +964,10 @@ function openGuideAssignPanel(){
   renderGuideAssignPanel();
   document.getElementById('guide-assign-panel').classList.add('open');
 }
+async function saveGuideAssignment(){
+  try{await window.storage.set('s5data',JSON.stringify(s5data));showToast('✓ Guide assignment saved');}
+  catch(e){showToast('⚠ Save failed — check connection');}
+}
 function toggleLevelGuide(btn){
   const lvl=btn.dataset.lvl;const staff=btn.dataset.staff;
   if(!s5data.__levelguides__)s5data.__levelguides__={};
@@ -973,6 +977,7 @@ function toggleLevelGuide(btn){
   applyLevelGuides(lvl,arr);
   logAudit('guide',lvl,'level guides',arr.join(', '));
   renderGuideAssignPanel();
+  saveGuideAssignment();
 }
 function assignUnassignedToLevel(btn){
   const guide=btn.dataset.guide;const lvl=btn.dataset.lvl;
@@ -983,6 +988,7 @@ function assignUnassignedToLevel(btn){
   applyLevelGuides(lvl,arr);
   logAudit('guide',lvl,'level guides',arr.join(', '));
   renderGuideAssignPanel();
+  saveGuideAssignment();
 }
 function closeGuideAssignPanel(){document.getElementById('guide-assign-panel').classList.remove('open');}
 
