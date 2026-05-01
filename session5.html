@@ -185,20 +185,26 @@ tr:hover td{background:rgba(59,130,246,.04);}
 <div class="page" id="page"><div class="loading">Loading…</div></div>
 
 <script>
-// ── Storage shim ──────────────────────────────────────────────────
+// ── Storage shim: tries /api/storage (Vercel KV), falls back to localStorage ─
 window.storage = {
   get: async (key) => {
-    const r = await fetch(`/api/storage?key=${encodeURIComponent(key)}`);
-    if (!r.ok) throw new Error(`storage GET ${r.status}`);
-    return r.json();
+    try {
+      const r = await fetch(`/api/storage?key=${encodeURIComponent(key)}`);
+      const d = await r.json();
+      if (r.ok) return { value: d.value };
+    } catch (e) {}
+    return { value: localStorage.getItem(key) };
   },
   set: async (key, value) => {
-    const r = await fetch('/api/storage', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({key, value})
-    });
-    if (!r.ok) throw new Error(`storage POST ${r.status}`);
+    localStorage.setItem(key, value);
+    try {
+      const r = await fetch('/api/storage', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({key, value})
+      });
+      if (!r.ok) { const d = await r.json().catch(()=>({})); if (!d.fallback) console.warn('storage POST failed:', r.status); }
+    } catch (e) { console.warn('storage POST error:', e); }
   }
 };
 </script>

@@ -582,20 +582,30 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-// ── Storage shim — calls /api/storage serverless function ─────────
+// ── Storage shim: tries /api/storage (Vercel KV), falls back to localStorage ─
 window.storage = {
   get: async (key) => {
-    const r = await fetch(`/api/storage?key=${encodeURIComponent(key)}`);
-    if (!r.ok) throw new Error(`storage GET ${r.status}`);
-    return r.json(); // {value: string|null}
+    try {
+      const r = await fetch(`/api/storage?key=${encodeURIComponent(key)}`);
+      const d = await r.json();
+      if (r.ok) return { value: d.value };
+    } catch (e) {}
+    // localStorage fallback
+    return { value: localStorage.getItem(key) };
   },
   set: async (key, value) => {
-    const r = await fetch('/api/storage', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({key, value})
-    });
-    if (!r.ok) throw new Error(`storage POST ${r.status}`);
+    localStorage.setItem(key, value); // always save locally first
+    try {
+      const r = await fetch('/api/storage', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({key, value})
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        if (!d.fallback) console.warn('storage POST failed:', r.status, d);
+      }
+    } catch (e) { console.warn('storage POST error:', e); }
   }
 };
 </script>
@@ -828,13 +838,12 @@ function startActivityPoll(){
 }
 
 // ── Storage ──────────────────────────────────────────────────────
-let _resolveDataReady, _storageOk=false;
+let _resolveDataReady;
 const _dataReady=new Promise(r=>{_resolveDataReady=r;});
 
 async function loadData(){
   try{
     const r=await window.storage.get('s5data');
-    _storageOk=true;
     if(r?.value){
       s5data=JSON.parse(r.value);
       if(!s5data.__guides__)s5data.__guides__={};
@@ -871,7 +880,6 @@ loadData();
 async function saveAll(){
   if(!requireUser())return;
   await _dataReady;
-  if(!_storageOk){showToast('⚠ Storage unavailable — reload page');return;}
   const btn=document.getElementById('save-btn');
   btn.classList.add('saving');btn.textContent='Saving…';
   try{await window.storage.set('s5data',JSON.stringify(s5data));showToast('✓ Saved');}
@@ -991,7 +999,6 @@ function openGuideAssignPanel(){
 }
 async function saveGuideAssignment(){
   await _dataReady;
-  if(!_storageOk){showToast('⚠ Storage unavailable — reload page');return;}
   try{await window.storage.set('s5data',JSON.stringify(s5data));showToast('✓ Guide assignment saved');}
   catch(e){console.error('saveGuideAssignment failed:',e);showToast('⚠ Save failed: '+(e?.message||'unknown error'));}
 }
