@@ -755,6 +755,7 @@ function completeSelectWho(name){
   document.getElementById('activity-tab').style.display=isSuperAdmin?'inline-block':'none';
   document.getElementById('dashboard-tab').style.display=isSuperAdmin?'inline-block':'none';
   document.getElementById('ws-data-tab').style.display=name===WS_DATA_EDITOR?'inline-block':'none';
+  document.getElementById('levelFilter').value='';
   document.getElementById('assigneeFilter').value=SEE_ALL.includes(name)?'':'__mine__';
   updateChipStates();
   renderList();
