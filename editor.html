@@ -1265,21 +1265,22 @@ function renderList(){
               }
             } else {
               const d3=s5data.__3cs__?.[s.n]?.[item.key]||{};
+              const notesId3=`3cn-${safeN2}-${item.key}`;
               content=`<div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                   <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">Loves School?</span>
-                  <div style="display:flex;gap:4px;">${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d3.lovesSchool===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" style="padding:3px 10px;font-size:10px;" onclick="set3C('${safeN2}','${item.key}','lovesSchool','${v}',this);saveAll()">${v}</button>`).join('')}</div>
+                  <div style="display:flex;gap:10px;">${['Yes','No','N/A'].map(v=>`<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;color:${d3.lovesSchool===v?(v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'):'var(--muted2)'}"><input type="radio" name="ls-${safeN2}-${item.key}" value="${v}" ${d3.lovesSchool===v?'checked':''} style="accent-color:${v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'};cursor:pointer;" onchange="set3CCheck('${safeN2}','${item.key}','lovesSchool','${v}','${notesId3}',this)">${v}</label>`).join('')}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                   <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">Learning 2×?</span>
-                  <div style="display:flex;gap:4px;flex-wrap:wrap;">${['All at 2x','Some at 2x','None at 2x'].map(v=>`<button class="score-btn ${d3.learning2x===v?'active-track':''}" style="padding:3px 8px;font-size:9px;" onclick="set3C('${safeN2}','${item.key}','learning2x','${v}',this);saveAll()">${v}</button>`).join('')}</div>
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;">${['All at 2x','Some at 2x','None at 2x'].map(v=>`<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;color:${d3.learning2x===v?'#60a5fa':'var(--muted2)'}"><input type="radio" name="l2x-${safeN2}-${item.key}" value="${v}" ${d3.learning2x===v?'checked':''} style="accent-color:#60a5fa;cursor:pointer;" onchange="set3CCheck('${safeN2}','${item.key}','learning2x','${v}','${notesId3}',this)">${v}</label>`).join('')}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                   <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">T2P on track?</span>
-                  <div style="display:flex;gap:4px;">${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d3.onTrack===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" style="padding:3px 10px;font-size:10px;" onclick="set3C('${safeN2}','${item.key}','onTrack','${v}',this);saveAll()">${v}</button>`).join('')}</div>
+                  <div style="display:flex;gap:10px;">${['Yes','No','N/A'].map(v=>`<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;color:${d3.onTrack===v?(v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'):'var(--muted2)'}"><input type="radio" name="ot-${safeN2}-${item.key}" value="${v}" ${d3.onTrack===v?'checked':''} style="accent-color:${v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'};cursor:pointer;" onchange="set3CCheck('${safeN2}','${item.key}','onTrack','${v}','${notesId3}',this)">${v}</label>`).join('')}</div>
                 </div>
               </div>
-              <details style="border-top:1px solid var(--border);">
+              <details id="${notesId3}" style="border-top:1px solid var(--border);">
                 <summary style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted2);padding:7px 12px;cursor:pointer;list-style:none;user-select:none;">▸ Notes</summary>
                 <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px;background:rgba(0,0,0,.1);">
                   ${[{field:'noteSchool',label:'Loves School',placeholder:'What are they loving / not loving about school?'},{field:'noteMinimums',label:'Daily minimums',placeholder:'Hitting daily subject minimums AND earning 120 XP/day?'},{field:'noteSubjects',label:'Subjects (2×)',placeholder:'Which subjects excelling or need support? Motivation vs academics?'},{field:'noteT2p',label:'T2P on track',placeholder:'On track to pass their T2P workshop?'},{field:'noteSkills',label:'Skills & growth',placeholder:'Skills excelling? Areas of growth? Needs support?'}].map(n=>`<div>
@@ -1683,33 +1684,24 @@ function renderDmBody(){
 
           <div>
             <div class="field-label" style="margin-bottom:6px;">1 · Loves School?</div>
-            <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
-              ${['Yes','No','N/A'].map(v=>`<button
-                class="score-btn ${d.lovesSchool===v ? (v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent') : ''}"
-                onclick="set3C('${name}','${wk}','lovesSchool','${v}',this)"
-                style="padding:5px 14px;border-radius:5px;font-size:11px;">${v}</button>`).join('')}
+            <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
+              ${['Yes','No','N/A'].map(v=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;color:${d.lovesSchool===v?(v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'):'var(--muted2)'}"><input type="radio" name="dp-ls-${wk}-${sl}" value="${v}" ${d.lovesSchool===v?'checked':''} style="accent-color:${v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'};cursor:pointer;" onchange="set3CDp('${name}','${wk}','lovesSchool','${v}','3c-${wk}-lovesnote-${sl}',this)">${v}</label>`).join('')}
             </div>
             <textarea class="field-textarea" id="3c-${wk}-lovesnote-${sl}" placeholder="What are they loving or not liking about school?" style="min-height:48px;">${d.lovesNote||''}</textarea>
           </div>
 
           <div>
             <div class="field-label" style="margin-bottom:6px;">2 · Learning 2x?</div>
-            <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;">
-              ${['All at 2x','Some at 2x','None at 2x','N/A'].map(v=>`<button
-                class="score-btn ${d.learning2x===v ? 'active-track' : ''}"
-                onclick="set3C('${name}','${wk}','learning2x','${v}',this)"
-                style="padding:5px 11px;border-radius:5px;font-size:10px;">${v}</button>`).join('')}
+            <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
+              ${['All at 2x','Some at 2x','None at 2x','N/A'].map(v=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'DM Mono',monospace;font-size:${v==='N/A'?'10':'11'}px;color:${d.learning2x===v?'#60a5fa':'var(--muted2)'}"><input type="radio" name="dp-l2x-${wk}-${sl}" value="${v}" ${d.learning2x===v?'checked':''} style="accent-color:#60a5fa;cursor:pointer;" onchange="set3CDp('${name}','${wk}','learning2x','${v}','3c-${wk}-learnnote-${sl}',this)">${v}</label>`).join('')}
             </div>
             <textarea class="field-textarea" id="3c-${wk}-learnnote-${sl}" placeholder="Which subjects excelling / need support? Motivation or academics issue?" style="min-height:48px;">${d.learnNote||''}</textarea>
           </div>
 
           <div>
             <div class="field-label" style="margin-bottom:6px;">3 · Lifeskills — On track to T2P?</div>
-            <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
-              ${['Yes','No','N/A'].map(v=>`<button
-                class="score-btn ${d.onTrack===v ? (v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent') : ''}"
-                onclick="set3C('${name}','${wk}','onTrack','${v}',this)"
-                style="padding:5px 14px;border-radius:5px;font-size:11px;">${v}</button>`).join('')}
+            <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
+              ${['Yes','No','N/A'].map(v=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;color:${d.onTrack===v?(v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'):'var(--muted2)'}"><input type="radio" name="dp-ot-${wk}-${sl}" value="${v}" ${d.onTrack===v?'checked':''} style="accent-color:${v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'};cursor:pointer;" onchange="set3CDp('${name}','${wk}','onTrack','${v}','3c-${wk}-tracknote-${sl}',this)">${v}</label>`).join('')}
             </div>
             <textarea class="field-textarea" id="3c-${wk}-tracknote-${sl}" placeholder="If No — what's the action plan?" style="min-height:48px;">${d.trackNote||''}</textarea>
           </div>
@@ -1876,6 +1868,43 @@ function set3C(name, wk, field, val, btn) {
   btn.classList.add(cls);
 }
 
+// Radio-checkbox handler for allWeeks inline editor — auto-opens Notes on "No"
+function set3CCheck(name, wk, field, val, notesId, radio) {
+  if (!s5data.__3cs__) s5data.__3cs__ = {};
+  if (!s5data.__3cs__[name]) s5data.__3cs__[name] = {};
+  if (!s5data.__3cs__[name][wk]) s5data.__3cs__[name][wk] = {};
+  s5data.__3cs__[name][wk][field] = val;
+  // Update sibling label colors
+  radio.closest('div').querySelectorAll('label').forEach(lbl => {
+    const r = lbl.querySelector('input');
+    const v = r.value;
+    lbl.style.color = r.checked ? (field==='learning2x' ? '#60a5fa' : v==='Yes' ? '#4ade80' : v==='No' ? '#f87171' : '#94a3b8') : 'var(--muted2)';
+  });
+  if ((field === 'lovesSchool' || field === 'onTrack') && val === 'No') {
+    const det = document.getElementById(notesId);
+    if (det) { det.open = true; det.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  }
+  saveAll();
+}
+
+// Radio-checkbox handler for the 3Cs detail tab — focuses note textarea on "No"
+function set3CDp(name, wk, field, val, taId, radio) {
+  if (!s5data.__3cs__) s5data.__3cs__ = {};
+  if (!s5data.__3cs__[name]) s5data.__3cs__[name] = {};
+  if (!s5data.__3cs__[name][wk]) s5data.__3cs__[name][wk] = {};
+  s5data.__3cs__[name][wk][field] = val;
+  radio.closest('div').querySelectorAll('label').forEach(lbl => {
+    const r = lbl.querySelector('input');
+    const v = r.value;
+    lbl.style.color = r.checked ? (field==='learning2x' ? '#60a5fa' : v==='Yes' ? '#4ade80' : v==='No' ? '#f87171' : '#94a3b8') : 'var(--muted2)';
+  });
+  if ((field === 'lovesSchool' || field === 'onTrack') && val === 'No') {
+    const ta = document.getElementById(taId);
+    if (ta) { ta.focus(); ta.scrollIntoView({behavior:'smooth',block:'nearest'}); if(!ta.value) ta.placeholder = '⚠ Please add a note — what\'s the plan to get back on track?'; }
+  }
+  saveAll();
+}
+
 function save3Cs(name) {
   const sl = slug(name);
   if (!s5data.__3cs__) s5data.__3cs__ = {};
@@ -2022,58 +2051,55 @@ document.addEventListener('keydown',e=>{
 // ── Export / Import data ──────────────────────────────────────────
 let _syncMode='export';
 
-function exportCsv(){
+function _buildExportData(){
   const students=[...STUDENTS].sort((a,b)=>{const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l);return d||a.n.localeCompare(b.n);});
   const chkWeeks=[{key:'w1',label:'Week 1 Baseline'},{key:'w3',label:'Week 3 Chk1'},{key:'w5',label:'Week 5 Chk2'},{key:'w7',label:'Week 7 T2P'}];
   const tc3Weeks=[{key:'w2',label:'Wk2'},{key:'w4',label:'Wk4'},{key:'w6',label:'Wk6'}];
-  const allLevelWs={};
-  ['LL','L1','L2','MS'].forEach(l=>{allLevelWs[l]=S5_WORKSHOPS[l]||[];});
-
-  // Build headers
-  const headers=['Student','Level'];
-  // Per-workshop checkpoint columns
-  students.forEach(s=>{});// just collecting unique workshop/chk combos per level
   const lvlWsCols={};
   ['LL','L1','L2','MS'].forEach(lvl=>{
     lvlWsCols[lvl]=[];
-    (allLevelWs[lvl]||[]).forEach(ws=>{
-      chkWeeks.forEach(ck=>{lvlWsCols[lvl].push({ws,ck,col:`${ws.code} · ${ck.label}`});});
-      lvlWsCols[lvl].push({ws,ck:null,col:`${ws.code} · Final`});
+    (S5_WORKSHOPS[lvl]||[]).forEach(ws=>{
+      chkWeeks.forEach(ck=>{lvlWsCols[lvl].push({ws,ck,col:`${ws.code} ${ck.label}`});});
+      lvlWsCols[lvl].push({ws,ck:null,col:`${ws.code} Final`});
     });
   });
-  // 3Cs columns (same for all levels)
   const tc3Cols=[];
   tc3Weeks.forEach(wk=>{
     tc3Cols.push({wk,field:'lovesSchool',col:`${wk.label} Loves School`});
-    tc3Cols.push({wk,field:'learning2x',col:`${wk.label} Learning 2×`});
+    tc3Cols.push({wk,field:'learning2x',col:`${wk.label} Learning 2x`});
     tc3Cols.push({wk,field:'onTrack',col:`${wk.label} T2P on track`});
   });
-
-  // Collect all unique ws+chk cols across all levels for the header
-  const maxWsCols=Math.max(...['LL','L1','L2','MS'].map(l=>lvlWsCols[l].length));
-  // Use a per-level approach — each student only fills their own workshops
   const allWsColLabels=['LL','L1','L2','MS'].flatMap(lvl=>lvlWsCols[lvl].map(c=>c.col));
-  const allHeaders=['Student','Level',...allWsColLabels,...tc3Cols.map(c=>c.col)];
-
-  const esc=v=>`"${String(v||'').replace(/"/g,'""')}"`;
-
+  const headers=['Student','Level',...allWsColLabels,...tc3Cols.map(c=>c.col)];
   const rows=students.map(s=>{
-    const wsCols=lvlWsCols[s.l]||[];
-    const allWsForAllLevels=['LL','L1','L2','MS'].flatMap(lvl=>{
-      if(lvl===s.l) return wsCols.map(c=>{
-        if(c.ck){
-          return esc(s5data[s.n]?.[chkKey(c.ws.name,c.ck.key)]||'');
-        }else{
-          return esc(s5data[s.n]?.[c.ws.name]||'');
-        }
-      });
-      return lvlWsCols[lvl].map(()=>esc(''));
+    const allWsCells=['LL','L1','L2','MS'].flatMap(lvl=>{
+      if(lvl===s.l) return lvlWsCols[lvl].map(c=>c.ck?s5data[s.n]?.[chkKey(c.ws.name,c.ck.key)]||'':s5data[s.n]?.[c.ws.name]||'');
+      return lvlWsCols[lvl].map(()=>'');
     });
-    const tc3Values=tc3Cols.map(c=>esc(s5data.__3cs__?.[s.n]?.[c.wk.key]?.[c.field]||''));
-    return[esc(s.n),esc(s.l),...allWsForAllLevels,...tc3Values].join(',');
+    const tc3Values=tc3Cols.map(c=>s5data.__3cs__?.[s.n]?.[c.wk.key]?.[c.field]||'');
+    return[s.n,s.l,...allWsCells,...tc3Values];
   });
+  return{headers,rows};
+}
 
-  const csv=[allHeaders.map(esc).join(','),...rows].join('\n');
+function copyForSheets(){
+  const{headers,rows}=_buildExportData();
+  const tsv=[headers,...rows].map(r=>r.map(v=>String(v).replace(/\t/g,' ')).join('\t')).join('\n');
+  navigator.clipboard.writeText(tsv).then(()=>{
+    const s=document.getElementById('sync-status');
+    s.style.color='#4ade80';
+    s.textContent='✓ Copied! Open your Google Sheet and press Ctrl+V (or Cmd+V on Mac).';
+  }).catch(()=>{
+    const s=document.getElementById('sync-status');
+    s.style.color='#f87171';
+    s.textContent='Copy failed — try the Download CSV button instead.';
+  });
+}
+
+function exportCsv(){
+  const{headers,rows}=_buildExportData();
+  const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
+  const csv=[headers,...rows].map(r=>r.map(esc).join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -2178,7 +2204,7 @@ function mergeImportData(){
         <div class="sync-lbl">Your local data (copy this and send to Admin)</div>
         <textarea class="sync-textarea" id="sync-export-ta" readonly></textarea>
         <div class="sync-row">
-          <button class="sync-btn copy" onclick="copyExportData()">📋 Copy JSON</button>
+          <button class="sync-btn copy" onclick="copyForSheets()">📋 Copy for Google Sheets</button>
           <button class="sync-btn copy" onclick="exportCsv()" style="color:#34d399;border-color:rgba(52,211,153,.3)">⬇ Download CSV</button>
         </div>
       </div>
