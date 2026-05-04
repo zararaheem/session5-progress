@@ -143,6 +143,9 @@ select option{background:var(--surface2);}
 table{width:100%;border-collapse:collapse;font-size:12px;}
 th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted2);padding:7px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
 th.chk-th{text-align:center;min-width:90px;}
+th.tc-th{text-align:center;min-width:72px;}
+td.tc-td{text-align:center;vertical-align:middle;}
+.tc-dot{display:inline-flex;align-items:center;gap:2px;font-family:'DM Mono',monospace;font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;white-space:nowrap;}
 td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(59,130,246,.04);}
@@ -681,17 +684,40 @@ function render(){
       const filledCount=students.filter(s=>CHECKPOINTS.some(c=>getChk(s.n,ws.name,c.key))||getFinal(s.n,ws.name)).length;
       const pct=students.length?Math.round(filledCount/students.length*100):0;
       const skipBadge=skipped?`<span style="font-family:'DM Mono',monospace;font-size:9px;background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:2px 7px;border-radius:4px;margin-left:6px">data not collected</span>`:'';
+      // Which 3Cs week to show (due week, else most recent past, else w2)
+      const tcWeeks=['w2','w4','w6'];
+      const tcWkNum=w=>parseInt(w.slice(1));
+      const wkNum=getCurrentSessionWeek();
+      const tcKey=(due&&due.type==='3cs')?due.key:(tcWeeks.filter(w=>tcWkNum(w)<wkNum).pop()||'w2');
+      const tcLabel={w2:'Wk 2',w4:'Wk 4',w6:'Wk 6'}[tcKey];
+      const tc3cDue=due&&due.type==='3cs'&&due.key===tcKey;
+      function tc3cCell(sName){
+        const d=s5data.__3cs__?.[sName]?.[tcKey]||{};
+        if(!d.lovesSchool&&!d.learning2x&&!d.onTrack)return`<td class="tc-td"><span style="color:var(--border2);font-size:16px">○</span></td>`;
+        const lC=d.lovesSchool==='Yes'?'#34d399':d.lovesSchool==='No'?'#f87171':'var(--muted2)';
+        const lT=d.lovesSchool==='Yes'?'♥':d.lovesSchool==='No'?'✗':'·';
+        const lBg=d.lovesSchool==='Yes'?'rgba(52,211,153,.12)':d.lovesSchool==='No'?'rgba(248,113,113,.12)':'transparent';
+        const xC=d.learning2x?.includes('All')?'#4ade80':d.learning2x?.includes('Some')?'#fbbf24':d.learning2x?'#f87171':'var(--muted2)';
+        const xT=d.learning2x?.includes('All')?'2×':d.learning2x?.includes('Some')?'½×':d.learning2x?'✗':'·';
+        const tC=d.onTrack==='Yes'?'#34d399':d.onTrack==='No'?'#f87171':'var(--muted2)';
+        const tT=d.onTrack==='Yes'?'T✓':d.onTrack==='No'?'T✗':'·';
+        return`<td class="tc-td" title="Loves School: ${d.lovesSchool||'—'} · 2×: ${d.learning2x||'—'} · T2P: ${d.onTrack||'—'}">
+          <span class="tc-dot" style="color:${lC};background:${lBg}">${lT}</span>
+          <span class="tc-dot" style="color:${xC}">${xT}</span>
+          <span class="tc-dot" style="color:${tC}">${tT}</span>
+        </td>`;
+      }
       const headerRow=`<th style="min-width:160px">Student</th>${CHECKPOINTS.map(c=>{
         const isDue=due&&due.type==='checkpoint'&&due.key===c.key;
         return`<th class="chk-th${isDue?' chk-th-due':''}">${c.label}${isDue?'<span class="due-col-badge">Due this Week</span>':''}</th>`;
-      }).join('')}<th>Status</th>`;
+      }).join('')}<th>Status</th><th class="tc-th${tc3cDue?' chk-th-due':''}">3Cs · ${tcLabel}${tc3cDue?'<span class="due-col-badge">Due this Week</span>':''}</th>`;
       const bodyRows=students.map(s=>{
         const chkCells=CHECKPOINTS.map(c=>{
           const isDue=due&&due.type==='checkpoint'&&due.key===c.key;
           const val=getChk(s.n,ws.name,c.key);
           return`<td class="chk-td${isDue?' due-col':''}"><a href="https://session5-progress.vercel.app/editor.html?level=${lvl}" class="dot-link" title="Enter ${c.label} for ${s.n}">${dotHtml(val)}</a></td>`;
         }).join('');
-        return`<tr><td><span class="s-name">${s.n}</span>${s.note?`<span class="s-note">* ${s.note}</span>`:''}</td>${chkCells}<td>${finalPill(getFinal(s.n,ws.name))}</td></tr>`;
+        return`<tr><td><span class="s-name">${s.n}</span>${s.note?`<span class="s-note">* ${s.note}</span>`:''}</td>${chkCells}<td>${finalPill(getFinal(s.n,ws.name))}</td>${tc3cCell(s.n)}</tr>`;
       }).join('');
       allBlocks.push(`<div class="ws-block" id="${wsId}">
         <div class="ws-block-header" onclick="toggleWs('${wsId}')">
