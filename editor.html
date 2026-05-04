@@ -1206,23 +1206,13 @@ function renderList(){
         <span class="row-chevron">▶</span>
       </div>
       <div class="row-body" id="body-${sl}">
-        <div class="profile-section">
-          <div class="profile-col">
-            <div><div class="field-label">Motivational model</div><textarea class="field-textarea" id="mot-${sl}" data-sslug="${sl}" onchange="saveProfileBySlug(this)" placeholder="What drives them, how they work best…">${profile.motivation||''}</textarea></div>
-          </div>
-          <div class="profile-col">
-            <div><div class="field-label">Guide notes</div><textarea class="field-textarea" id="note-${sl}" data-sslug="${sl}" onchange="saveProfileBySlug(this)" placeholder="This week's observations, action plan…">${profile.notes||''}</textarea></div>
-          </div>
-        </div>
         ${(()=>{
           const due3cWeeks=['w2','w4','w6'];
           const wkLabels={w2:'Week 2',w4:'Week 4',w6:'Week 6'};
           const due=getDueThisWeek();
-          // Show due week first, then all others
           const sorted=[...due3cWeeks].sort((a,b)=>(due&&due.key===b?1:due&&due.key===a?-1:0));
-          return`<div style="border-top:1px solid var(--border);padding:14px 16px 8px;">
+          return`<div style="padding:14px 16px 8px;">
             <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;">3Cs — Alpha's 3 Commitments</div>
-            ${sorted.map(wk=>{
               const d3=s5data.__3cs__?.[s.n]?.[wk]||{};
               const isDue=due&&due.type==='3cs'&&due.key===wk;
               const safeN2=s.n.replace(/'/g,"\\'").replace(/"/g,'&quot;');
