@@ -818,14 +818,14 @@ function completeSelectWho(name){
   document.getElementById('export-btn').style.display='inline-flex';
   document.getElementById('import-btn').style.display=isSuperAdmin?'inline-flex':'none';
   document.getElementById('roster-btn').style.display=isSuperAdmin?'inline-flex':'none';
-  document.getElementById('activity-tab').style.display=isSuperAdmin?'inline-block':'none';
+  document.getElementById('activity-tab').style.display=name==='Admin'?'inline-block':'none';
   document.getElementById('dashboard-tab').style.display=isSuperAdmin?'inline-block':'none';
   document.getElementById('ws-data-tab').style.display=name===WS_DATA_EDITOR?'inline-block':'none';
   document.getElementById('levelFilter').value='';
   document.getElementById('assigneeFilter').value=SEE_ALL.includes(name)?'':'__mine__';
   updateChipStates();
   renderList();
-  if(isSuperAdmin){updateActivityBadge();startActivityPoll();}
+  if(name==='Admin'){updateActivityBadge();startActivityPoll();}
 }
 function requireUser(){
   if(currentUser)return true;
@@ -855,7 +855,7 @@ function renderActivity(){
   document.getElementById('activity-badge').style.display='none';
 }
 function updateActivityBadge(){
-  if(!isSuperAdmin)return;
+  if(currentUser!=='Admin')return;
   const entries=s5data.__audit__||[];
   const lastSeen=localStorage.getItem('alphaAdminLastSeen')||'1970-01-01';
   const n=entries.filter(e=>e.ts>lastSeen).length;
@@ -867,7 +867,7 @@ let _pollTimer=null;
 function startActivityPoll(){
   if(_pollTimer)return;
   _pollTimer=setInterval(async()=>{
-    if(!isSuperAdmin)return;
+    if(currentUser!=='Admin')return;
     try{
       const r=await window.storage.get('s5data');
       if(r?.value){const fresh=JSON.parse(r.value);s5data.__audit__=fresh.__audit__||s5data.__audit__;updateActivityBadge();}
