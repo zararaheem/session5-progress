@@ -55,39 +55,16 @@ body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50
 .cs.s-track .cs-num{color:#4ade80;}
 .cs.s-ahead{background:rgba(109,40,217,.12);border:1px solid rgba(196,181,253,.25);}
 .cs.s-ahead .cs-num{color:#a78bfa;}
+.cs.s-blue{background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.25);}
+.cs.s-blue .cs-num{color:#60a5fa;}
 .cs-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;justify-content:center;max-width:460px;margin-left:auto;margin-right:auto;}
 .cs-bar-track{flex:1;max-width:320px;height:6px;background:var(--border2);border-radius:3px;overflow:hidden;}
 .cs-bar-fill{height:100%;background:#1a56db;border-radius:3px;transition:width .4s;}
 .cs-bar-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);}
 
-/* DUAL STAT PANELS */
-.dual-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
-@media(max-width:600px){.dual-stats{grid-template-columns:1fr;}}
-.stat-panel{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
-.sp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;}
-.sp-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);}
-.sp-select{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border:1px solid var(--border2);border-radius:6px;background:var(--surface);color:var(--text);outline:none;max-width:200px;}
-.sp-stats{display:flex;gap:6px;flex-wrap:wrap;}
-.sp-cs{display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:8px;min-width:56px;text-align:center;flex:1;}
-.sp-cs-num{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;line-height:1;}
-.sp-cs-lbl{font-size:8px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em;}
-.sp-cs.sp-total{background:var(--surface);border:1px solid var(--border);}
-.sp-cs.sp-pass{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);}
-.sp-cs.sp-pass .sp-cs-num{color:#34d399;}
-.sp-cs.sp-noyet{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);}
-.sp-cs.sp-noyet .sp-cs-num{color:#f87171;}
-.sp-cs.sp-absent{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);}
-.sp-cs.sp-absent .sp-cs-num{color:#fbbf24;}
-.sp-cs.sp-green{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);}
-.sp-cs.sp-green .sp-cs-num{color:#4ade80;}
-.sp-cs.sp-blue{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);}
-.sp-cs.sp-blue .sp-cs-num{color:#60a5fa;}
-.sp-lvl-row{margin-top:10px;display:flex;flex-direction:column;gap:4px;}
-.sp-lvl-item{display:flex;align-items:center;gap:6px;font-size:11px;}
-.sp-lvl-tag{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;min-width:26px;}
-.sp-lvl-bar-wrap{flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden;}
-.sp-lvl-bar{height:100%;border-radius:2px;transition:width .3s;}
-.sp-lvl-nums{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);white-space:nowrap;}
+/* STAT MODE SELECTOR */
+.stat-mode-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
+.stat-mode-select{font-family:'DM Mono',monospace;font-size:11px;padding:5px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none;}
 
 /* LEVEL SELECTOR */
 .level-selector{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding-bottom:2px;}
@@ -327,8 +304,8 @@ const CHECKPOINTS = CFG.checkpoints || [
 
 let currentLevel = 'ALL';
 let s5data = {};
-let wsStatFilter = '';       // selected workshop for top panel ('': all)
-let threecsStatFilter = '';  // selected 3Cs week key ('': auto = most recent)
+let statMode = 'checkpoint';  // 'checkpoint' or '3cs'
+let threecsWeekFilter = '';  // 'w2', 'w4', 'w6', or '' for auto
 
 function getCurrentSessionWeek(){
   const start=new Date(2026,3,27);
@@ -377,12 +354,12 @@ function renderStats(){
   const due=getDueThisWeek();
   const allStudents=(CFG.students||[]).filter(s=>!s.inactive);
   const allLevels=['LL','L1','L2','MS'];
-  const totalAll=allStudents.length;
+  const total=allStudents.length;
   const lvlColors={LL:'var(--ll)',L1:'var(--l1)',L2:'var(--l2)',MS:'var(--ms)'};
   const lvlBgs={LL:'var(--ll-bg)',L1:'var(--l1-bg)',L2:'var(--l2-bg)',MS:'var(--ms-bg)'};
   const lvlHex={LL:'#60a5fa',L1:'#f4896a',L2:'#5dd6c6',MS:'#f07ab0'};
 
-  // ── Week bar helpers ────────────────────────────────────────────
+  // ── Week bar ──────────────────────────────────────────────────────
   function weekDateRange(w){
     const s=new Date(2026,3,27);
     const mon=new Date(s.getTime()+(w-1)*7*24*60*60*1000);
@@ -415,147 +392,148 @@ function renderStats(){
       </div>`
     :`<div class="s5-week-bar"><span class="ph-week-badge">Session ${weekNum>7?'Complete':'Starting'}</span></div>`;
 
-  // ── Workshop panel ──────────────────────────────────────────────
-  // Build flat list of all workshops visible at current level filter
-  const wsScope=currentLevel==='ALL'?allLevels:[currentLevel];
-  const allWs=[];
-  wsScope.forEach(lvl=>(WORKSHOPS[lvl]||[]).forEach(ws=>allWs.push({...ws,lvl})));
-  const wsSelected=wsStatFilter&&allWs.find(w=>w.name===wsStatFilter)?wsStatFilter:'';
+  // ── Checkpoint stats ──────────────────────────────────────────────
+  function mostRecentChkKey(){
+    if(weekNum>=7)return'w7';
+    if(weekNum>=5)return'w5';
+    if(weekNum>=3)return'w3';
+    return'w1';
+  }
+  const chkKey=mostRecentChkKey();
 
-  function wsStatsFor(students,wsName){
-    let passed=0,notyet=0,absent=0,entered=0;
+  function chkStatsFor(students){
+    let behind=0,track=0,ahead=0;
     students.forEach(s=>{
-      const wsList=wsName?[wsName]:(WORKSHOPS[s.l]||[]).map(w=>w.name);
-      wsList.forEach(wn=>{
-        const v=getFinal(s.n,wn);
-        if(v){entered++;if(v==='Passed')passed++;else if(v==='Not Yet')notyet++;else if(v==='Absent')absent++;}
+      (WORKSHOPS[s.l]||[]).forEach(ws=>{
+        const v=getChk(s.n,ws.name,chkKey);
+        if(v==='Behind')behind++;
+        else if(v==='On Track')track++;
+        else if(v==='Ahead')ahead++;
       });
     });
-    const slots=wsName?students.length:students.reduce((a,s)=>a+(WORKSHOPS[s.l]||[]).length,0);
-    return{passed,notyet,absent,entered,slots};
+    return{behind,track,ahead};
   }
 
-  const wsAll=wsStatsFor(allStudents,wsSelected);
-  const wsLvlStats={};
-  allLevels.forEach(lvl=>wsLvlStats[lvl]=wsStatsFor(allStudents.filter(s=>s.l===lvl),wsSelected&&(WORKSHOPS[lvl]||[]).find(w=>w.name===wsSelected)?wsSelected:null));
-
-  const wsDropdownOpts=`<option value="">All workshops</option>`+
-    wsScope.map(lvl=>(WORKSHOPS[lvl]||[]).map(ws=>
-      `<option value="${ws.name.replace(/"/g,'&quot;')}"${wsStatFilter===ws.name?' selected':''}>${currentLevel==='ALL'?`[${lvl}] `:''}${ws.code} — ${ws.name}</option>`
-    ).join('')).join('');
-
-  const wsLvlRows=allLevels.map(lvl=>{
-    const ls=wsLvlStats[lvl];
-    const pct=ls.slots>0?Math.round(ls.passed/ls.slots*100):0;
-    return`<div class="sp-lvl-item">
-      <span class="sp-lvl-tag" style="color:${lvlHex[lvl]}">${lvl}</span>
-      <div class="sp-lvl-bar-wrap"><div class="sp-lvl-bar" style="width:${pct}%;background:${lvlHex[lvl]}"></div></div>
-      <span class="sp-lvl-nums">${ls.passed}P ${ls.notyet}N ${ls.absent}Ab</span>
-    </div>`;
-  }).join('');
-
-  const wsPanelHtml=`<div class="stat-panel">
-    <div class="sp-hdr">
-      <span class="sp-title">Workshops</span>
-      <select class="sp-select" id="wsStatSelect" onchange="wsStatFilter=this.value;renderStats()">
-        ${wsDropdownOpts}
-      </select>
-    </div>
-    <div class="sp-stats">
-      <div class="sp-cs sp-total"><span class="sp-cs-num">${wsAll.slots}</span><span class="sp-cs-lbl">Slots</span></div>
-      <div class="sp-cs sp-pass"><span class="sp-cs-num">${wsAll.passed}</span><span class="sp-cs-lbl">Passed</span></div>
-      <div class="sp-cs sp-noyet"><span class="sp-cs-num">${wsAll.notyet}</span><span class="sp-cs-lbl">Not Yet</span></div>
-      <div class="sp-cs sp-absent"><span class="sp-cs-num">${wsAll.absent}</span><span class="sp-cs-lbl">Absent</span></div>
-    </div>
-    <div class="sp-lvl-row">${wsLvlRows}</div>
-  </div>`;
-
-  // ── 3Cs panel ───────────────────────────────────────────────────
+  // ── 3Cs stats ─────────────────────────────────────────────────────
   const threecsWeeks=[
     {key:'w2',label:'Week 2'},{key:'w4',label:'Week 4'},{key:'w6',label:'Week 6'}
   ];
-  // Auto-select: most recently past 3Cs week, or w2 if none yet
   function autoThreecs(){
-    const past=threecsWeeks.filter(w=>{
-      const wn=parseInt(w.key.slice(1));return wn<weekNum;
-    });
+    const past=threecsWeeks.filter(w=>parseInt(w.key.slice(1))<weekNum);
     return past.length?past[past.length-1].key:threecsWeeks[0].key;
   }
-  const tcKey=threecsStatFilter||autoThreecs();
-  const tcLabel=threecsWeeks.find(w=>w.key===tcKey)?.label||tcKey;
+  const tcKey=threecsWeekFilter||autoThreecs();
 
   function threecsStatsFor(students,key){
-    let entered=0,lovesY=0,l2x=0,t2pY=0,t2pN=0;
+    let lovesY=0,l2x=0,t2pY=0;
     students.forEach(s=>{
       const d=s5data.__3cs__?.[s.n]?.[key]||{};
-      if(d.lovesSchool||d.learning2x||d.onTrack)entered++;
       if(d.lovesSchool==='Yes')lovesY++;
       if(d.learning2x==='All at 2x'||d.learning2x==='Some at 2x')l2x++;
-      if(d.onTrack==='Yes')t2pY++;else if(d.onTrack==='No')t2pN++;
+      if(d.onTrack==='Yes')t2pY++;
     });
-    return{entered,lovesY,l2x,t2pY,t2pN,total:students.length};
+    return{lovesY,l2x,t2pY,total:students.length};
   }
 
+  // ── Compute all & per-level stats ─────────────────────────────────
+  const chkAll=chkStatsFor(allStudents);
   const tcAll=threecsStatsFor(allStudents,tcKey);
-  const tcLvlRows=allLevels.map(lvl=>{
-    const ls=threecsStatsFor(allStudents.filter(s=>s.l===lvl),tcKey);
-    const pct=ls.total>0?Math.round(ls.entered/ls.total*100):0;
-    return`<div class="sp-lvl-item">
-      <span class="sp-lvl-tag" style="color:${lvlHex[lvl]}">${lvl}</span>
-      <div class="sp-lvl-bar-wrap"><div class="sp-lvl-bar" style="width:${pct}%;background:${lvlHex[lvl]}"></div></div>
-      <span class="sp-lvl-nums">${ls.entered}/${ls.total} in · ♥${ls.lovesY} · 2×${ls.l2x} · T2P:${ls.t2pY}</span>
-    </div>`;
-  }).join('');
+  const chkLvlStats={},tcLvlStats={};
+  allLevels.forEach(lvl=>{
+    const ls=allStudents.filter(s=>s.l===lvl);
+    chkLvlStats[lvl]=chkStatsFor(ls);
+    tcLvlStats[lvl]=threecsStatsFor(ls,tcKey);
+  });
 
-  const tcDropdownOpts=threecsWeeks.map(w=>
-    `<option value="${w.key}"${tcKey===w.key?' selected':''}>${w.label}</option>`
-  ).join('');
+  // ── Mode selector ─────────────────────────────────────────────────
+  const tcWeekDropdown=statMode==='3cs'
+    ?`<select class="stat-mode-select" onchange="threecsWeekFilter=this.value;renderStats()">
+        ${threecsWeeks.map(w=>`<option value="${w.key}"${tcKey===w.key?' selected':''}>${w.label}</option>`).join('')}
+      </select>`:'';
 
-  const tcPanelHtml=`<div class="stat-panel">
-    <div class="sp-hdr">
-      <span class="sp-title">3Cs</span>
-      <select class="sp-select" id="threecsStatSelect" onchange="threecsStatFilter=this.value;renderStats()">
-        ${tcDropdownOpts}
-      </select>
-    </div>
-    <div class="sp-stats">
-      <div class="sp-cs sp-total"><span class="sp-cs-num">${tcAll.entered}</span><span class="sp-cs-lbl">Entered</span></div>
-      <div class="sp-cs sp-green"><span class="sp-cs-num">${tcAll.lovesY}</span><span class="sp-cs-lbl">Love School</span></div>
-      <div class="sp-cs sp-blue"><span class="sp-cs-num">${tcAll.l2x}</span><span class="sp-cs-lbl">At 2×</span></div>
-      <div class="sp-cs sp-${tcAll.t2pN>0?'noyet':'green'}"><span class="sp-cs-num">${tcAll.t2pY}</span><span class="sp-cs-lbl">T2P On Track</span></div>
-    </div>
-    <div class="sp-lvl-row">${tcLvlRows}</div>
+  const modeSelectorHtml=`<div class="stat-mode-bar">
+    <select class="stat-mode-select" onchange="statMode=this.value;renderStats()">
+      <option value="checkpoint"${statMode==='checkpoint'?' selected':''}>Checkpoints</option>
+      <option value="3cs"${statMode==='3cs'?' selected':''}>3Cs</option>
+    </select>
+    ${tcWeekDropdown}
   </div>`;
 
-  // ── Level selector cards ────────────────────────────────────────
-  // Pills for level cards use workshop stats (most actionable)
+  // ── Stat cards ────────────────────────────────────────────────────
+  let statsHtml;
+  if(statMode==='checkpoint'){
+    statsHtml=`<div class="campus-stats">
+      <div class="cs s-total"><span class="cs-num">${total}</span><span class="cs-label">Students</span></div>
+      <div class="cs s-behind"><span class="cs-num">${chkAll.behind}</span><span class="cs-label">Behind</span></div>
+      <div class="cs s-track"><span class="cs-num">${chkAll.track}</span><span class="cs-label">On Track</span></div>
+      <div class="cs s-ahead"><span class="cs-num">${chkAll.ahead}</span><span class="cs-label">Ahead</span></div>
+    </div>`;
+  }else{
+    statsHtml=`<div class="campus-stats">
+      <div class="cs s-total"><span class="cs-num">${total}</span><span class="cs-label">Students</span></div>
+      <div class="cs s-track"><span class="cs-num">${tcAll.lovesY}</span><span class="cs-label">Love School</span></div>
+      <div class="cs s-blue"><span class="cs-num">${tcAll.l2x}</span><span class="cs-label">At 2×</span></div>
+      <div class="cs s-ahead"><span class="cs-num">${tcAll.t2pY}</span><span class="cs-label">T2P On Track</span></div>
+    </div>`;
+  }
+
+  // ── Level cards ───────────────────────────────────────────────────
   function levelPills(lvl){
-    const ls=wsLvlStats[lvl];if(!ls)return'';
-    return(ls.passed>0?`<span class="lvc-pill" style="background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.25);">${ls.passed} Passed</span>`:'')+
-      (ls.notyet>0?`<span class="lvc-pill" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);">${ls.notyet} Not Yet</span>`:'')+
-      (ls.absent>0?`<span class="lvc-pill" style="background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25);">${ls.absent} Absent</span>`:'');
+    if(statMode==='checkpoint'){
+      const ls=chkLvlStats[lvl];
+      return(ls.behind>0?`<span class="lvc-pill" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);">${ls.behind} Behind</span>`:'')+
+        (ls.track>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">${ls.track} On Track</span>`:'')+
+        (ls.ahead>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">${ls.ahead} Ahead</span>`:'');
+    }else{
+      const ls=tcLvlStats[lvl];
+      return(ls.lovesY>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">♥ ${ls.lovesY}</span>`:'')+
+        (ls.l2x>0?`<span class="lvc-pill" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25);">2× ${ls.l2x}</span>`:'')+
+        (ls.t2pY>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">T2P ${ls.t2pY}</span>`:'');
+    }
   }
   function allLevelPills(){
-    return(wsAll.passed>0?`<span class="lvc-pill" style="background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.25);">${wsAll.passed} Passed</span>`:'')+
-      (wsAll.notyet>0?`<span class="lvc-pill" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);">${wsAll.notyet} Not Yet</span>`:'')+
-      (wsAll.absent>0?`<span class="lvc-pill" style="background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25);">${wsAll.absent} Absent</span>`:'');
+    if(statMode==='checkpoint'){
+      return(chkAll.behind>0?`<span class="lvc-pill" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);">${chkAll.behind} Behind</span>`:'')+
+        (chkAll.track>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">${chkAll.track} On Track</span>`:'')+
+        (chkAll.ahead>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">${chkAll.ahead} Ahead</span>`:'');
+    }else{
+      return(tcAll.lovesY>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">♥ ${tcAll.lovesY}</span>`:'')+
+        (tcAll.l2x>0?`<span class="lvc-pill" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25);">2× ${tcAll.l2x}</span>`:'')+
+        (tcAll.t2pY>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">T2P ${tcAll.t2pY}</span>`:'');
+    }
   }
-  const pctAll=wsAll.slots>0?Math.round(wsAll.passed/wsAll.slots*100):0;
+
+  function levelBarPct(lvl){
+    if(statMode==='checkpoint'){
+      const ls=chkLvlStats[lvl];
+      const filled=ls.behind+ls.track+ls.ahead;
+      const slots=(WORKSHOPS[lvl]||[]).length*allStudents.filter(s=>s.l===lvl).length;
+      return slots>0?Math.round(filled/slots*100):0;
+    }else{
+      const ls=tcLvlStats[lvl];
+      return ls.total>0?Math.round(ls.lovesY/ls.total*100):0;
+    }
+  }
+
+  const pctAll=statMode==='checkpoint'
+    ?(()=>{const slots=allStudents.reduce((a,s)=>a+(WORKSHOPS[s.l]||[]).length,0);return slots>0?Math.round((chkAll.behind+chkAll.track+chkAll.ahead)/slots*100):0;})()
+    :(total>0?Math.round(tcAll.lovesY/total*100):0);
+
   const allActive=currentLevel==='ALL';
   const allCard=`<div class="lvc" onclick="setLevelCard('ALL')" style="${allActive?'background:rgba(148,163,184,.1);border-color:#94a3b8;':''}">
-    <div class="lvc-top"><span class="lvc-label" style="color:${allActive?'#cbd5e1':'var(--muted2)'}">All</span><span class="lvc-count">${totalAll}</span></div>
+    <div class="lvc-top"><span class="lvc-label" style="color:${allActive?'#cbd5e1':'var(--muted2)'}">All</span><span class="lvc-count">${total}</span></div>
     <div class="lvc-pills">${allLevelPills()}</div>
     <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${pctAll}%;background:#94a3b8;"></div></div><span class="lvc-bar-label">${pctAll}%</span></div>
   </div>`;
 
   const lvlCardsHtml=allLevels.map(lvl=>{
-    const ls=wsLvlStats[lvl];
     const isActive=lvl===currentLevel;
-    const lsPct=ls.slots>0?Math.round(ls.passed/ls.slots*100):0;
+    const cnt=allStudents.filter(s=>s.l===lvl).length;
+    const pct=levelBarPct(lvl);
     return`<div class="lvc" onclick="setLevelCard('${lvl}')" style="${isActive?`background:${lvlBgs[lvl]};border-color:${lvlColors[lvl]};`:''}">
-      <div class="lvc-top"><span class="lvc-label" style="color:${lvlColors[lvl]}">${lvl}</span><span class="lvc-count">${allStudents.filter(s=>s.l===lvl).length} students</span></div>
+      <div class="lvc-top"><span class="lvc-label" style="color:${lvlColors[lvl]}">${lvl}</span><span class="lvc-count">${cnt} students</span></div>
       <div class="lvc-pills">${levelPills(lvl)}</div>
-      <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${lsPct}%;background:${lvlColors[lvl]};"></div></div><span class="lvc-bar-label">${lsPct}%</span></div>
+      <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${pct}%;background:${lvlColors[lvl]};"></div></div><span class="lvc-bar-label">${pct}%</span></div>
     </div>`;
   }).join('');
 
@@ -565,7 +543,8 @@ function renderStats(){
     <h1 class="s5-h1">Session <em>5</em> Data <em>Tracker</em></h1>
     <p class="s5-sub">Workshop progress, checkpoints &amp; 3Cs</p>
     ${weekInfoHtml}
-    <div class="dual-stats">${wsPanelHtml}${tcPanelHtml}</div>
+    ${modeSelectorHtml}
+    ${statsHtml}
     <div class="level-selector">${allCard}${lvlCardsHtml}</div>
     <div class="s5-hist-link"><a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" rel="noopener noreferrer">Previous T2P data ↗</a></div>
   </div>`;
