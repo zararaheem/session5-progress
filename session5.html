@@ -650,10 +650,16 @@ async function loadData(){
     const local = localStorage.getItem('s5data');
     if(local) try{ s5data = JSON.parse(local); }catch(e){}
   }
+  applyLevelOverrides();
   populateWsFilter();
   render();
   // Re-render stats so the storage badge updates
   renderStats();
+}
+
+function applyLevelOverrides(){
+  const ov=s5data.__levelOverrides__||{};
+  (CFG.students||[]).forEach(s=>{if(ov[s.n])s.l=ov[s.n];});
 }
 
 function populateWsFilter(){

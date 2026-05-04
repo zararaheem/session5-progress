@@ -446,6 +446,7 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
       <span class="superadmin-pill" id="superadmin-pill" style="display:none">★ Admin</span>
       <button class="hdr-btn export-btn" id="export-btn" style="display:none" onclick="openSyncModal('export')">↓ Export data</button>
       <button class="hdr-btn audit" id="import-btn" style="display:none" onclick="openSyncModal('import')">↑ Import data</button>
+      <button class="hdr-btn audit" id="roster-btn" style="display:none" onclick="openSyncModal('roster')">⇄ Roster</button>
       <button class="hdr-btn audit" id="audit-btn" style="display:none" onclick="openAudit()">Audit log</button>
       <button class="hdr-btn primary" id="save-btn" onclick="saveAll()">↑ Save</button>
     </div>
@@ -815,6 +816,7 @@ function completeSelectWho(name){
   document.getElementById('audit-btn').style.display=isSuperAdmin?'inline-flex':'none';
   document.getElementById('export-btn').style.display='inline-flex';
   document.getElementById('import-btn').style.display=isSuperAdmin?'inline-flex':'none';
+  document.getElementById('roster-btn').style.display=isSuperAdmin?'inline-flex':'none';
   document.getElementById('activity-tab').style.display=isSuperAdmin?'inline-block':'none';
   document.getElementById('dashboard-tab').style.display=isSuperAdmin?'inline-block':'none';
   document.getElementById('ws-data-tab').style.display=name===WS_DATA_EDITOR?'inline-block':'none';
@@ -893,8 +895,10 @@ async function loadData(){
       if(!s5data.__townhalls__)s5data.__townhalls__=[];
       if(!s5data.__coaching__)s5data.__coaching__={};
       if(!s5data.__levelguides__)s5data.__levelguides__={};
+      if(!s5data.__levelOverrides__)s5data.__levelOverrides__={};
     }
   }catch(e){console.error('loadData failed:',e);}
+  applyLevelOverrides();
   _resolveDataReady();
   // Apply ?level= URL param from session5.html "Enter data" link
   const urlLevel=new URLSearchParams(window.location.search).get('level');
@@ -911,6 +915,46 @@ async function loadData(){
 buildGuideBanner();
 renderList();
 loadData();
+
+function applyLevelOverrides(){
+  const ov=s5data.__levelOverrides__||{};
+  STUDENTS.forEach(s=>{if(ov[s.n])s.l=ov[s.n];});
+}
+
+function setStudentLevel(name,newLvl){
+  if(!s5data.__levelOverrides__)s5data.__levelOverrides__={};
+  const orig=CFG.students.find(s=>s.n===name);
+  if(orig&&orig.l===newLvl){
+    delete s5data.__levelOverrides__[name];
+  } else {
+    s5data.__levelOverrides__[name]=newLvl;
+  }
+  applyLevelOverrides();
+  saveAll().then(()=>{renderList();renderDashboard();renderRoster();});
+}
+
+function renderRoster(){
+  const el=document.getElementById('roster-body');
+  if(!el)return;
+  const levels=['LL','L1','L2','MS'];
+  const ov=s5data.__levelOverrides__||{};
+  el.innerHTML=LEVEL_ORDER.map(lvl=>{
+    const sts=CFG.students.filter(s=>!s.inactive).map(s=>({...s,effectiveL:ov[s.n]||s.l})).filter(s=>s.effectiveL===lvl);
+    if(!sts.length)return'';
+    return`<div style="margin-bottom:12px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted2);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);">${lvl}</div>
+      ${sts.map(s=>{
+        const changed=!!ov[s.n];
+        return`<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+          <span style="font-size:12px;color:var(--text);">${s.n}${changed?`<span style="margin-left:6px;font-size:9px;font-family:'DM Mono',monospace;color:#fbbf24;">(was ${s.l})</span>`:''}</span>
+          <select onchange="setStudentLevel('${s.n.replace(/'/g,"\\'")}',this.value)" style="font-family:'DM Mono',monospace;font-size:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:3px 6px;cursor:pointer;">
+            ${levels.map(l=>`<option value="${l}" ${(ov[s.n]||s.l)===l?'selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
 
 async function saveAll(){
   if(!requireUser())return;
@@ -2109,22 +2153,27 @@ function exportCsv(){
 
 function openSyncModal(mode){
   _syncMode=mode;
-  const box=document.getElementById('sync-box');
   const title=document.getElementById('sync-title');
   const exportSection=document.getElementById('sync-export-section');
   const importSection=document.getElementById('sync-import-section');
+  const rosterSection=document.getElementById('sync-roster-section');
   const status=document.getElementById('sync-status');
   status.textContent='';
+  exportSection.style.display='none';
+  importSection.style.display='none';
+  rosterSection.style.display='none';
 
   if(mode==='export'){
     title.textContent='Export your data';
     exportSection.style.display='block';
-    importSection.style.display='none';
     const json=JSON.stringify(s5data,null,2);
     document.getElementById('sync-export-ta').value=json;
+  } else if(mode==='roster'){
+    title.textContent='Manage student roster';
+    rosterSection.style.display='block';
+    renderRoster();
   } else {
     title.textContent='Import & merge data';
-    exportSection.style.display='none';
     importSection.style.display='block';
     document.getElementById('sync-import-ta').value='';
   }
@@ -2215,6 +2264,11 @@ function mergeImportData(){
         <div class="sync-row">
           <button class="sync-btn merge" onclick="mergeImportData()">⬆ Merge into current data</button>
         </div>
+      </div>
+      <!-- Roster section (admin only) -->
+      <div id="sync-roster-section" style="display:none">
+        <div class="sync-lbl">Move students between levels — changes save instantly</div>
+        <div id="roster-body" style="max-height:340px;overflow-y:auto;padding:4px 0;"></div>
       </div>
       <div class="sync-status" id="sync-status"></div>
     </div>
