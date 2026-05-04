@@ -692,10 +692,11 @@ function getFinal(studentName,wsName){
 function dotHtml(val){
   if(val==='Passed')return'<span class="chk-dot st-pass">✓</span>';
   if(val==='Not passed'||val==='Not Yet')return'<span class="chk-dot st-fail">✗</span>';
-  if(val==='Behind')return'<span class="chk-dot st-behind">B</span>';
-  if(val==='On Track')return'<span class="chk-dot st-track">T</span>';
-  if(val==='Ahead')return'<span class="chk-dot st-ahead">A</span>';
+  if(val==='Behind')return'<span class="chk-dot st-behind">✗</span>';
+  if(val==='On Track')return'<span class="chk-dot st-track">✓</span>';
+  if(val==='Ahead')return'<span class="chk-dot st-ahead">↑</span>';
   if(val==='Absent')return'<span class="chk-dot st-absent">–</span>';
+  if(val==='N/A')return'<span class="chk-dot st-absent" style="opacity:.5;font-size:9px;">N/A</span>';
   return'<span class="chk-dot st-empty"></span>';
 }
 
@@ -917,17 +918,24 @@ function render(){
         {type:'3cs',tc:{key:'w6',label:'Wk 6'},sw:6},
         {type:'chk',chk:CHECKPOINTS[3],sw:7},
       ];
+      function wsFilledCount(col){
+        if(col.type==='chk'){
+          return students.filter(s=>{const v=getChk(s.n,ws.name,col.chk.key);return v&&v!=='N/A';}).length;
+        }
+        return students.filter(s=>{const e=s5data.__3cs__?.[s.n]?.[col.tc.key]||{};return e.lovesSchool||e.learning2x||e.onTrack;}).length;
+      }
       function colStatus(col){
         const isDue=col.type==='chk'?(due&&due.type==='checkpoint'&&due.key===col.chk.key):(due&&due.type==='3cs'&&due.key===col.tc.key);
         const isPast=wkNum>col.sw;
-        const filled=isPast?filledCountForWeek(col.sw):-1;
-        const isMissing=isPast&&filled>=0&&!isFilledForWeek(col.sw);
-        return{isDue,isMissing,filled};
+        const filled=isPast?wsFilledCount(col):-1;
+        const total=students.filter(s=>!(col.type==='chk'&&getChk(s.n,ws.name,col.chk.key)==='N/A')).length;
+        const isMissing=isPast&&filled>=0&&filled<Math.ceil(total*0.8);
+        return{isDue,isMissing,filled,total};
       }
       const headerRow=`<th style="min-width:160px">Student</th>`+allCols.map(col=>{
-        const{isDue,isMissing,filled}=colStatus(col);
+        const{isDue,isMissing,filled,total}=colStatus(col);
         const cls=isDue?' chk-th-due':isMissing?' chk-th-missing':'';
-        const badge=isDue?`<span class="due-col-badge">Due this Week</span>`:isMissing?`<span class="missing-col-badge">⚠ ${filled} entered</span>`:'';
+        const badge=isDue?`<span class="due-col-badge">Due this Week</span>`:isMissing?`<span class="missing-col-badge">⚠ ${filled}/${total} entered</span>`:'';
         if(col.type==='chk')return`<th class="chk-th${cls}">${col.chk.label}${badge}</th>`;
         return`<th class="tc-th${cls}">3Cs · ${col.tc.label}${badge}</th>`;
       }).join('')+`<th>Status</th>`;

@@ -689,16 +689,17 @@ function isMine(s){return getGuides(s).includes(currentUser);}
 function chkKey(ws,ck){return`__chk__${ws}__${ck}`;}
 function getChkOptions(ck){
   if(ck==='w7')return[{val:'Passed',label:'Passed',cls:'active-pass'},{val:'Not Yet',label:'Not Yet',cls:'active-fail'},{val:'Absent',label:'Absent',cls:'active-absent'}];
-  return[{val:'Behind',label:'Behind',cls:'active-fail'},{val:'On Track',label:'On Track',cls:'active-track'},{val:'Ahead',label:'Ahead',cls:'active-ahead'},{val:'Absent',label:'Absent',cls:'active-absent'}];
+  return[{val:'Behind',label:'Behind',cls:'active-fail'},{val:'On Track',label:'On Track',cls:'active-track'},{val:'Ahead',label:'Ahead',cls:'active-ahead'},{val:'Absent',label:'Absent',cls:'active-absent'},{val:'N/A',label:'N/A',cls:'active-absent'}];
 }
 function dotClass(val){
   if(val==='Passed')return'dot-pass';if(val==='Ahead')return'dot-ahead';
   if(val==='On Track')return'dot-track';if(val==='Behind')return'dot-behind';
-  if(val==='Absent'||val==='Not Yet')return'dot-absent';return'dot-empty';
+  if(val==='Absent'||val==='Not Yet'||val==='N/A')return'dot-absent';return'dot-empty';
 }
 function dotLabel(val){
-  if(val==='Passed')return'P';if(val==='Ahead')return'A';if(val==='On Track')return'T';
-  if(val==='Behind')return'B';if(val==='Absent'||val==='Not Yet')return'–';return'·';
+  if(val==='Passed')return'P';if(val==='Ahead')return'↑';if(val==='On Track')return'✓';
+  if(val==='Behind')return'✗';if(val==='N/A')return'N/A';
+  if(val==='Absent'||val==='Not Yet')return'–';return'·';
 }
 function chkMiniClass(val){
   if(!val)return'chk-e';if(val==='Passed')return'chk-p';if(val==='On Track')return'chk-t';
