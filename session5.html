@@ -244,6 +244,7 @@ tr:hover td{background:rgba(59,130,246,.04);}
 .due-col{background:rgba(251,191,36,.05)!important;}
 .chk-th-due{background:rgba(251,191,36,.05)!important;}
 .chk-th-missing{background:rgba(248,113,113,.05)!important;}
+.th-future,.td-future{opacity:.3;pointer-events:none;}
 .due-col-badge{display:block;font-size:8px;font-weight:700;color:#fbbf24;margin-top:2px;letter-spacing:.06em;text-align:center;}
 .missing-col-badge{display:block;font-size:8px;font-weight:700;color:#f87171;margin-top:2px;letter-spacing:.06em;text-align:center;}
 .lvl-section-head{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 0 6px;border-bottom:2px solid;margin-bottom:4px;}
@@ -285,8 +286,8 @@ tr:hover td{background:rgba(59,130,246,.04);}
 <div id="stats-hero"></div>
 <div class="controls">
   <div class="view-toggle">
-    <button id="vt-workshop" class="vt-btn active" onclick="setViewMode('workshop')">By Workshop</button>
-    <button id="vt-student" class="vt-btn" onclick="setViewMode('student')">By Student</button>
+    <button id="vt-workshop" class="vt-btn" onclick="setViewMode('workshop')">By Workshop</button>
+    <button id="vt-student" class="vt-btn active" onclick="setViewMode('student')">By Student</button>
   </div>
   <select id="wsFilter" onchange="render()">
     <option value="">All workshops</option>
@@ -410,7 +411,7 @@ const CHECKPOINTS = CFG.checkpoints || [
 ];
 
 let currentLevel = 'ALL';
-let viewMode = 'workshop';
+let viewMode = 'student';
 let s5data = {};
 const weekLevelFilters = {};  // per-week level filter: { w1:'LL', w2:'ALL', ... }
 
@@ -545,6 +546,45 @@ function openWeekDetail(key){
 }
 function closeWeekDetail(){document.getElementById('week-detail-modal').style.display='none';}
 
+function openStudentWeekPopup(name,wkKey,type,wsName){
+  const wkDef=WEEK_DEFS.find(d=>d.key===wkKey);
+  const title=wkDef?`${wkDef.label} · ${wkDef.sub}`:wkKey;
+  const stu=(CFG.students||[]).find(s=>s.n===name);
+  const lvl=stu?stu.l:'';
+  const editorLink=`https://session5-progress.vercel.app/editor.html?level=${lvl}`;
+  let body='';
+  if(type==='checkpoint'){
+    const val=wsName?getChk(name,wsName,wkKey):'';
+    body=`<div style="margin-bottom:12px;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-bottom:4px;">WORKSHOP</div>
+      <div style="font-size:13px;font-weight:500;">${wsName||'—'}</div>
+      <div style="margin-top:8px;">${val?`<span style="font-family:'DM Mono',monospace;font-size:11px;">${val}</span>`:'<span style="font-family:\'DM Mono\',monospace;font-size:11px;color:#fbbf24;">Not entered</span>'}</div>
+    </div>`;
+  }else{
+    const d=s5data.__3cs__?.[name]?.[wkKey]||{};
+    const row=(label,val,na)=>
+      `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;">
+        <span style="color:var(--muted2)">${label}</span>
+        <span style="font-family:'DM Mono',monospace;font-weight:600;color:${na?'#fbbf24':'var(--text)'}">${val||'—'}</span>
+      </div>`;
+    body=row('Loves School',d.lovesSchool,!d.lovesSchool)+row('Learning 2×',d.learning2x,!d.learning2x)+row('T2P on track',d.onTrack,!d.onTrack);
+  }
+  document.getElementById('swp-title').textContent=name;
+  document.getElementById('swp-week').textContent=title;
+  document.getElementById('swp-body').innerHTML=body;
+  document.getElementById('swp-link').href=editorLink;
+  document.getElementById('student-week-popup').style.display='flex';
+}
+function closeStudentWeekPopup(){document.getElementById('student-week-popup').style.display='none';}
+
+function goToDueColumn(){
+  if(viewMode!=='student')setViewMode('student');
+  setTimeout(()=>{
+    const el=document.getElementById('due-col-header');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  },viewMode==='student'?0:150);
+}
+
 function renderStats(){
   const container=document.getElementById('stats-hero');
   if(!container)return;
@@ -559,9 +599,9 @@ function renderStats(){
   function weekDateRange(w){
     const s=new Date(2026,3,27);
     const mon=new Date(s.getTime()+(w-1)*7*24*60*60*1000);
-    const fri=new Date(mon.getTime()+4*24*60*60*1000);
+    const sun=new Date(mon.getTime()+6*24*60*60*1000);
     const fmt=d=>`${d.getMonth()+1}/${d.getDate()}`;
-    return`${fmt(mon)}–${fmt(fri)}`;
+    return`${fmt(mon)}–${fmt(sun)}`;
   }
 
   // ── Week hub (current week + past pills) ─────────────────────────
@@ -594,7 +634,7 @@ function renderStats(){
     }
     const borderColor=isFilled?'rgba(74,222,128,.4)':'rgba(251,191,36,.5)';
     const bgColor=isFilled?'rgba(74,222,128,.05)':'rgba(251,191,36,.06)';
-    currentCardHtml=`<div class="wh-now" style="border-color:${borderColor};background:${bgColor}">
+    currentCardHtml=`<div class="wh-now" style="border-color:${borderColor};background:${bgColor};cursor:pointer;" onclick="goToDueColumn()">
       <div class="wh-now-left">
         <div class="wss-due-badge" style="margin-bottom:5px;">${isFilled?'✓ COMPLETE':'DUE THIS WEEK'}</div>
         <div class="wh-now-title">${dueItem.label} · ${dueItem.sub}</div>
@@ -602,7 +642,7 @@ function renderStats(){
       </div>
       <div class="wh-now-right">
         <div class="wss-stats" style="justify-content:flex-end;">${statsHtml}</div>
-        <select class="wss-lvl-sel" style="width:auto;" onchange="setWeekLevelFilter('${dueItem.key}',this.value)">
+        <select class="wss-lvl-sel" style="width:auto;" onclick="event.stopPropagation()" onchange="setWeekLevelFilter('${dueItem.key}',this.value)">
           <option value="ALL"${lvlFilter==='ALL'?' selected':''}>All levels</option>
           ${allLevels.map(l=>`<option value="${l}"${lvlFilter===l?' selected':''}>${l}</option>`).join('')}
         </select>
@@ -831,9 +871,10 @@ function renderByStudent(){
   function colStatus(col){
     const isDue=col.type==='chk'?(due&&due.type==='checkpoint'&&due.key===col.chk.key):(due&&due.type==='3cs'&&due.key===col.tc.key);
     const isPast=wkNum>col.sw;
+    const isFuture=col.sw>wkNum;
     const filled=isPast?filledCountForWeek(col.sw):-1;
     const isMissing=isPast&&filled>=0&&!isFilledForWeek(col.sw);
-    return{isDue,isMissing,filled};
+    return{isDue,isMissing,isFuture,filled};
   }
 
   function chkDotsForStudent(sName,lvl,chkKey){
@@ -842,6 +883,44 @@ function renderByStudent(){
       const val=getChk(sName,ws.name,chkKey);
       return`<a href="${editorBase}?level=${lvl}" class="dot-link" title="${ws.name}: ${val||'—'}">${dotHtml(val)}</a>`;
     }).join('');
+  }
+
+  function chkDotsForStudentClickable(sName,lvl,chkKey,isDue,isFuture){
+    if(isFuture){return`<span class="chk-dot st-empty"></span>`;}
+    const wsList=WORKSHOPS[lvl]||[];
+    return wsList.map(ws=>{
+      const val=getChk(sName,ws.name,chkKey);
+      if(!val&&isDue){
+        const esc=s=>s.replace(/'/g,"\\'");
+        return`<button class="dot-link" onclick="openStudentWeekPopup('${esc(sName)}','${chkKey}','checkpoint','${esc(ws.name)}')" title="Enter ${ws.name} for ${sName}">${dotHtml(val)}</button>`;
+      }
+      return`<a href="${editorBase}?level=${lvl}" class="dot-link" title="${ws.name}: ${val||'—'}">${dotHtml(val)}</a>`;
+    }).join('');
+  }
+
+  function tc3cDotsClickable(sName,wkKey,lvl,isDue,isFuture){
+    if(isFuture){return`<span class="chk-dot st-empty"></span>`;}
+    const d=s5data.__3cs__?.[sName]?.[wkKey]||{};
+    const editorLink=`${editorBase}?level=${lvl}`;
+    if(!d.lovesSchool&&!d.learning2x&&!d.onTrack){
+      if(isDue){
+        const esc=s=>s.replace(/'/g,"\\'");
+        return`<button class="dot-link" onclick="openStudentWeekPopup('${esc(sName)}','${wkKey}','3cs',null)" title="Enter 3Cs for ${sName}"><span class="chk-dot st-empty"></span></button>`;
+      }
+      return`<a href="${editorLink}" class="dot-link" title="Enter 3Cs"><span class="chk-dot st-empty"></span></a>`;
+    }
+    const lC=d.lovesSchool==='Yes'?'#34d399':d.lovesSchool==='No'?'#f87171':'var(--muted2)';
+    const lT=d.lovesSchool==='Yes'?'♥':d.lovesSchool==='No'?'✗':'·';
+    const lBg=d.lovesSchool==='Yes'?'rgba(52,211,153,.12)':d.lovesSchool==='No'?'rgba(248,113,113,.12)':'transparent';
+    const xC=d.learning2x?.includes('All')?'#4ade80':d.learning2x?.includes('Some')?'#fbbf24':d.learning2x?'#f87171':'var(--muted2)';
+    const xT=d.learning2x?.includes('All')?'2×':d.learning2x?.includes('Some')?'½×':d.learning2x?'✗':'·';
+    const tC=d.onTrack==='Yes'?'#34d399':d.onTrack==='No'?'#f87171':'var(--muted2)';
+    const tT=d.onTrack==='Yes'?'T✓':d.onTrack==='No'?'T✗':'·';
+    return`<a href="${editorLink}" class="dot-link" style="display:inline-flex;gap:3px;" title="Loves:${d.lovesSchool||'—'} 2×:${d.learning2x||'—'} T2P:${d.onTrack||'—'}">
+      <span class="tc-dot" style="color:${lC};background:${lBg}">${lT}</span>
+      <span class="tc-dot" style="color:${xC}">${xT}</span>
+      <span class="tc-dot" style="color:${tC}">${tT}</span>
+    </a>`;
   }
 
   function tc3cDots(sName,wkKey,lvl){
@@ -865,11 +944,12 @@ function renderByStudent(){
   }
 
   const headerCells=allCols.map(col=>{
-    const{isDue,isMissing}=colStatus(col);
-    const cls=isDue?' th-due':isMissing?' th-missing':'';
+    const{isDue,isMissing,isFuture}=colStatus(col);
+    const cls=isDue?' th-due':isMissing?' th-missing':isFuture?' th-future':'';
+    const idAttr=isDue?' id="due-col-header"':'';
     const badge=isDue?'<br><span style="font-size:8px">Due this week</span>':isMissing?'<br><span style="font-size:8px">⚠ missing</span>':'';
-    if(col.type==='chk')return`<th class="${cls}">${col.chk.label}${badge}</th>`;
-    return`<th class="${cls}">${col.tc.label}: 3Cs${badge}</th>`;
+    if(col.type==='chk')return`<th class="${cls}"${idAttr}>${col.chk.label}${badge}</th>`;
+    return`<th class="${cls}"${idAttr}>${col.tc.label}: 3Cs${badge}</th>`;
   }).join('');
 
   let totalStudents=0;
@@ -890,12 +970,14 @@ function renderByStudent(){
       const passed=wsList.filter(w=>getFinal(s.n,w.name)==='Passed').length;
       const pct=wsList.length?Math.round(passed/wsList.length*100):0;
       const cells=allCols.map(col=>{
-        const{isDue}=colStatus(col);
+        const{isDue,isFuture}=colStatus(col);
+        const futureCls=isFuture?' td-future':'';
         const dueCls=isDue?' due-col':'';
         if(col.type==='chk'){
-          return`<td class="chk-td${dueCls}"><div class="stu-ws-dots">${chkDotsForStudent(s.n,lvl,col.chk.key)}</div></td>`;
+          const dots=chkDotsForStudentClickable(s.n,lvl,col.chk.key,isDue,isFuture);
+          return`<td class="chk-td${dueCls}${futureCls}"><div class="stu-ws-dots">${dots}</div></td>`;
         }
-        return`<td class="tc-td${dueCls}">${tc3cDots(s.n,col.tc.key,lvl)}</td>`;
+        return`<td class="tc-td${dueCls}${futureCls}">${tc3cDotsClickable(s.n,col.tc.key,lvl,isDue,isFuture)}</td>`;
       }).join('');
       const wsBar=passed===wsList.length&&wsList.length>0
         ?`<div class="stu-ws-bar"><span style="color:#4ade80;font-size:15px;font-weight:600">✓</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:#4ade80;margin-left:3px">All passed</span></div>`
@@ -1215,6 +1297,22 @@ loadData();
 </div>
 
 <!-- Week detail popup -->
+<div id="student-week-popup" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeStudentWeekPopup()">
+  <div class="modal-box" style="max-width:360px;">
+    <div class="modal-hdr">
+      <div>
+        <span class="modal-title" id="swp-title"></span>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-top:2px;" id="swp-week"></div>
+      </div>
+      <button class="modal-close" onclick="closeStudentWeekPopup()">×</button>
+    </div>
+    <div class="modal-body" id="swp-body"></div>
+    <div style="padding:12px 18px;border-top:1px solid var(--border);">
+      <a id="swp-link" href="#" style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:#60a5fa;text-decoration:none;" onclick="closeStudentWeekPopup()">→ Enter data in editor</a>
+    </div>
+  </div>
+</div>
+
 <div id="week-detail-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeWeekDetail()">
   <div class="modal-box" style="max-width:480px;">
     <div class="modal-hdr">
