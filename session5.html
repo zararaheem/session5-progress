@@ -182,7 +182,9 @@ tr:hover td{background:rgba(59,130,246,.04);}
 
 .due-col{background:rgba(251,191,36,.05)!important;}
 .chk-th-due{background:rgba(251,191,36,.05)!important;}
+.chk-th-missing{background:rgba(248,113,113,.05)!important;}
 .due-col-badge{display:block;font-size:8px;font-weight:700;color:#fbbf24;margin-top:2px;letter-spacing:.06em;text-align:center;}
+.missing-col-badge{display:block;font-size:8px;font-weight:700;color:#f87171;margin-top:2px;letter-spacing:.06em;text-align:center;}
 .lvl-section-head{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 0 6px;border-bottom:2px solid;margin-bottom:4px;}
 
 /* FINAL STATUS PILLS */
@@ -775,21 +777,41 @@ function render(){
           <span class="tc-dot" style="color:${tC}">${tT}</span>
         </td>`;
       }
-      const headerRow=`<th style="min-width:160px">Student</th>${CHECKPOINTS.map(c=>{
-        const isDue=due&&due.type==='checkpoint'&&due.key===c.key;
-        return`<th class="chk-th${isDue?' chk-th-due':''}">${c.label}${isDue?'<span class="due-col-badge">Due this Week</span>':''}</th>`;
-      }).join('')}<th>Status</th>${tcWeekDefs.map(tw=>{
-        const isDue=due&&due.type==='3cs'&&due.key===tw.key;
-        return`<th class="tc-th${isDue?' chk-th-due':''}">3Cs · ${tw.label}${isDue?'<span class="due-col-badge">Due this Week</span>':''}</th>`;
-      }).join('')}`;
+      // Interleaved columns: w1, 3Cs·w2, w3, 3Cs·w4, w5, 3Cs·w6, w7, Status
+      const wkNum=getCurrentSessionWeek();
+      const allCols=[
+        {type:'chk',chk:CHECKPOINTS[0],sw:1},
+        {type:'3cs',tc:{key:'w2',label:'Wk 2'},sw:2},
+        {type:'chk',chk:CHECKPOINTS[1],sw:3},
+        {type:'3cs',tc:{key:'w4',label:'Wk 4'},sw:4},
+        {type:'chk',chk:CHECKPOINTS[2],sw:5},
+        {type:'3cs',tc:{key:'w6',label:'Wk 6'},sw:6},
+        {type:'chk',chk:CHECKPOINTS[3],sw:7},
+      ];
+      function colStatus(col){
+        const isDue=col.type==='chk'?(due&&due.type==='checkpoint'&&due.key===col.chk.key):(due&&due.type==='3cs'&&due.key===col.tc.key);
+        const isPast=wkNum>col.sw;
+        const filled=isPast?filledCountForWeek(col.sw):-1;
+        const isMissing=isPast&&filled>=0&&!isFilledForWeek(col.sw);
+        return{isDue,isMissing,filled};
+      }
+      const headerRow=`<th style="min-width:160px">Student</th>`+allCols.map(col=>{
+        const{isDue,isMissing,filled}=colStatus(col);
+        const cls=isDue?' chk-th-due':isMissing?' chk-th-missing':'';
+        const badge=isDue?`<span class="due-col-badge">Due this Week</span>`:isMissing?`<span class="missing-col-badge">⚠ ${filled} entered</span>`:'';
+        if(col.type==='chk')return`<th class="chk-th${cls}">${col.chk.label}${badge}</th>`;
+        return`<th class="tc-th${cls}">3Cs · ${col.tc.label}${badge}</th>`;
+      }).join('')+`<th>Status</th>`;
       const bodyRows=students.map(s=>{
-        const chkCells=CHECKPOINTS.map(c=>{
-          const isDue=due&&due.type==='checkpoint'&&due.key===c.key;
-          const val=getChk(s.n,ws.name,c.key);
-          return`<td class="chk-td${isDue?' due-col':''}"><a href="https://session5-progress.vercel.app/editor.html?level=${lvl}" class="dot-link" title="Enter ${c.label} for ${s.n}">${dotHtml(val)}</a></td>`;
+        const cells=allCols.map(col=>{
+          const{isDue}=colStatus(col);
+          if(col.type==='chk'){
+            const val=getChk(s.n,ws.name,col.chk.key);
+            return`<td class="chk-td${isDue?' due-col':''}"><a href="https://session5-progress.vercel.app/editor.html?level=${lvl}" class="dot-link" title="Enter ${col.chk.label} for ${s.n}">${dotHtml(val)}</a></td>`;
+          }
+          return tc3cCell(s.n,col.tc.key);
         }).join('');
-        const tc3cCells=tcWeekDefs.map(tw=>tc3cCell(s.n,tw.key)).join('');
-        return`<tr><td><span class="s-name">${s.n}</span>${s.note?`<span class="s-note">* ${s.note}</span>`:''}</td>${chkCells}<td>${finalPill(getFinal(s.n,ws.name))}</td>${tc3cCells}</tr>`;
+        return`<tr><td><span class="s-name">${s.n}</span>${s.note?`<span class="s-note">* ${s.note}</span>`:''}</td>${cells}<td>${finalPill(getFinal(s.n,ws.name))}</td></tr>`;
       }).join('');
       allBlocks.push(`<div class="ws-block" id="${wsId}">
         <div class="ws-block-header" onclick="toggleWs('${wsId}')">
