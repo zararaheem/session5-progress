@@ -67,6 +67,11 @@ body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50
 .stat-mode-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
 .stat-mode-select{font-family:'DM Mono',monospace;font-size:11px;padding:5px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none;}
 
+/* STORAGE BADGE */
+.storage-badge{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:10px;}
+.storage-badge.kv{color:#4ade80;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);}
+.storage-badge.local{color:#f87171;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);cursor:help;}
+
 /* REMINDER BUTTON */
 .reminder-btn{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;background:transparent;color:var(--muted2);border:1px solid var(--border2);padding:4px 12px;border-radius:6px;cursor:pointer;transition:all .15s;margin-left:6px;}
 .reminder-btn:hover{color:var(--text);border-color:var(--border2);background:var(--surface2);}
@@ -562,8 +567,15 @@ function renderStats(){
     </div>`;
   }).join('');
 
+  const storageBadge=_storageMode==='kv'
+    ?`<div class="storage-badge kv">● Shared KV storage</div>`
+    :_storageMode==='local'
+      ?`<div class="storage-badge local" title="Data is saved per-browser only. Connect Vercel KV for shared storage.">⚠ Local storage only — data not shared</div>`
+      :``;
+
   container.innerHTML=`<div class="page-hero">
     <div class="ph-live">Live · Session 5</div>
+    ${storageBadge}
     <div class="s5-kicker">Alpha NYC · Session 5 · 2026</div>
     <h1 class="s5-h1">Session <em>5</em> Data <em>Tracker</em></h1>
     <p class="s5-sub">Workshop progress, checkpoints &amp; 3Cs</p>
@@ -582,13 +594,31 @@ function setLevelCard(l){
   document.querySelector('.controls')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+let _storageMode = 'unknown'; // 'kv' | 'local' | 'unknown'
+
 async function loadData(){
   try{
-    const r = await window.storage.get('s5data');
-    if(r?.value) s5data = JSON.parse(r.value);
-  }catch(e){}
+    const resp = await fetch('/api/storage');
+    if(resp.status === 503){
+      _storageMode = 'local';
+    } else if(resp.ok){
+      _storageMode = 'kv';
+      const d = await resp.json();
+      if(d.value) s5data = JSON.parse(d.value);
+    } else {
+      _storageMode = 'local';
+    }
+  }catch(e){
+    _storageMode = 'local';
+  }
+  if(_storageMode === 'local'){
+    const local = localStorage.getItem('s5data');
+    if(local) try{ s5data = JSON.parse(local); }catch(e){}
+  }
   populateWsFilter();
   render();
+  // Re-render stats so the storage badge updates
+  renderStats();
 }
 
 function populateWsFilter(){
