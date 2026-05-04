@@ -1310,30 +1310,28 @@ function renderList(){
               }
             } else {
               const d3=s5data.__3cs__?.[s.n]?.[item.key]||{};
-              const notesId3=`3cn-${safeN2}-${item.key}`;
-              content=`<div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                  <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">Loves School?</span>
-                  <div style="display:flex;gap:10px;">${['Yes','No','N/A'].map(v=>`<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;color:${d3.lovesSchool===v?(v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'):'var(--muted2)'}"><input type="radio" name="ls-${safeN2}-${item.key}" value="${v}" ${d3.lovesSchool===v?'checked':''} style="accent-color:${v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'};cursor:pointer;" onchange="set3CCheck('${safeN2}','${item.key}','lovesSchool','${v}','${notesId3}',this)">${v}</label>`).join('')}</div>
+              const n2=safeN2,wk2=item.key;
+              content=`<div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px;">
+                <div>
+                  <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">1 · Loves School?</div>
+                  <div class="score-btns">${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d3.lovesSchool===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" onclick="set3CNew('${n2}','${wk2}','lovesSchool','${v}',this,'3ci-ls-${n2}-${wk2}',['No'])">${v}</button>`).join('')}</div>
+                  <div id="3ci-ls-${n2}-${wk2}" style="display:${d3.lovesSchool==='No'?'block':'none'};margin-top:6px;"><textarea class="field-textarea" style="min-height:44px;font-size:11px;width:100%;" placeholder="What are they loving / not loving about school?" onchange="save3CNote('${n2}','${wk2}','noteSchool',this.value)">${d3.noteSchool||''}</textarea></div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                  <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">Learning 2×?</span>
-                  <div style="display:flex;gap:10px;flex-wrap:wrap;">${['All at 2x','Some at 2x','None at 2x'].map(v=>`<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;color:${d3.learning2x===v?'#60a5fa':'var(--muted2)'}"><input type="radio" name="l2x-${safeN2}-${item.key}" value="${v}" ${d3.learning2x===v?'checked':''} style="accent-color:#60a5fa;cursor:pointer;" onchange="set3CCheck('${safeN2}','${item.key}','learning2x','${v}','${notesId3}',this)">${v}</label>`).join('')}</div>
+                <div>
+                  <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">2 · Learning 2×?</div>
+                  <div class="score-btns" style="flex-wrap:wrap;">${['All at 2x','Some at 2x','None at 2x','N/A'].map(v=>`<button class="score-btn ${d3.learning2x===v?'active-track':''}" style="font-size:10px;" onclick="set3CNew('${n2}','${wk2}','learning2x','${v}',this,'3ci-l2x-${n2}-${wk2}',['Some at 2x','None at 2x'])">${v}</button>`).join('')}</div>
+                  <div id="3ci-l2x-${n2}-${wk2}" style="display:${['Some at 2x','None at 2x'].includes(d3.learning2x)?'block':'none'};margin-top:6px;"><textarea class="field-textarea" style="min-height:44px;font-size:11px;width:100%;" placeholder="Subjects & daily minimums: which need support? Hitting 120 XP/day?" onchange="save3CNote('${n2}','${wk2}','noteSubjects',this.value)">${d3.noteSubjects||''}</textarea></div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                  <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">T2P on track?</span>
-                  <div style="display:flex;gap:10px;">${['Yes','No','N/A'].map(v=>`<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;color:${d3.onTrack===v?(v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'):'var(--muted2)'}"><input type="radio" name="ot-${safeN2}-${item.key}" value="${v}" ${d3.onTrack===v?'checked':''} style="accent-color:${v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'};cursor:pointer;" onchange="set3CCheck('${safeN2}','${item.key}','onTrack','${v}','${notesId3}',this)">${v}</label>`).join('')}</div>
+                <div>
+                  <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">3 · T2P on track?</div>
+                  <div class="score-btns">${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d3.onTrack===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" onclick="set3CNew('${n2}','${wk2}','onTrack','${v}',this,'3ci-ot-${n2}-${wk2}',['No'])">${v}</button>`).join('')}</div>
+                  <div id="3ci-ot-${n2}-${wk2}" style="display:${d3.onTrack==='No'?'block':'none'};margin-top:6px;"><textarea class="field-textarea" style="min-height:44px;font-size:11px;width:100%;" placeholder="On track to pass their life skills workshop?" onchange="save3CNote('${n2}','${wk2}','noteT2p',this.value)">${d3.noteT2p||''}</textarea></div>
                 </div>
-              </div>
-              <details id="${notesId3}" style="border-top:1px solid var(--border);">
-                <summary style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted2);padding:7px 12px;cursor:pointer;list-style:none;user-select:none;">▸ Notes</summary>
-                <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px;background:rgba(0,0,0,.1);">
-                  ${[{field:'noteSchool',label:'Loves School',placeholder:'What are they loving / not loving about school?'},{field:'noteMinimums',label:'Daily minimums',placeholder:'Hitting daily subject minimums AND earning 120 XP/day?'},{field:'noteSubjects',label:'Subjects (2×)',placeholder:'Which subjects excelling or need support? Motivation vs academics?'},{field:'noteT2p',label:'T2P on track',placeholder:'On track to pass their T2P workshop?'},{field:'noteSkills',label:'Skills & growth',placeholder:'Skills excelling? Areas of growth? Needs support?'}].map(n=>`<div>
-                    <div style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">${n.label}</div>
-                    <textarea class="field-textarea" style="min-height:48px;font-size:11px;width:100%;" placeholder="${n.placeholder}" onchange="save3CNote('${safeN2}','${item.key}','${n.field}',this.value)">${d3[n.field]||''}</textarea>
-                  </div>`).join('')}
+                <div>
+                  <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Additional notes <span style="font-weight:400;opacity:.55">(optional)</span></div>
+                  <textarea class="field-textarea" style="min-height:40px;font-size:11px;width:100%;" placeholder="Anything else worth noting…" onchange="save3CNote('${n2}','${wk2}','noteExtra',this.value)">${d3.noteExtra||''}</textarea>
                 </div>
-              </details>`;
+              </div>`;
             }
 
             return`<div style="border:1px solid ${bdr};border-radius:8px;overflow:hidden;background:${bg}${isFuture?';opacity:.55':''}">
@@ -1729,26 +1727,31 @@ function renderDmBody(){
 
           <div>
             <div class="field-label" style="margin-bottom:6px;">1 · Loves School?</div>
-            <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
-              ${['Yes','No','N/A'].map(v=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;color:${d.lovesSchool===v?(v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'):'var(--muted2)'}"><input type="radio" name="dp-ls-${wk}-${sl}" value="${v}" ${d.lovesSchool===v?'checked':''} style="accent-color:${v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'};cursor:pointer;" onchange="set3CDp('${name}','${wk}','lovesSchool','${v}','3c-${wk}-lovesnote-${sl}',this)">${v}</label>`).join('')}
+            <div class="score-btns" style="margin-bottom:0;">${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d.lovesSchool===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" onclick="set3CNew('${name}','${wk}','lovesSchool','${v}',this,'3cd-ls-${wk}-${sl}',['No'])">${v}</button>`).join('')}</div>
+            <div id="3cd-ls-${wk}-${sl}" style="display:${d.lovesSchool==='No'?'block':'none'};margin-top:8px;">
+              <textarea class="field-textarea" style="min-height:48px;" placeholder="What are they loving / not loving about school?" onchange="save3CNote('${name}','${wk}','noteSchool',this.value)">${d.noteSchool||d.lovesNote||''}</textarea>
             </div>
-            <textarea class="field-textarea" id="3c-${wk}-lovesnote-${sl}" placeholder="What are they loving or not liking about school?" style="min-height:48px;">${d.lovesNote||''}</textarea>
           </div>
 
           <div>
-            <div class="field-label" style="margin-bottom:6px;">2 · Learning 2x?</div>
-            <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
-              ${['All at 2x','Some at 2x','None at 2x','N/A'].map(v=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'DM Mono',monospace;font-size:${v==='N/A'?'10':'11'}px;color:${d.learning2x===v?'#60a5fa':'var(--muted2)'}"><input type="radio" name="dp-l2x-${wk}-${sl}" value="${v}" ${d.learning2x===v?'checked':''} style="accent-color:#60a5fa;cursor:pointer;" onchange="set3CDp('${name}','${wk}','learning2x','${v}','3c-${wk}-learnnote-${sl}',this)">${v}</label>`).join('')}
+            <div class="field-label" style="margin-bottom:6px;">2 · Learning 2×?</div>
+            <div class="score-btns" style="flex-wrap:wrap;margin-bottom:0;">${['All at 2x','Some at 2x','None at 2x','N/A'].map(v=>`<button class="score-btn ${d.learning2x===v?'active-track':''}" style="font-size:10px;" onclick="set3CNew('${name}','${wk}','learning2x','${v}',this,'3cd-l2x-${wk}-${sl}',['Some at 2x','None at 2x'])">${v}</button>`).join('')}</div>
+            <div id="3cd-l2x-${wk}-${sl}" style="display:${['Some at 2x','None at 2x'].includes(d.learning2x)?'block':'none'};margin-top:8px;">
+              <textarea class="field-textarea" style="min-height:48px;" placeholder="Subjects & daily minimums: which need support? Hitting 120 XP/day?" onchange="save3CNote('${name}','${wk}','noteSubjects',this.value)">${d.noteSubjects||d.learnNote||''}</textarea>
             </div>
-            <textarea class="field-textarea" id="3c-${wk}-learnnote-${sl}" placeholder="Which subjects excelling / need support? Motivation or academics issue?" style="min-height:48px;">${d.learnNote||''}</textarea>
           </div>
 
           <div>
-            <div class="field-label" style="margin-bottom:6px;">3 · Lifeskills — On track to T2P?</div>
-            <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
-              ${['Yes','No','N/A'].map(v=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;color:${d.onTrack===v?(v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'):'var(--muted2)'}"><input type="radio" name="dp-ot-${wk}-${sl}" value="${v}" ${d.onTrack===v?'checked':''} style="accent-color:${v==='Yes'?'#4ade80':v==='No'?'#f87171':'#94a3b8'};cursor:pointer;" onchange="set3CDp('${name}','${wk}','onTrack','${v}','3c-${wk}-tracknote-${sl}',this)">${v}</label>`).join('')}
+            <div class="field-label" style="margin-bottom:6px;">3 · Lifeskills — T2P on track?</div>
+            <div class="score-btns" style="margin-bottom:0;">${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d.onTrack===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" onclick="set3CNew('${name}','${wk}','onTrack','${v}',this,'3cd-ot-${wk}-${sl}',['No'])">${v}</button>`).join('')}</div>
+            <div id="3cd-ot-${wk}-${sl}" style="display:${d.onTrack==='No'?'block':'none'};margin-top:8px;">
+              <textarea class="field-textarea" style="min-height:48px;" placeholder="On track to pass their life skills workshop?" onchange="save3CNote('${name}','${wk}','noteT2p',this.value)">${d.noteT2p||d.trackNote||''}</textarea>
             </div>
-            <textarea class="field-textarea" id="3c-${wk}-tracknote-${sl}" placeholder="If No — what's the action plan?" style="min-height:48px;">${d.trackNote||''}</textarea>
+          </div>
+
+          <div>
+            <div class="field-label" style="margin-bottom:6px;opacity:.7;">Additional notes <span style="font-weight:400">(optional)</span></div>
+            <textarea class="field-textarea" style="min-height:44px;" placeholder="Anything else worth noting…" onchange="save3CNote('${name}','${wk}','noteExtra',this.value)">${d.noteExtra||''}</textarea>
           </div>
 
         </div>
@@ -1758,11 +1761,10 @@ function renderDmBody(){
     html = `<div class="ds-section">
       <div class="ds-title">Alpha's 3Cs</div>
       <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-bottom:16px;line-height:1.5;">
-        Loves School · Learning 2x · Lifeskills — tracked at Weeks 2, 4, and 6.
+        Loves School · Learning 2× · Lifeskills — tracked at Weeks 2, 4, and 6. Notes autosave.
       </div>
       ${weekForms}
-    </div>
-    <button class="save-detail-btn" onclick="save3Cs('${safeN}')">Save commitments</button>`;
+    </div>`;
   }
 
   else if(currentDmTab==='meetings'){
@@ -1895,77 +1897,22 @@ function saveWsDeliveries(name){
   saveAll();showToast('✓ Saved');
 }
 
-function set3C(name, wk, field, val, btn) {
+function set3CNew(name, wk, field, val, btn, noteId, showVals) {
   if (!s5data.__3cs__) s5data.__3cs__ = {};
   if (!s5data.__3cs__[name]) s5data.__3cs__[name] = {};
   if (!s5data.__3cs__[name][wk]) s5data.__3cs__[name][wk] = {};
   s5data.__3cs__[name][wk][field] = val;
-  // Update button styles
-  const group = btn.parentElement;
-  group.querySelectorAll('.score-btn').forEach(b => {
-    b.className = 'score-btn';
-    b.style.padding = '5px 14px';
-    b.style.borderRadius = '5px';
-    b.style.fontSize = field === 'learning2x' ? '10px' : '11px';
-    if (field === 'learning2x') { b.style.padding = '5px 11px'; }
-  });
-  const cls = field === 'learning2x' ? 'active-track' : val === 'Yes' ? 'active-pass' : val === 'No' ? 'active-fail' : 'active-absent';
+  btn.parentElement.querySelectorAll('.score-btn').forEach(b => { b.className='score-btn'; if(field==='learning2x')b.style.fontSize='10px'; });
+  const cls = field==='learning2x' ? 'active-track' : val==='Yes' ? 'active-pass' : val==='No' ? 'active-fail' : 'active-absent';
   btn.classList.add(cls);
-}
-
-// Radio-checkbox handler for allWeeks inline editor — auto-opens Notes on "No"
-function set3CCheck(name, wk, field, val, notesId, radio) {
-  if (!s5data.__3cs__) s5data.__3cs__ = {};
-  if (!s5data.__3cs__[name]) s5data.__3cs__[name] = {};
-  if (!s5data.__3cs__[name][wk]) s5data.__3cs__[name][wk] = {};
-  s5data.__3cs__[name][wk][field] = val;
-  // Update sibling label colors
-  radio.closest('div').querySelectorAll('label').forEach(lbl => {
-    const r = lbl.querySelector('input');
-    const v = r.value;
-    lbl.style.color = r.checked ? (field==='learning2x' ? '#60a5fa' : v==='Yes' ? '#4ade80' : v==='No' ? '#f87171' : '#94a3b8') : 'var(--muted2)';
-  });
-  if ((field === 'lovesSchool' || field === 'onTrack') && val === 'No') {
-    const det = document.getElementById(notesId);
-    if (det) { det.open = true; det.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  if (noteId) {
+    const el = document.getElementById(noteId);
+    if (el) {
+      el.style.display = showVals.includes(val) ? 'block' : 'none';
+      if (showVals.includes(val)) { const ta=el.querySelector('textarea'); if(ta){ta.focus();} }
+    }
   }
   saveAll();
-}
-
-// Radio-checkbox handler for the 3Cs detail tab — focuses note textarea on "No"
-function set3CDp(name, wk, field, val, taId, radio) {
-  if (!s5data.__3cs__) s5data.__3cs__ = {};
-  if (!s5data.__3cs__[name]) s5data.__3cs__[name] = {};
-  if (!s5data.__3cs__[name][wk]) s5data.__3cs__[name][wk] = {};
-  s5data.__3cs__[name][wk][field] = val;
-  radio.closest('div').querySelectorAll('label').forEach(lbl => {
-    const r = lbl.querySelector('input');
-    const v = r.value;
-    lbl.style.color = r.checked ? (field==='learning2x' ? '#60a5fa' : v==='Yes' ? '#4ade80' : v==='No' ? '#f87171' : '#94a3b8') : 'var(--muted2)';
-  });
-  if ((field === 'lovesSchool' || field === 'onTrack') && val === 'No') {
-    const ta = document.getElementById(taId);
-    if (ta) { ta.focus(); ta.scrollIntoView({behavior:'smooth',block:'nearest'}); if(!ta.value) ta.placeholder = '⚠ Please add a note — what\'s the plan to get back on track?'; }
-  }
-  saveAll();
-}
-
-function save3Cs(name) {
-  const sl = slug(name);
-  if (!s5data.__3cs__) s5data.__3cs__ = {};
-  if (!s5data.__3cs__[name]) s5data.__3cs__[name] = {};
-  ['w2','w4','w6'].forEach(wk => {
-    if (!s5data.__3cs__[name][wk]) s5data.__3cs__[name][wk] = {};
-    const d = s5data.__3cs__[name][wk];
-    const lovesnote = document.getElementById(`3c-${wk}-lovesnote-${sl}`);
-    const learnnote = document.getElementById(`3c-${wk}-learnnote-${sl}`);
-    const tracknote = document.getElementById(`3c-${wk}-tracknote-${sl}`);
-    if (lovesnote) d.lovesNote = lovesnote.value;
-    if (learnnote) d.learnNote = learnnote.value;
-    if (tracknote) d.trackNote = tracknote.value;
-  });
-  logAudit('profile', name, '3Cs', 'updated');
-  saveAll(); showToast('✓ Commitments saved');
 }
 
 function saveMeetings(name){
