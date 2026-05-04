@@ -459,26 +459,33 @@ function renderStats(){
 
   // ── Stats helpers (parameterised by key) ──────────────────────────
   function chkStatsFor(students,key){
-    let behind=0,track=0,ahead=0;
+    const behind=[],track=[],ahead=[];
     students.forEach(s=>{
-      (WORKSHOPS[s.l]||[]).forEach(ws=>{
+      const wsList=WORKSHOPS[s.l]||[];
+      let hasBehind=false,hasAhead=false,hasData=false;
+      wsList.forEach(ws=>{
         const v=getChk(s.n,ws.name,key);
-        if(v==='Behind')behind++;
-        else if(v==='On Track')track++;
-        else if(v==='Ahead')ahead++;
+        if(v&&v!=='N/A'&&v!=='Absent')hasData=true;
+        if(v==='Behind')hasBehind=true;
+        else if(v==='Ahead')hasAhead=true;
       });
+      if(!hasData)return;
+      if(hasBehind)behind.push(s.n);
+      else if(hasAhead)ahead.push(s.n);
+      else track.push(s.n);
     });
     return{behind,track,ahead};
   }
   function threecsStatsFor(students,key){
-    let lovesY=0,l2x=0,t2pY=0;
+    const lovesYN=[],l2xN=[],t2pYN=[];
     students.forEach(s=>{
       const d=s5data.__3cs__?.[s.n]?.[key]||{};
-      if(d.lovesSchool==='Yes')lovesY++;
-      if(d.learning2x==='All at 2x'||d.learning2x==='Some at 2x')l2x++;
-      if(d.onTrack==='Yes')t2pY++;
+      if(d.lovesSchool==='Yes')lovesYN.push(s.n);
+      if(d.learning2x==='All at 2x'||d.learning2x==='Some at 2x')l2xN.push(s.n);
+      if(d.onTrack==='Yes')t2pYN.push(s.n);
     });
-    return{lovesY,l2x,t2pY,total:students.length};
+    return{lovesY:lovesYN.length,l2x:l2xN.length,t2pY:t2pYN.length,
+           lovesYN,l2xN,t2pYN,total:students.length};
   }
 
   // ── 7-week stats strip ────────────────────────────────────────────
@@ -513,20 +520,20 @@ function renderStats(){
     if(active){
       if(item.type==='chk'){
         const st=chkStatsFor(filtStudents,item.key);
-        const hasData=st.behind+st.track+st.ahead>0;
+        const hasData=st.behind.length+st.track.length+st.ahead.length>0;
         statsHtml=`<div class="wss-stats">`+
-          (st.behind>0?`<span class="wss-stat s-behind">${st.behind} B</span>`:'')+
-          (st.track>0?`<span class="wss-stat s-track">${st.track} T</span>`:'')+
-          (st.ahead>0?`<span class="wss-stat s-ahead">${st.ahead} A</span>`:'')+
+          (st.behind.length>0?`<span class="wss-stat s-behind" title="${st.behind.join(', ')}">${st.behind.length} Behind</span>`:'')+
+          (st.track.length>0?`<span class="wss-stat s-track" title="${st.track.join(', ')}">${st.track.length} On Track</span>`:'')+
+          (st.ahead.length>0?`<span class="wss-stat s-ahead" title="${st.ahead.join(', ')}">${st.ahead.length} Ahead</span>`:'')+
           (!hasData?`<span class="wss-nodata">No data yet</span>`:'')+
           `</div>`;
       }else{
         const st=threecsStatsFor(filtStudents,item.key);
         const hasData=st.lovesY+st.l2x+st.t2pY>0;
         statsHtml=`<div class="wss-stats">`+
-          (st.lovesY>0?`<span class="wss-stat s-track">♥ ${st.lovesY}</span>`:'')+
-          (st.l2x>0?`<span class="wss-stat s-blue">2× ${st.l2x}</span>`:'')+
-          (st.t2pY>0?`<span class="wss-stat s-ahead">T✓ ${st.t2pY}</span>`:'')+
+          (st.lovesY>0?`<span class="wss-stat s-track" title="${st.lovesYN.join(', ')}">Loves School ${st.lovesY}</span>`:'')+
+          (st.l2x>0?`<span class="wss-stat s-blue" title="${st.l2xN.join(', ')}">2× ${st.l2x}</span>`:'')+
+          (st.t2pY>0?`<span class="wss-stat s-ahead" title="${st.t2pYN.join(', ')}">T2P on track ${st.t2pY}</span>`:'')+
           (!hasData?`<span class="wss-nodata">No data yet</span>`:'')+
           `</div>`;
       }
@@ -560,21 +567,21 @@ function renderStats(){
     if(!due)return'';
     if(due.type==='checkpoint'){
       const st=chkStatsFor(students,due.key);
-      return(st.behind>0?`<span class="lvc-pill" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);">${st.behind} Behind</span>`:'')+
-        (st.track>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">${st.track} On Track</span>`:'')+
-        (st.ahead>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">${st.ahead} Ahead</span>`:'');
+      return(st.behind.length>0?`<span class="lvc-pill" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);" title="${st.behind.join(', ')}">${st.behind.length} Behind</span>`:'')+
+        (st.track.length>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);" title="${st.track.join(', ')}">${st.track.length} On Track</span>`:'')+
+        (st.ahead.length>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);" title="${st.ahead.join(', ')}">${st.ahead.length} Ahead</span>`:'');
     }
     const st=threecsStatsFor(students,due.key);
-    return(st.lovesY>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">♥ ${st.lovesY}</span>`:'')+
-      (st.l2x>0?`<span class="lvc-pill" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25);">2× ${st.l2x}</span>`:'')+
-      (st.t2pY>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">T2P ${st.t2pY}</span>`:'');
+    return(st.lovesY>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);" title="${st.lovesYN.join(', ')}">Loves School ${st.lovesY}</span>`:'')+
+      (st.l2x>0?`<span class="lvc-pill" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25);" title="${st.l2xN.join(', ')}">2× ${st.l2x}</span>`:'')+
+      (st.t2pY>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);" title="${st.t2pYN.join(', ')}">T2P on track ${st.t2pY}</span>`:'');
   }
   function duePct(students,lvl){
     if(!due)return 0;
     if(due.type==='checkpoint'){
       const st=chkStatsFor(students,due.key);
-      const slots=(WORKSHOPS[lvl]||[]).length*students.length;
-      return slots>0?Math.round((st.behind+st.track+st.ahead)/slots*100):0;
+      const n=students.filter(s=>(WORKSHOPS[s.l]||[]).length>0).length;
+      return n>0?Math.round((st.behind.length+st.track.length+st.ahead.length)/n*100):0;
     }
     const st=threecsStatsFor(students,due.key);
     return st.total>0?Math.round(st.lovesY/st.total*100):0;
@@ -614,7 +621,7 @@ function renderStats(){
     <div class="s5-week-bar">
       <span class="ph-week-badge">Week ${weekNum>0&&weekNum<=7?weekNum:(weekNum>7?'Session Complete':'Starting')}${weekNum>0&&weekNum<=7?' · '+weekDateRange(weekNum):''}</span>
       <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
-      <button class="reminder-btn" onclick="openReminderModal()">📧 Send reminder</button>
+      <button class="reminder-btn" onclick="openReminderModal()">Send reminder</button>
     </div>
     <div class="wss-strip">${weekStripHtml}</div>
     <div class="level-selector">${allCard}${lvlCardsHtml}</div>
