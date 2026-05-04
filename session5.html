@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Session 5 Dashboard — Alpha NYC</title>
 <script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -65,6 +66,29 @@ body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50
 /* STAT MODE SELECTOR */
 .stat-mode-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
 .stat-mode-select{font-family:'DM Mono',monospace;font-size:11px;padding:5px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none;}
+
+/* REMINDER BUTTON */
+.reminder-btn{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;background:transparent;color:var(--muted2);border:1px solid var(--border2);padding:4px 12px;border-radius:6px;cursor:pointer;transition:all .15s;margin-left:6px;}
+.reminder-btn:hover{color:var(--text);border-color:var(--border2);background:var(--surface2);}
+
+/* REMINDER MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-box{background:var(--card);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.modal-title{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--text);}
+.modal-close{background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer;line-height:1;padding:2px 6px;}
+.modal-close:hover{color:var(--text);}
+.modal-body{padding:16px 18px;overflow-y:auto;flex:1;}
+.modal-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.modal-preview{font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;white-space:pre-wrap;color:var(--text);margin-bottom:14px;max-height:340px;overflow-y:auto;}
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.modal-btn{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;padding:7px 16px;border-radius:7px;border:none;cursor:pointer;transition:all .15s;}
+.modal-btn.copy{background:var(--surface2);color:var(--text);border:1px solid var(--border2);}
+.modal-btn.copy:hover{background:var(--border2);}
+.modal-btn.send{background:#1a56db;color:#fff;}
+.modal-btn.send:hover{background:#1745c0;}
+.modal-btn:disabled{opacity:.4;cursor:not-allowed;}
+.modal-status{font-family:'DM Mono',monospace;font-size:11px;margin-top:10px;min-height:18px;}
 
 /* LEVEL SELECTOR */
 .level-selector{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding-bottom:2px;}
@@ -389,6 +413,7 @@ function renderStats(){
         ${dueLabel?`<span class="ph-due-now">Due this week: ${dueLabel}</span>`:''}
         ${nextDueLabel?`<span class="ph-due-next">Due next week: ${nextDueLabel}</span>`:''}
         <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
+        <button class="reminder-btn" onclick="openReminderModal()">📧 Send reminder</button>
       </div>`
     :`<div class="s5-week-bar"><span class="ph-week-badge">Session ${weekNum>7?'Complete':'Starting'}</span></div>`;
 
@@ -718,10 +743,169 @@ function render(){
   document.getElementById('page').innerHTML=allBlocks.join('');
 }
 
+// ── Reminder helpers ──────────────────────────────────────────────
+
+function getStudentGuides(sName, level) {
+  const ov = s5data.__guides__?.[sName];
+  if (ov && ov.length) return ov;
+  return (CFG.levelGuides || {})[level] || ['(unassigned)'];
+}
+
+function buildReminderData() {
+  const due = getDueThisWeek();
+  if (!due) return null;
+  const weekNum = getCurrentSessionWeek();
+  const allStudents = (CFG.students || []).filter(s => !s.inactive);
+
+  // Which students are missing data for this due item
+  const missing = allStudents.filter(s => {
+    if (due.type === 'checkpoint') {
+      return !(WORKSHOPS[s.l] || []).some(ws => getChk(s.n, ws.name, due.key));
+    }
+    if (due.type === '3cs') {
+      const d = s5data.__3cs__?.[s.n]?.[due.key] || {};
+      return !d.lovesSchool && !d.learning2x && !d.onTrack;
+    }
+    return false;
+  });
+
+  // Group by guide
+  const byGuide = {};
+  missing.forEach(s => {
+    getStudentGuides(s.n, s.l).forEach(g => {
+      if (!byGuide[g]) byGuide[g] = [];
+      byGuide[g].push(s);
+    });
+  });
+
+  const dueLabel = due.type === 'checkpoint'
+    ? (CFG.checkpoints || []).find(c => c.key === due.key)?.label || due.key
+    : `3Cs (Week ${due.key.slice(1)})`;
+
+  return { due, dueLabel, weekNum, missing, byGuide };
+}
+
+function generateReminderText(data) {
+  if (!data) return 'No data due this week.';
+  if (data.missing.length === 0) return `All data for "${data.dueLabel}" has been entered. `;
+
+  const start = new Date(2026, 3, 27);
+  const mon = new Date(start.getTime() + (data.weekNum - 1) * 7 * 24 * 60 * 60 * 1000);
+  const fri = new Date(mon.getTime() + 4 * 24 * 60 * 60 * 1000);
+  const fmt = d => `${d.getMonth() + 1}/${d.getDate()}`;
+  const dateRange = `${fmt(mon)}–${fmt(fri)}`;
+
+  const guideBlocks = Object.entries(data.byGuide)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([guide, students]) => {
+      const list = students.map(s => `  • ${s.n} (${s.l})`).join('\n');
+      return `${guide}:\n${list}`;
+    }).join('\n\n');
+
+  return `Hi team,
+
+Quick reminder — ${data.dueLabel} data is due this week (Week ${data.weekNum}, ${dateRange}).
+
+The following students still need data entered:
+
+${guideBlocks}
+
+Please enter data at:
+https://session5-progress.vercel.app/editor.html
+
+Thanks!`;
+}
+
+let _reminderText = '';
+
+function openReminderModal() {
+  const data = buildReminderData();
+  _reminderText = generateReminderText(data);
+
+  const due = getDueThisWeek();
+  const dueLabel = data?.dueLabel || 'this week';
+  const missingCount = data?.missing?.length || 0;
+
+  document.getElementById('reminder-preview').textContent = _reminderText;
+  document.getElementById('reminder-subject').textContent =
+    `Subject: Data reminder — ${dueLabel} · ${missingCount} student${missingCount !== 1 ? 's' : ''} missing`;
+  document.getElementById('reminder-status').textContent = '';
+  document.getElementById('reminder-modal').style.display = 'flex';
+}
+
+function closeReminderModal() {
+  document.getElementById('reminder-modal').style.display = 'none';
+}
+
+function copyReminder() {
+  const subjectEl = document.getElementById('reminder-subject');
+  const full = subjectEl.textContent + '\n\n' + _reminderText;
+  navigator.clipboard.writeText(full).then(() => {
+    document.getElementById('reminder-status').textContent = '✓ Copied to clipboard';
+    document.getElementById('reminder-status').style.color = '#4ade80';
+  }).catch(() => {
+    document.getElementById('reminder-status').textContent = 'Copy failed — select text manually';
+    document.getElementById('reminder-status').style.color = '#f87171';
+  });
+}
+
+function sendReminderEmail() {
+  const N = CFG.notifications || {};
+  if (!N.emailjsServiceId || N.emailjsServiceId === 'YOUR_SERVICE_ID') {
+    document.getElementById('reminder-status').textContent = '⚠ EmailJS not configured in config.js';
+    document.getElementById('reminder-status').style.color = '#fbbf24';
+    return;
+  }
+  const btn = document.getElementById('send-reminder-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  document.getElementById('reminder-status').textContent = '';
+
+  const due = getDueThisWeek();
+  const data = buildReminderData();
+
+  emailjs.init(N.emailjsPublicKey);
+  emailjs.send(N.emailjsServiceId, N.emailjsTemplateId, {
+    to_name: N.notifyName || 'Team',
+    to_email: N.notifyEmail,
+    subject: `Data reminder — ${data?.dueLabel || 'this week'}`,
+    message: _reminderText,
+  }).then(() => {
+    document.getElementById('reminder-status').textContent = `✓ Sent to ${N.notifyEmail}`;
+    document.getElementById('reminder-status').style.color = '#4ade80';
+    btn.disabled = false;
+    btn.textContent = 'Send via EmailJS';
+  }).catch(err => {
+    document.getElementById('reminder-status').textContent = `✗ Send failed: ${err?.text || err}`;
+    document.getElementById('reminder-status').style.color = '#f87171';
+    btn.disabled = false;
+    btn.textContent = 'Send via EmailJS';
+  });
+}
+
 // Render hero immediately so it shows before storage resolves
 renderStats();
 populateWsFilter();
 loadData();
 </script>
+
+<!-- Reminder modal -->
+<div id="reminder-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeReminderModal()">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <span class="modal-title">Send Data Reminder</span>
+      <button class="modal-close" onclick="closeReminderModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-label" id="reminder-subject"></div>
+      <div class="modal-preview" id="reminder-preview"></div>
+      <div class="modal-actions">
+        <button class="modal-btn copy" onclick="copyReminder()">📋 Copy to clipboard</button>
+        <button class="modal-btn send" id="send-reminder-btn" onclick="sendReminderEmail()">📧 Send via EmailJS</button>
+      </div>
+      <div class="modal-status" id="reminder-status"></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
