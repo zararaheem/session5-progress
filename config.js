@@ -63,6 +63,7 @@ const T2P_CONFIG = {
   students: [
 
     // ── LL ──────────────────────────────────────────────────────
+    { n: "Arthur Armilio",            l: "LL", note: "Joined S5 Wk2", newS5: true },
     { n: "Colm Bowen",               l: "LL" },
     { n: "Fiadh Hogan",              l: "LL", note: "Joined S5" },
     { n: "Harper Lembo",             l: "LL" },
@@ -83,6 +84,7 @@ const T2P_CONFIG = {
     { n: "Vasilios Giannopoulos",    l: "L1", note: "Joined S2" },
 
     // ── L2 ──────────────────────────────────────────────────────
+    { n: "Anra Armilio",              l: "L2", note: "Joined S5 Wk2", newS5: true },
     { n: "Annabelle Lembo",          l: "L2" },
     { n: "Casper White",             l: "L2", note: "Joined S4" },
     { n: "Catherine Henry",          l: "L2", note: "Joined S3" },

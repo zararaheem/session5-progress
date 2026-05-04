@@ -397,7 +397,11 @@ function renderStats(){
   const nextWeekDue=getDueNextWeek();
   const nextDueLabel=dueItemLabel(nextWeekDue);
   const missingWeeks=getMissingWeeks(weekNum);
-  const missingHtml=missingWeeks.map(m=>`<span class="ph-due-missing">⚠ Missing: ${dueItemLabel(m.due)}</span>`).join('');
+  const missingHtml=missingWeeks.map(m=>{
+    const label=dueItemLabel(m.due);
+    const prefix=m.week===weekNum-1?'Due last week':'Missing';
+    return`<span class="ph-due-missing">⚠ ${prefix}: ${label}</span>`;
+  }).join('');
   const weekInfoHtml=(weekNum>0&&weekNum<=7&&due)
     ?`<div class="s5-week-bar">
         <span class="ph-week-badge">Week ${weekNum} · ${weekDateRange(weekNum)}</span>

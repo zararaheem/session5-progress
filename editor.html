@@ -16,11 +16,11 @@ const T2P_CONFIG = {
     {key:"w5",label:"Week 5: Checkpoint 2"},{key:"w7",label:"Week 7: T2P"},
   ],
   students: [
-    {n:"Colm Bowen",l:"LL"},{n:"Fiadh Hogan",l:"LL",note:"Joined S5"},{n:"Harper Lembo",l:"LL"},{n:"Hildy (Alice) Grimm",l:"LL"},{n:"Oliver McLeod",l:"LL",note:"Joined S4"},
+    {n:"Arthur Armilio",l:"LL",note:"Joined S5 Wk2",newS5:true},{n:"Colm Bowen",l:"LL"},{n:"Fiadh Hogan",l:"LL",note:"Joined S5"},{n:"Harper Lembo",l:"LL"},{n:"Hildy (Alice) Grimm",l:"LL"},{n:"Oliver McLeod",l:"LL",note:"Joined S4"},
     {n:"Ada Cone",l:"L1"},{n:"Blake Richheimer",l:"L1"},{n:"Conan Hogan",l:"L1"},{n:"Harvey Caulin",l:"L1",note:"Joined S4"},
     {n:"Lola Propp",l:"L1"},{n:"London Politi",l:"L1"},{n:"Oleander Poulson",l:"L1",note:"Joined S4"},
     {n:"Raika Ackman",l:"L1"},{n:"Van McDavid",l:"L1"},{n:"Vasilios Giannopoulos",l:"L1",note:"Joined S2"},
-    {n:"Annabelle Lembo",l:"L2"},{n:"Casper White",l:"L2",note:"Joined S4"},{n:"Catherine Henry",l:"L2",note:"Joined S3"},
+    {n:"Anra Armilio",l:"L2",note:"Joined S5 Wk2",newS5:true},{n:"Annabelle Lembo",l:"L2"},{n:"Casper White",l:"L2",note:"Joined S4"},{n:"Catherine Henry",l:"L2",note:"Joined S3"},
     {n:"Hunter Taback",l:"L2",note:"Joined S3"},{n:"Jaya Vora",l:"L2"},{n:"Liv Brodsky",l:"L2"},
     {n:"Lucian McDavid",l:"L2"},{n:"Nicholas Sidea",l:"L2",note:"Joined S4"},{n:"Pax Ovitz",l:"L2"},
     {n:"Ayla White",l:"MS",note:"Joined S4"},{n:"Eli Slifka",l:"MS"},{n:"Emma Slifka",l:"MS"},
@@ -1185,6 +1185,44 @@ function renderList(){
             <div><div class="field-label">Guide notes</div><textarea class="field-textarea" id="note-${sl}" data-sslug="${sl}" onchange="saveProfileBySlug(this)" placeholder="This week's observations, action plan…">${profile.notes||''}</textarea></div>
           </div>
         </div>
+        ${(()=>{
+          const due3cWeeks=['w2','w4','w6'];
+          const wkLabels={w2:'Week 2',w4:'Week 4',w6:'Week 6'};
+          const due=getDueThisWeek();
+          // Show due week first, then all others
+          const sorted=[...due3cWeeks].sort((a,b)=>(due&&due.key===b?1:due&&due.key===a?-1:0));
+          return`<div style="border-top:1px solid var(--border);padding:14px 16px 8px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;">3Cs — Alpha's 3 Commitments</div>
+            ${sorted.map(wk=>{
+              const d3=s5data.__3cs__?.[s.n]?.[wk]||{};
+              const isDue=due&&due.type==='3cs'&&due.key===wk;
+              const safeN2=s.n.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+              return`<div style="margin-bottom:10px;border:1px solid ${isDue?'rgba(251,191,36,.35)':'var(--border)'};border-radius:8px;overflow:hidden;background:${isDue?'rgba(251,191,36,.04)':'var(--surface2)'}">
+                <div style="padding:5px 12px;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:${isDue?'#fbbf24':'var(--muted2)'};letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);">${wkLabels[wk]}${isDue?' · DUE THIS WEEK':''}</div>
+                <div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">Loves School?</span>
+                    <div style="display:flex;gap:4px;">
+                      ${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d3.lovesSchool===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" style="padding:3px 10px;font-size:10px;" onclick="set3C('${safeN2}','${wk}','lovesSchool','${v}',this);saveAll()">${v}</button>`).join('')}
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">Learning 2×?</span>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                      ${['All at 2x','Some at 2x','None at 2x'].map(v=>`<button class="score-btn ${d3.learning2x===v?'active-track':''}" style="padding:3px 8px;font-size:9px;" onclick="set3C('${safeN2}','${wk}','learning2x','${v}',this);saveAll()">${v}</button>`).join('')}
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">T2P on track?</span>
+                    <div style="display:flex;gap:4px;">
+                      ${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d3.onTrack===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" style="padding:3px 10px;font-size:10px;" onclick="set3C('${safeN2}','${wk}','onTrack','${v}',this);saveAll()">${v}</button>`).join('')}
+                    </div>
+                  </div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>`;
+        })()}
         <div class="scores-section">${scoreLines}</div>
       </div>
     </div>`;
