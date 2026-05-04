@@ -690,8 +690,7 @@ function getCurrentSessionWeek(){
   const w=Math.floor(diff/7)+1;
   return w>7?8:w;
 }
-function getDueThisWeek(){
-  const w=getCurrentSessionWeek();
+function getDueForWeek(w){
   if(w===1)return{type:'checkpoint',key:'w1'};
   if(w===2)return{type:'3cs',key:'w2'};
   if(w===3)return{type:'checkpoint',key:'w3'};
@@ -700,6 +699,19 @@ function getDueThisWeek(){
   if(w===6)return{type:'3cs',key:'w6'};
   if(w===7)return{type:'checkpoint',key:'w7'};
   return null;
+}
+function getDueThisWeek(){return getDueForWeek(getCurrentSessionWeek());}
+function isFilledForWeek(w){
+  const d=getDueForWeek(w);if(!d)return true;
+  const all=STUDENTS.filter(s=>!s.inactive);
+  if(d.type==='checkpoint'){return all.some(s=>(S5_WORKSHOPS[s.l]||[]).some(ws=>{const v=s5data[s.n]?.[`__chk__${ws.name}__${d.key}`];return!!v;}));}
+  if(d.type==='3cs'){return all.some(s=>{const e=s5data.__3cs__?.[s.n]?.[d.key]||{};return e.lovesSchool||e.learning2x||e.onTrack;});}
+  return true;
+}
+function getMissingWeeks(){
+  const w=getCurrentSessionWeek();const missing=[];
+  for(let i=1;i<w;i++){const d=getDueForWeek(i);if(d&&!isFilledForWeek(i))missing.push({week:i,due:d});}
+  return missing;
 }
 function saveCoaching(sSlug,wsSlug,ck,val){
   const sName=nameFromSlug(sSlug);
@@ -1376,10 +1388,12 @@ function renderCampusOverview(){
 
   const wkLabel=weekNum>0&&weekNum<=7?`Week ${weekNum}`:(weekNum>7?'Session Complete':'Pre-Session');
   const dueLabel=due?(due.type==='checkpoint'?(CHECKPOINTS.find(c=>c.key===due.key)?.label||due.key):'3Cs'):'';
+  const missingWeeks=getMissingWeeks();
+  const missingHtml=missingWeeks.map(m=>{const lbl=m.due.type==='checkpoint'?(CHECKPOINTS.find(c=>c.key===m.due.key)?.label||m.due.key):'3Cs';return`<span style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.3);padding:2px 7px;border-radius:4px;">⚠ Missing: ${lbl}</span>`;}).join('');
   container.innerHTML=`<div class="cov-section">
     <div class="cov-hdr">
       <span>Campus Overview · All Levels</span>
-      <span style="color:var(--accent2);font-size:9px;">${wkLabel}${dueLabel?' · '+dueLabel:''}</span>
+      <span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${missingHtml}<span style="color:var(--accent2);font-size:9px;">${wkLabel}${dueLabel?' · '+dueLabel:''}</span></span>
     </div>
     <div class="cov-grid">${cards}</div>
   </div>`;

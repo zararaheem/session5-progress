@@ -32,7 +32,7 @@ body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50
 .ph-week-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:4px 12px;border-radius:4px;}
 .ph-due-now{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.4);padding:4px 12px;border-radius:4px;}
 .ph-due-next{font-family:'DM Mono',monospace;font-size:10px;color:#7dd3fc;padding:4px 10px;border-radius:4px;border:1px solid rgba(125,211,252,.3);background:rgba(125,211,252,.07);}
-.s5-enter-btn{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;background:#1a56db;color:white;border:none;padding:5px 14px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:background .15s;}
+.ph-due-missing{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.4);padding:4px 12px;border-radius:4px;}.s5-enter-btn{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;background:#1a56db;color:white;border:none;padding:5px 14px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:background .15s;}
 .s5-enter-btn:hover{background:#1745c0;}
 .s5-hist-link{padding:12px 0 18px;text-align:center;}
 .s5-hist-link a{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:4px 12px;border-radius:20px;transition:all .15s;}
@@ -316,6 +316,26 @@ function getDueForWeek(w){
 }
 function getDueThisWeek(){return getDueForWeek(getCurrentSessionWeek());}
 function getDueNextWeek(){return getDueForWeek(getCurrentSessionWeek()+1);}
+function isFilledForWeek(w){
+  const d=getDueForWeek(w);
+  if(!d)return true;
+  const all=(CFG.students||[]).filter(s=>!s.inactive);
+  if(d.type==='checkpoint'){
+    return all.some(s=>(WORKSHOPS[s.l]||[]).some(ws=>getChk(s.n,ws.name,d.key)));
+  }
+  if(d.type==='3cs'){
+    return all.some(s=>{const e=s5data.__3cs__?.[s.n]?.[d.key]||{};return e.lovesSchool||e.learning2x||e.onTrack;});
+  }
+  return true;
+}
+function getMissingWeeks(upToWeek){
+  const missing=[];
+  for(let w=1;w<upToWeek;w++){
+    const d=getDueForWeek(w);
+    if(d&&!isFilledForWeek(w))missing.push({week:w,due:d});
+  }
+  return missing;
+}
 function renderStats(){
   const container=document.getElementById('stats-hero');
   if(!container)return;
@@ -399,9 +419,12 @@ function renderStats(){
   const dueLabel=dueItemLabel(due);
   const nextWeekDue=getDueNextWeek();
   const nextDueLabel=dueItemLabel(nextWeekDue);
+  const missingWeeks=getMissingWeeks(weekNum);
+  const missingHtml=missingWeeks.map(m=>`<span class="ph-due-missing">⚠ Missing: ${dueItemLabel(m.due)}</span>`).join('');
   const weekInfoHtml=(weekNum>0&&weekNum<=7&&due)
     ?`<div class="s5-week-bar">
         <span class="ph-week-badge">Week ${weekNum} · ${weekDateRange(weekNum)}</span>
+        ${missingHtml}
         ${dueLabel?`<span class="ph-due-now">Due this week: ${dueLabel}</span>`:''}
         ${nextDueLabel?`<span class="ph-due-next">Due next week: ${nextDueLabel}</span>`:''}
         <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
