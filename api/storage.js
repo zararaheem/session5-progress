@@ -23,21 +23,23 @@ module.exports = async function handler(req, res) {
       });
       if (!r.ok) throw new Error(`KV GET ${r.status}`);
       const data = await r.json();
+      // Upstash/Vercel KV returns {"result": storedValue}
       return res.json({ value: data.result ?? null });
 
     } else if (req.method === 'POST') {
       const value = req.body && req.body.value;
       if (value === undefined) return res.status(400).json({ error: 'No value' });
 
-      const r = await fetch(`${KV_URL}/set/${key}`, {
+      // Use pipeline to store large JSON strings reliably
+      const r = await fetch(`${KV_URL}/pipeline`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${KV_TOKEN}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(value)
+        body: JSON.stringify([['SET', key, value]])
       });
-      if (!r.ok) throw new Error(`KV SET ${r.status}`);
+      if (!r.ok) throw new Error(`KV pipeline ${r.status}`);
       return res.json({ ok: true });
     }
   } catch (e) {
