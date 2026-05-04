@@ -87,6 +87,37 @@ body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50
 .wss-stat.s-blue{background:rgba(96,165,250,.12);color:#60a5fa;}
 .wss-nodata{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);font-style:italic;}
 
+/* WEEK HUB */
+.week-hub{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.wh-now{border:1px solid;border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.wh-now-left{display:flex;flex-direction:column;gap:3px;}
+.wh-now-title{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--text);}
+.wh-now-fill{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-top:2px;}
+.wh-now-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.wh-past-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.wh-past-hdr{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.wh-pp{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid;transition:all .15s;background:transparent;display:inline-flex;align-items:center;gap:6px;}
+.wh-pp-ok{color:#4ade80;border-color:rgba(74,222,128,.3);}
+.wh-pp-ok:hover{background:rgba(74,222,128,.08);}
+.wh-pp-warn{color:#f87171;border-color:rgba(248,113,113,.3);}
+.wh-pp-warn:hover{background:rgba(248,113,113,.08);}
+.wh-pp-fill{font-size:9px;opacity:.65;}
+.wh-upcoming{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-align:center;padding:2px;opacity:.7;}
+/* WEEK DETAIL POPUP */
+.wd-stat-row{font-family:'DM Mono',monospace;font-size:11px;padding:8px 10px;border-radius:7px;margin-bottom:6px;}
+.wd-stat-row.s-behind{background:rgba(248,113,113,.1);}
+.wd-stat-row.s-track{background:rgba(74,222,128,.1);}
+.wd-stat-row.s-ahead{background:rgba(109,40,217,.1);}
+.wd-stat-row.s-blue{background:rgba(96,165,250,.1);}
+.wd-stat-label{font-weight:700;display:block;margin-bottom:3px;}
+.wd-stat-row.s-behind .wd-stat-label{color:#f87171;}
+.wd-stat-row.s-track .wd-stat-label{color:#4ade80;}
+.wd-stat-row.s-ahead .wd-stat-label{color:#a78bfa;}
+.wd-stat-row.s-blue .wd-stat-label{color:#60a5fa;}
+.wd-stat-names{color:var(--muted2);font-size:10px;line-height:1.5;}
+.wd-missing-hdr{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#f87171;margin-bottom:5px;}
+.wd-missing-list{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);line-height:1.6;background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.2);border-radius:7px;padding:8px 10px;}
+
 /* STORAGE BADGE */
 .storage-badge{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:10px;}
 .storage-badge.kv{color:#4ade80;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);}
@@ -438,6 +469,81 @@ function getMissingWeeks(upToWeek){
   }
   return missing;
 }
+// ── Module-scope stat helpers ────────────────────────────────────────
+function chkStatsFor(students,key){
+  const behind=[],track=[],ahead=[];
+  students.forEach(s=>{
+    const wsList=WORKSHOPS[s.l]||[];
+    let hasBehind=false,hasAhead=false,hasData=false;
+    wsList.forEach(ws=>{
+      const v=getChk(s.n,ws.name,key);
+      if(v&&v!=='N/A'&&v!=='Absent')hasData=true;
+      if(v==='Behind')hasBehind=true;
+      else if(v==='Ahead')hasAhead=true;
+    });
+    if(!hasData)return;
+    if(hasBehind)behind.push(s.n);
+    else if(hasAhead)ahead.push(s.n);
+    else track.push(s.n);
+  });
+  return{behind,track,ahead};
+}
+function threecsStatsFor(students,key){
+  const lovesYN=[],l2xN=[],t2pYN=[];
+  students.forEach(s=>{
+    const d=s5data.__3cs__?.[s.n]?.[key]||{};
+    if(d.lovesSchool==='Yes')lovesYN.push(s.n);
+    if(d.learning2x==='All at 2x'||d.learning2x==='Some at 2x')l2xN.push(s.n);
+    if(d.onTrack==='Yes')t2pYN.push(s.n);
+  });
+  return{lovesY:lovesYN.length,l2x:l2xN.length,t2pY:t2pYN.length,
+         lovesYN,l2xN,t2pYN,total:students.length};
+}
+
+const WEEK_DEFS=[
+  {w:1,type:'chk',key:'w1',label:'Week 1',sub:'Baseline'},
+  {w:2,type:'3cs',key:'w2',label:'Week 2',sub:'Week 2: 3Cs'},
+  {w:3,type:'chk',key:'w3',label:'Week 3',sub:'Checkpoint 1'},
+  {w:4,type:'3cs',key:'w4',label:'Week 4',sub:'Week 4: 3Cs'},
+  {w:5,type:'chk',key:'w5',label:'Week 5',sub:'Checkpoint 2'},
+  {w:6,type:'3cs',key:'w6',label:'Week 6',sub:'Week 6: 3Cs'},
+  {w:7,type:'chk',key:'w7',label:'Week 7',sub:'T2P'},
+];
+
+function openWeekDetail(key){
+  const item=WEEK_DEFS.find(d=>d.key===key);
+  if(!item)return;
+  const allStu=(CFG.students||[]).filter(s=>!s.inactive);
+  const filled=filledCountForWeek(item.w);
+  const total=allStu.length;
+
+  let statsHtml='',missingList=[];
+  if(item.type==='chk'){
+    const st=chkStatsFor(allStu,key);
+    const statPill=(arr,cls,label)=>arr.length?`<div class="wd-stat-row ${cls}"><span class="wd-stat-label">${label} (${arr.length})</span><span class="wd-stat-names">${arr.join(', ')}</span></div>`:'';
+    statsHtml=statPill(st.behind,'s-behind','Behind')+statPill(st.track,'s-track','On Track')+statPill(st.ahead,'s-ahead','Ahead');
+    missingList=allStu.filter(s=>{
+      const wsList=WORKSHOPS[s.l]||[];
+      return wsList.length>0&&!wsList.some(ws=>{const v=getChk(s.n,ws.name,key);return v&&v!=='N/A';});
+    }).map(s=>s.n);
+  }else{
+    const st=threecsStatsFor(allStu,key);
+    const statPill=(arr,cls,label)=>arr.length?`<div class="wd-stat-row ${cls}"><span class="wd-stat-label">${label} (${arr.length})</span><span class="wd-stat-names">${arr.join(', ')}</span></div>`:'';
+    statsHtml=statPill(st.lovesYN,'s-track','Loves School')+statPill(st.l2xN,'s-blue','Learning 2×')+statPill(st.t2pYN,'s-ahead','T2P on track');
+    missingList=allStu.filter(s=>{const d=s5data.__3cs__?.[s.n]?.[key]||{};return!d.lovesSchool&&!d.learning2x&&!d.onTrack;}).map(s=>s.n);
+  }
+
+  const missingHtml=missingList.length
+    ?`<div class="wd-missing-hdr">Missing data (${missingList.length})</div><div class="wd-missing-list">${missingList.join(', ')}</div>`
+    :`<div class="wd-missing-hdr" style="color:#4ade80">All data entered ✓</div>`;
+
+  document.getElementById('wd-title').textContent=`${item.label} · ${item.sub}`;
+  document.getElementById('wd-fill').textContent=`${filled}/${total} entered`;
+  document.getElementById('wd-body').innerHTML=statsHtml+(statsHtml&&missingList.length?'<div style="height:10px"></div>':'')+missingHtml;
+  document.getElementById('week-detail-modal').style.display='flex';
+}
+function closeWeekDetail(){document.getElementById('week-detail-modal').style.display='none';}
+
 function renderStats(){
   const container=document.getElementById('stats-hero');
   if(!container)return;
@@ -457,110 +563,72 @@ function renderStats(){
     return`${fmt(mon)}–${fmt(fri)}`;
   }
 
-  // ── Stats helpers (parameterised by key) ──────────────────────────
-  function chkStatsFor(students,key){
-    const behind=[],track=[],ahead=[];
-    students.forEach(s=>{
-      const wsList=WORKSHOPS[s.l]||[];
-      let hasBehind=false,hasAhead=false,hasData=false;
-      wsList.forEach(ws=>{
-        const v=getChk(s.n,ws.name,key);
-        if(v&&v!=='N/A'&&v!=='Absent')hasData=true;
-        if(v==='Behind')hasBehind=true;
-        else if(v==='Ahead')hasAhead=true;
-      });
-      if(!hasData)return;
-      if(hasBehind)behind.push(s.n);
-      else if(hasAhead)ahead.push(s.n);
-      else track.push(s.n);
-    });
-    return{behind,track,ahead};
-  }
-  function threecsStatsFor(students,key){
-    const lovesYN=[],l2xN=[],t2pYN=[];
-    students.forEach(s=>{
-      const d=s5data.__3cs__?.[s.n]?.[key]||{};
-      if(d.lovesSchool==='Yes')lovesYN.push(s.n);
-      if(d.learning2x==='All at 2x'||d.learning2x==='Some at 2x')l2xN.push(s.n);
-      if(d.onTrack==='Yes')t2pYN.push(s.n);
-    });
-    return{lovesY:lovesYN.length,l2x:l2xN.length,t2pY:t2pYN.length,
-           lovesYN,l2xN,t2pYN,total:students.length};
-  }
+  // ── Week hub (current week + past pills) ─────────────────────────
+  // Current/due week featured card
+  const dueItem=WEEK_DEFS.find(d=>due&&d.key===due.key)||WEEK_DEFS[weekNum-1];
+  const pastItems=WEEK_DEFS.filter(d=>d.w<weekNum&&(!due||d.key!==due.key));
+  const futureItems=WEEK_DEFS.filter(d=>d.w>weekNum);
 
-  // ── 7-week stats strip ────────────────────────────────────────────
-  const weekDefs=[
-    {w:1,type:'chk',key:'w1',label:'Week 1',sub:'Baseline'},
-    {w:2,type:'3cs',key:'w2',label:'Week 2',sub:'3Cs'},
-    {w:3,type:'chk',key:'w3',label:'Week 3',sub:'Chk 1'},
-    {w:4,type:'3cs',key:'w4',label:'Week 4',sub:'3Cs'},
-    {w:5,type:'chk',key:'w5',label:'Week 5',sub:'Chk 2'},
-    {w:6,type:'3cs',key:'w6',label:'Week 6',sub:'3Cs'},
-    {w:7,type:'chk',key:'w7',label:'Week 7',sub:'T2P'},
-  ];
-
-  const weekStripHtml=weekDefs.map(item=>{
-    const isDue=due&&due.key===item.key;
-    const isPast=weekNum>item.w;
-    const isCurrent=weekNum===item.w;
-    const filled=filledCountForWeek(item.w);
-    const isFilled=isFilledForWeek(item.w);
-    const active=item.w<=weekNum||isDue;
-
-    let cardState;
-    if(item.w>weekNum)cardState='future';
-    else if(isDue||isCurrent)cardState='due';
-    else if(isFilled)cardState='ok';
-    else cardState='warn';
-
-    const lvlFilter=weekLevelFilters[item.key]||'ALL';
+  let currentCardHtml='';
+  if(dueItem&&weekNum>0&&weekNum<=7){
+    const filled=filledCountForWeek(dueItem.w);
+    const isFilled=isFilledForWeek(dueItem.w);
+    const lvlFilter=weekLevelFilters[dueItem.key]||'ALL';
     const filtStudents=lvlFilter==='ALL'?allStudents:allStudents.filter(s=>s.l===lvlFilter);
-
-    let statsHtml='<div class="wss-stats"><span class="wss-nodata">—</span></div>';
-    if(active){
-      if(item.type==='chk'){
-        const st=chkStatsFor(filtStudents,item.key);
-        const hasData=st.behind.length+st.track.length+st.ahead.length>0;
-        statsHtml=`<div class="wss-stats">`+
-          (st.behind.length>0?`<span class="wss-stat s-behind" title="${st.behind.join(', ')}">${st.behind.length} Behind</span>`:'')+
-          (st.track.length>0?`<span class="wss-stat s-track" title="${st.track.join(', ')}">${st.track.length} On Track</span>`:'')+
-          (st.ahead.length>0?`<span class="wss-stat s-ahead" title="${st.ahead.join(', ')}">${st.ahead.length} Ahead</span>`:'')+
-          (!hasData?`<span class="wss-nodata">No data yet</span>`:'')+
-          `</div>`;
-      }else{
-        const st=threecsStatsFor(filtStudents,item.key);
-        const hasData=st.lovesY+st.l2x+st.t2pY>0;
-        statsHtml=`<div class="wss-stats">`+
-          (st.lovesY>0?`<span class="wss-stat s-track" title="${st.lovesYN.join(', ')}">Loves School ${st.lovesY}</span>`:'')+
-          (st.l2x>0?`<span class="wss-stat s-blue" title="${st.l2xN.join(', ')}">2× ${st.l2x}</span>`:'')+
-          (st.t2pY>0?`<span class="wss-stat s-ahead" title="${st.t2pYN.join(', ')}">T2P on track ${st.t2pY}</span>`:'')+
-          (!hasData?`<span class="wss-nodata">No data yet</span>`:'')+
-          `</div>`;
-      }
+    let statsHtml='';
+    if(dueItem.type==='chk'){
+      const st=chkStatsFor(filtStudents,dueItem.key);
+      const hasData=st.behind.length+st.track.length+st.ahead.length>0;
+      statsHtml=(st.behind.length>0?`<span class="wss-stat s-behind" title="${st.behind.join(', ')}">${st.behind.length} Behind</span>`:'')+
+        (st.track.length>0?`<span class="wss-stat s-track" title="${st.track.join(', ')}">${st.track.length} On Track</span>`:'')+
+        (st.ahead.length>0?`<span class="wss-stat s-ahead" title="${st.ahead.join(', ')}">${st.ahead.length} Ahead</span>`:'')+
+        (!hasData?`<span class="wss-nodata">No data yet</span>`:'');
+    }else{
+      const st=threecsStatsFor(filtStudents,dueItem.key);
+      const hasData=st.lovesY+st.l2x+st.t2pY>0;
+      statsHtml=(st.lovesY>0?`<span class="wss-stat s-track" title="${st.lovesYN.join(', ')}">Loves School ${st.lovesY}</span>`:'')+
+        (st.l2x>0?`<span class="wss-stat s-blue" title="${st.l2xN.join(', ')}">2× ${st.l2x}</span>`:'')+
+        (st.t2pY>0?`<span class="wss-stat s-ahead" title="${st.t2pYN.join(', ')}">T2P on track ${st.t2pY}</span>`:'')+
+        (!hasData?`<span class="wss-nodata">No data yet</span>`:'');
     }
-
-    const countLine=active
-      ?`<div class="wss-count">${filled}/${total}${isFilled&&isPast?' ✓':!isFilled&&isPast?' ⚠':''}</div>`
-      :`<div class="wss-count wss-future-count">upcoming</div>`;
-
-    const lvlDrop=active
-      ?`<select class="wss-lvl-sel" onchange="setWeekLevelFilter('${item.key}',this.value)">
+    const borderColor=isFilled?'rgba(74,222,128,.4)':'rgba(251,191,36,.5)';
+    const bgColor=isFilled?'rgba(74,222,128,.05)':'rgba(251,191,36,.06)';
+    currentCardHtml=`<div class="wh-now" style="border-color:${borderColor};background:${bgColor}">
+      <div class="wh-now-left">
+        <div class="wss-due-badge" style="margin-bottom:5px;">${isFilled?'✓ COMPLETE':'DUE THIS WEEK'}</div>
+        <div class="wh-now-title">${dueItem.label} · ${dueItem.sub}</div>
+        <div class="wh-now-fill">${filled}/${total} entered · ${weekDateRange(dueItem.w)}</div>
+      </div>
+      <div class="wh-now-right">
+        <div class="wss-stats" style="justify-content:flex-end;">${statsHtml}</div>
+        <select class="wss-lvl-sel" style="width:auto;" onchange="setWeekLevelFilter('${dueItem.key}',this.value)">
           <option value="ALL"${lvlFilter==='ALL'?' selected':''}>All levels</option>
           ${allLevels.map(l=>`<option value="${l}"${lvlFilter===l?' selected':''}>${l}</option>`).join('')}
-        </select>`
-      :'';
-
-    return`<div class="wss-card wss-${cardState}">
-      <div class="wss-head">
-        <span class="wss-label">${item.label}</span>
-        ${isDue?`<span class="wss-due-badge">DUE</span>`:''}
+        </select>
       </div>
-      <div class="wss-sub">${item.sub}</div>
-      ${countLine}
-      ${lvlDrop}
-      ${statsHtml}
     </div>`;
-  }).join('');
+  }else if(weekNum>7){
+    currentCardHtml=`<div class="wh-now" style="border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.05)"><div class="wh-now-left"><div class="wss-due-badge" style="margin-bottom:5px;">SESSION COMPLETE</div><div class="wh-now-title">Session 5 finished</div></div></div>`;
+  }
+
+  // Past week pills
+  const pastPillsHtml=pastItems.length?`<div class="wh-past-bar">
+    <span class="wh-past-hdr">Past:</span>
+    ${pastItems.map(item=>{
+      const filled=filledCountForWeek(item.w);
+      const isFilled=isFilledForWeek(item.w);
+      const cls=isFilled?'wh-pp-ok':'wh-pp-warn';
+      return`<button class="wh-pp ${cls}" onclick="openWeekDetail('${item.key}')">
+        ${item.label} · ${item.sub}
+        <span class="wh-pp-fill">${filled}/${total}${isFilled?' ✓':' ⚠'}</span>
+      </button>`;
+    }).join('')}
+  </div>`:'';
+
+  // Upcoming note
+  const upcomingNote=futureItems.length&&weekNum>0?`<div class="wh-upcoming">${futureItems.map(d=>`${d.label}: ${d.sub}`).join(' · ')}</div>`:'';
+
+  const weekHubHtml=`<div class="week-hub">${currentCardHtml}${pastPillsHtml}${upcomingNote}</div>`;
 
   // ── Level cards (show due-week stats) ─────────────────────────────
   function duePills(students){
@@ -623,7 +691,7 @@ function renderStats(){
       <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
       <button class="reminder-btn" onclick="openReminderModal()">Send reminder</button>
     </div>
-    <div class="wss-strip">${weekStripHtml}</div>
+    ${weekHubHtml}
     <div class="level-selector">${allCard}${lvlCardsHtml}</div>
     <div class="s5-hist-link"><a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" rel="noopener noreferrer">Previous T2P data ↗</a></div>
   </div>`;
@@ -1139,6 +1207,20 @@ loadData();
       </div>
       <div class="modal-status" id="reminder-status"></div>
     </div>
+  </div>
+</div>
+
+<!-- Week detail popup -->
+<div id="week-detail-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeWeekDetail()">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-hdr">
+      <span class="modal-title" id="wd-title"></span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);" id="wd-fill"></span>
+        <button class="modal-close" onclick="closeWeekDetail()">×</button>
+      </div>
+    </div>
+    <div class="modal-body" id="wd-body"></div>
   </div>
 </div>
 </body>
