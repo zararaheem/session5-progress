@@ -63,20 +63,29 @@ body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50
 .cs-bar-fill{height:100%;background:#1a56db;border-radius:3px;transition:width .4s;}
 .cs-bar-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);}
 
-/* STAT MODE SELECTOR */
-.stat-mode-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
-.stat-mode-select{font-family:'DM Mono',monospace;font-size:11px;padding:5px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none;}
-
-/* WEEK TRACKER ROW */
-.week-track{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:18px;}
-.wt-item{display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:8px;min-width:88px;text-align:center;cursor:default;}
-.wt-item-label{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;line-height:1.25;}
-.wt-item-sub{font-family:'DM Mono',monospace;font-size:9px;margin-top:1px;opacity:.8;}
-.wt-item-status{font-family:'DM Mono',monospace;font-size:9px;margin-top:5px;font-weight:600;}
-.wt-future{border:1px solid var(--border);color:var(--muted);background:transparent;}
-.wt-current{border:1px solid rgba(251,191,36,.5);color:#fbbf24;background:rgba(251,191,36,.08);}
-.wt-ok{border:1px solid rgba(74,222,128,.35);color:#4ade80;background:rgba(74,222,128,.07);}
-.wt-warn{border:1px solid rgba(248,113,113,.45);color:#f87171;background:rgba(248,113,113,.07);}
+/* WEEK STATS STRIP */
+.wss-strip{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;}
+.wss-card{flex:1;min-width:100px;max-width:155px;padding:10px 10px 8px;border-radius:10px;border:1px solid;text-align:center;}
+.wss-future{border-color:var(--border);background:transparent;}
+.wss-due{border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.08);}
+.wss-ok{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.06);}
+.wss-warn{border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.06);}
+.wss-head{display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:2px;flex-wrap:wrap;}
+.wss-label{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--text);}
+.wss-future .wss-label{color:var(--muted);}
+.wss-due-badge{font-family:'DM Mono',monospace;font-size:8px;font-weight:700;background:rgba(251,191,36,.2);color:#fbbf24;border:1px solid rgba(251,191,36,.4);padding:1px 5px;border-radius:3px;}
+.wss-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);margin-bottom:5px;}
+.wss-future .wss-sub{color:var(--muted);}
+.wss-count{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;margin-bottom:4px;color:var(--text);}
+.wss-future .wss-count{color:var(--muted);font-weight:400;}
+.wss-lvl-sel{font-family:'DM Mono',monospace;font-size:9px;padding:2px 4px;border:1px solid var(--border2);border-radius:4px;background:var(--surface2);color:var(--text);margin-bottom:5px;width:100%;outline:none;}
+.wss-stats{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;min-height:18px;}
+.wss-stat{font-family:'DM Mono',monospace;font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;}
+.wss-stat.s-behind{background:rgba(248,113,113,.12);color:#f87171;}
+.wss-stat.s-track{background:rgba(74,222,128,.12);color:#4ade80;}
+.wss-stat.s-ahead{background:rgba(109,40,217,.12);color:#a78bfa;}
+.wss-stat.s-blue{background:rgba(96,165,250,.12);color:#60a5fa;}
+.wss-nodata{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);font-style:italic;}
 
 /* STORAGE BADGE */
 .storage-badge{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:10px;}
@@ -371,8 +380,12 @@ const CHECKPOINTS = CFG.checkpoints || [
 let currentLevel = 'ALL';
 let viewMode = 'workshop';
 let s5data = {};
-let statMode = 'checkpoint';  // 'checkpoint' or '3cs'
-let threecsWeekFilter = '';  // 'w2', 'w4', 'w6', or '' for auto
+const weekLevelFilters = {};  // per-week level filter: { w1:'LL', w2:'ALL', ... }
+
+function setWeekLevelFilter(wkKey, lvl){
+  weekLevelFilters[wkKey] = lvl;
+  renderStats();
+}
 
 function getCurrentSessionWeek(){
   const start=new Date(2026,3,27);
@@ -435,9 +448,7 @@ function renderStats(){
   const total=allStudents.length;
   const lvlColors={LL:'var(--ll)',L1:'var(--l1)',L2:'var(--l2)',MS:'var(--ms)'};
   const lvlBgs={LL:'var(--ll-bg)',L1:'var(--l1-bg)',L2:'var(--l2-bg)',MS:'var(--ms-bg)'};
-  const lvlHex={LL:'#60a5fa',L1:'#f4896a',L2:'#5dd6c6',MS:'#f07ab0'};
 
-  // ── Week bar ──────────────────────────────────────────────────────
   function weekDateRange(w){
     const s=new Date(2026,3,27);
     const mon=new Date(s.getTime()+(w-1)*7*24*60*60*1000);
@@ -445,62 +456,13 @@ function renderStats(){
     const fmt=d=>`${d.getMonth()+1}/${d.getDate()}`;
     return`${fmt(mon)}–${fmt(fri)}`;
   }
-  // ── 7-week tracker row ────────────────────────────────────────────
-  const allWeekItems=[
-    {w:1,label:'Week 1',sub:'Baseline'},
-    {w:2,label:'Week 2',sub:'3Cs'},
-    {w:3,label:'Week 3',sub:'Checkpoint 1'},
-    {w:4,label:'Week 4',sub:'3Cs'},
-    {w:5,label:'Week 5',sub:'Checkpoint 2'},
-    {w:6,label:'Week 6',sub:'3Cs'},
-    {w:7,label:'Week 7',sub:'T2P'},
-  ];
-  const totalStudents=(CFG.students||[]).filter(s=>!s.inactive).length;
-  const weekPillsHtml=allWeekItems.map(item=>{
-    const n=filledCountForWeek(item.w);
-    let cls,status;
-    if(item.w>weekNum){
-      cls='wt-future';status='—';
-    } else if(item.w===weekNum){
-      cls='wt-current';
-      status=n>0?`Due · ${n}/${totalStudents}`:'Due now';
-    } else {
-      // past week
-      if(isFilledForWeek(item.w)){
-        cls='wt-ok';status=`✓ ${n}/${totalStudents}`;
-      } else {
-        cls='wt-warn';status=n>0?`⚠ ${n}/${totalStudents}`:'⚠ 0 entered';
-      }
-    }
-    return`<div class="wt-item ${cls}">
-      <span class="wt-item-label">${item.label}</span>
-      <span class="wt-item-sub">${item.sub}</span>
-      <span class="wt-item-status">${status}</span>
-    </div>`;
-  }).join('');
 
-  const weekInfoHtml=`
-    <div class="week-track">${weekPillsHtml}</div>
-    <div class="s5-week-bar">
-      <span class="ph-week-badge">Week ${weekNum>0&&weekNum<=7?weekNum:(weekNum>7?'Session Complete':'Starting')}${weekNum>0&&weekNum<=7?' · '+weekDateRange(weekNum):''}</span>
-      <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
-      <button class="reminder-btn" onclick="openReminderModal()">📧 Send reminder</button>
-    </div>`;
-
-  // ── Checkpoint stats ──────────────────────────────────────────────
-  function mostRecentChkKey(){
-    if(weekNum>=7)return'w7';
-    if(weekNum>=5)return'w5';
-    if(weekNum>=3)return'w3';
-    return'w1';
-  }
-  const chkKey=mostRecentChkKey();
-
-  function chkStatsFor(students){
+  // ── Stats helpers (parameterised by key) ──────────────────────────
+  function chkStatsFor(students,key){
     let behind=0,track=0,ahead=0;
     students.forEach(s=>{
       (WORKSHOPS[s.l]||[]).forEach(ws=>{
-        const v=getChk(s.n,ws.name,chkKey);
+        const v=getChk(s.n,ws.name,key);
         if(v==='Behind')behind++;
         else if(v==='On Track')track++;
         else if(v==='Ahead')ahead++;
@@ -508,17 +470,6 @@ function renderStats(){
     });
     return{behind,track,ahead};
   }
-
-  // ── 3Cs stats ─────────────────────────────────────────────────────
-  const threecsWeeks=[
-    {key:'w2',label:'Week 2'},{key:'w4',label:'Week 4'},{key:'w6',label:'Week 6'}
-  ];
-  function autoThreecs(){
-    const past=threecsWeeks.filter(w=>parseInt(w.key.slice(1))<weekNum);
-    return past.length?past[past.length-1].key:threecsWeeks[0].key;
-  }
-  const tcKey=threecsWeekFilter||autoThreecs();
-
   function threecsStatsFor(students,key){
     let lovesY=0,l2x=0,t2pY=0;
     students.forEach(s=>{
@@ -530,104 +481,120 @@ function renderStats(){
     return{lovesY,l2x,t2pY,total:students.length};
   }
 
-  // ── Compute all & per-level stats ─────────────────────────────────
-  const chkAll=chkStatsFor(allStudents);
-  const tcAll=threecsStatsFor(allStudents,tcKey);
-  const chkLvlStats={},tcLvlStats={};
-  allLevels.forEach(lvl=>{
-    const ls=allStudents.filter(s=>s.l===lvl);
-    chkLvlStats[lvl]=chkStatsFor(ls);
-    tcLvlStats[lvl]=threecsStatsFor(ls,tcKey);
-  });
+  // ── 7-week stats strip ────────────────────────────────────────────
+  const weekDefs=[
+    {w:1,type:'chk',key:'w1',label:'Week 1',sub:'Baseline'},
+    {w:2,type:'3cs',key:'w2',label:'Week 2',sub:'3Cs'},
+    {w:3,type:'chk',key:'w3',label:'Week 3',sub:'Chk 1'},
+    {w:4,type:'3cs',key:'w4',label:'Week 4',sub:'3Cs'},
+    {w:5,type:'chk',key:'w5',label:'Week 5',sub:'Chk 2'},
+    {w:6,type:'3cs',key:'w6',label:'Week 6',sub:'3Cs'},
+    {w:7,type:'chk',key:'w7',label:'Week 7',sub:'T2P'},
+  ];
 
-  // ── Mode selector ─────────────────────────────────────────────────
-  const tcWeekDropdown=statMode==='3cs'
-    ?`<select class="stat-mode-select" onchange="threecsWeekFilter=this.value;renderStats()">
-        ${threecsWeeks.map(w=>`<option value="${w.key}"${tcKey===w.key?' selected':''}>${w.label}</option>`).join('')}
-      </select>`:'';
+  const weekStripHtml=weekDefs.map(item=>{
+    const isDue=due&&due.key===item.key;
+    const isPast=weekNum>item.w;
+    const isCurrent=weekNum===item.w;
+    const filled=filledCountForWeek(item.w);
+    const isFilled=isFilledForWeek(item.w);
+    const active=item.w<=weekNum||isDue;
 
-  const modeSelectorHtml=`<div class="stat-mode-bar">
-    <select class="stat-mode-select" onchange="statMode=this.value;renderStats()">
-      <option value="checkpoint"${statMode==='checkpoint'?' selected':''}>Checkpoints</option>
-      <option value="3cs"${statMode==='3cs'?' selected':''}>3Cs</option>
-    </select>
-    ${tcWeekDropdown}
-  </div>`;
+    let cardState;
+    if(item.w>weekNum)cardState='future';
+    else if(isDue||isCurrent)cardState='due';
+    else if(isFilled)cardState='ok';
+    else cardState='warn';
 
-  // ── Stat cards ────────────────────────────────────────────────────
-  let statsHtml;
-  if(statMode==='checkpoint'){
-    statsHtml=`<div class="campus-stats">
-      <div class="cs s-total"><span class="cs-num">${total}</span><span class="cs-label">Students</span></div>
-      <div class="cs s-behind"><span class="cs-num">${chkAll.behind}</span><span class="cs-label">Behind</span></div>
-      <div class="cs s-track"><span class="cs-num">${chkAll.track}</span><span class="cs-label">On Track</span></div>
-      <div class="cs s-ahead"><span class="cs-num">${chkAll.ahead}</span><span class="cs-label">Ahead</span></div>
+    const lvlFilter=weekLevelFilters[item.key]||'ALL';
+    const filtStudents=lvlFilter==='ALL'?allStudents:allStudents.filter(s=>s.l===lvlFilter);
+
+    let statsHtml='<div class="wss-stats"><span class="wss-nodata">—</span></div>';
+    if(active){
+      if(item.type==='chk'){
+        const st=chkStatsFor(filtStudents,item.key);
+        const hasData=st.behind+st.track+st.ahead>0;
+        statsHtml=`<div class="wss-stats">`+
+          (st.behind>0?`<span class="wss-stat s-behind">${st.behind} B</span>`:'')+
+          (st.track>0?`<span class="wss-stat s-track">${st.track} T</span>`:'')+
+          (st.ahead>0?`<span class="wss-stat s-ahead">${st.ahead} A</span>`:'')+
+          (!hasData?`<span class="wss-nodata">No data yet</span>`:'')+
+          `</div>`;
+      }else{
+        const st=threecsStatsFor(filtStudents,item.key);
+        const hasData=st.lovesY+st.l2x+st.t2pY>0;
+        statsHtml=`<div class="wss-stats">`+
+          (st.lovesY>0?`<span class="wss-stat s-track">♥ ${st.lovesY}</span>`:'')+
+          (st.l2x>0?`<span class="wss-stat s-blue">2× ${st.l2x}</span>`:'')+
+          (st.t2pY>0?`<span class="wss-stat s-ahead">T✓ ${st.t2pY}</span>`:'')+
+          (!hasData?`<span class="wss-nodata">No data yet</span>`:'')+
+          `</div>`;
+      }
+    }
+
+    const countLine=active
+      ?`<div class="wss-count">${filled}/${total}${isFilled&&isPast?' ✓':!isFilled&&isPast?' ⚠':''}</div>`
+      :`<div class="wss-count wss-future-count">upcoming</div>`;
+
+    const lvlDrop=active
+      ?`<select class="wss-lvl-sel" onchange="setWeekLevelFilter('${item.key}',this.value)">
+          <option value="ALL"${lvlFilter==='ALL'?' selected':''}>All levels</option>
+          ${allLevels.map(l=>`<option value="${l}"${lvlFilter===l?' selected':''}>${l}</option>`).join('')}
+        </select>`
+      :'';
+
+    return`<div class="wss-card wss-${cardState}">
+      <div class="wss-head">
+        <span class="wss-label">${item.label}</span>
+        ${isDue?`<span class="wss-due-badge">DUE</span>`:''}
+      </div>
+      <div class="wss-sub">${item.sub}</div>
+      ${countLine}
+      ${lvlDrop}
+      ${statsHtml}
     </div>`;
-  }else{
-    statsHtml=`<div class="campus-stats">
-      <div class="cs s-total"><span class="cs-num">${total}</span><span class="cs-label">Students</span></div>
-      <div class="cs s-track"><span class="cs-num">${tcAll.lovesY}</span><span class="cs-label">Love School</span></div>
-      <div class="cs s-blue"><span class="cs-num">${tcAll.l2x}</span><span class="cs-label">At 2×</span></div>
-      <div class="cs s-ahead"><span class="cs-num">${tcAll.t2pY}</span><span class="cs-label">T2P On Track</span></div>
-    </div>`;
-  }
+  }).join('');
 
-  // ── Level cards ───────────────────────────────────────────────────
-  function levelPills(lvl){
-    if(statMode==='checkpoint'){
-      const ls=chkLvlStats[lvl];
-      return(ls.behind>0?`<span class="lvc-pill" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);">${ls.behind} Behind</span>`:'')+
-        (ls.track>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">${ls.track} On Track</span>`:'')+
-        (ls.ahead>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">${ls.ahead} Ahead</span>`:'');
-    }else{
-      const ls=tcLvlStats[lvl];
-      return(ls.lovesY>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">♥ ${ls.lovesY}</span>`:'')+
-        (ls.l2x>0?`<span class="lvc-pill" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25);">2× ${ls.l2x}</span>`:'')+
-        (ls.t2pY>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">T2P ${ls.t2pY}</span>`:'');
+  // ── Level cards (show due-week stats) ─────────────────────────────
+  function duePills(students){
+    if(!due)return'';
+    if(due.type==='checkpoint'){
+      const st=chkStatsFor(students,due.key);
+      return(st.behind>0?`<span class="lvc-pill" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);">${st.behind} Behind</span>`:'')+
+        (st.track>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">${st.track} On Track</span>`:'')+
+        (st.ahead>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">${st.ahead} Ahead</span>`:'');
     }
+    const st=threecsStatsFor(students,due.key);
+    return(st.lovesY>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">♥ ${st.lovesY}</span>`:'')+
+      (st.l2x>0?`<span class="lvc-pill" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25);">2× ${st.l2x}</span>`:'')+
+      (st.t2pY>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">T2P ${st.t2pY}</span>`:'');
   }
-  function allLevelPills(){
-    if(statMode==='checkpoint'){
-      return(chkAll.behind>0?`<span class="lvc-pill" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);">${chkAll.behind} Behind</span>`:'')+
-        (chkAll.track>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">${chkAll.track} On Track</span>`:'')+
-        (chkAll.ahead>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">${chkAll.ahead} Ahead</span>`:'');
-    }else{
-      return(tcAll.lovesY>0?`<span class="lvc-pill" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25);">♥ ${tcAll.lovesY}</span>`:'')+
-        (tcAll.l2x>0?`<span class="lvc-pill" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.25);">2× ${tcAll.l2x}</span>`:'')+
-        (tcAll.t2pY>0?`<span class="lvc-pill" style="background:rgba(109,40,217,.12);color:#a78bfa;border:1px solid rgba(196,181,253,.25);">T2P ${tcAll.t2pY}</span>`:'');
+  function duePct(students,lvl){
+    if(!due)return 0;
+    if(due.type==='checkpoint'){
+      const st=chkStatsFor(students,due.key);
+      const slots=(WORKSHOPS[lvl]||[]).length*students.length;
+      return slots>0?Math.round((st.behind+st.track+st.ahead)/slots*100):0;
     }
+    const st=threecsStatsFor(students,due.key);
+    return st.total>0?Math.round(st.lovesY/st.total*100):0;
   }
-
-  function levelBarPct(lvl){
-    if(statMode==='checkpoint'){
-      const ls=chkLvlStats[lvl];
-      const filled=ls.behind+ls.track+ls.ahead;
-      const slots=(WORKSHOPS[lvl]||[]).length*allStudents.filter(s=>s.l===lvl).length;
-      return slots>0?Math.round(filled/slots*100):0;
-    }else{
-      const ls=tcLvlStats[lvl];
-      return ls.total>0?Math.round(ls.lovesY/ls.total*100):0;
-    }
-  }
-
-  const pctAll=statMode==='checkpoint'
-    ?(()=>{const slots=allStudents.reduce((a,s)=>a+(WORKSHOPS[s.l]||[]).length,0);return slots>0?Math.round((chkAll.behind+chkAll.track+chkAll.ahead)/slots*100):0;})()
-    :(total>0?Math.round(tcAll.lovesY/total*100):0);
 
   const allActive=currentLevel==='ALL';
+  const allPct=duePct(allStudents,'ALL');
   const allCard=`<div class="lvc" onclick="setLevelCard('ALL')" style="${allActive?'background:rgba(148,163,184,.1);border-color:#94a3b8;':''}">
     <div class="lvc-top"><span class="lvc-label" style="color:${allActive?'#cbd5e1':'var(--muted2)'}">All</span><span class="lvc-count">${total}</span></div>
-    <div class="lvc-pills">${allLevelPills()}</div>
-    <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${pctAll}%;background:#94a3b8;"></div></div><span class="lvc-bar-label">${pctAll}%</span></div>
+    <div class="lvc-pills">${duePills(allStudents)}</div>
+    <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${allPct}%;background:#94a3b8;"></div></div><span class="lvc-bar-label">${allPct}%</span></div>
   </div>`;
 
   const lvlCardsHtml=allLevels.map(lvl=>{
     const isActive=lvl===currentLevel;
-    const cnt=allStudents.filter(s=>s.l===lvl).length;
-    const pct=levelBarPct(lvl);
+    const ls=allStudents.filter(s=>s.l===lvl);
+    const pct=duePct(ls,lvl);
     return`<div class="lvc" onclick="setLevelCard('${lvl}')" style="${isActive?`background:${lvlBgs[lvl]};border-color:${lvlColors[lvl]};`:''}">
-      <div class="lvc-top"><span class="lvc-label" style="color:${lvlColors[lvl]}">${lvl}</span><span class="lvc-count">${cnt} students</span></div>
-      <div class="lvc-pills">${levelPills(lvl)}</div>
+      <div class="lvc-top"><span class="lvc-label" style="color:${lvlColors[lvl]}">${lvl}</span><span class="lvc-count">${ls.length} students</span></div>
+      <div class="lvc-pills">${duePills(ls)}</div>
       <div class="lvc-bar-wrap"><div class="lvc-bar"><div class="lvc-bar-fill" style="width:${pct}%;background:${lvlColors[lvl]};"></div></div><span class="lvc-bar-label">${pct}%</span></div>
     </div>`;
   }).join('');
@@ -644,9 +611,12 @@ function renderStats(){
     <div class="s5-kicker">Alpha NYC · Session 5 · 2026</div>
     <h1 class="s5-h1">Session <em>5</em> Data <em>Tracker</em></h1>
     <p class="s5-sub">Workshop progress, checkpoints &amp; 3Cs</p>
-    ${weekInfoHtml}
-    ${modeSelectorHtml}
-    ${statsHtml}
+    <div class="s5-week-bar">
+      <span class="ph-week-badge">Week ${weekNum>0&&weekNum<=7?weekNum:(weekNum>7?'Session Complete':'Starting')}${weekNum>0&&weekNum<=7?' · '+weekDateRange(weekNum):''}</span>
+      <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
+      <button class="reminder-btn" onclick="openReminderModal()">📧 Send reminder</button>
+    </div>
+    <div class="wss-strip">${weekStripHtml}</div>
     <div class="level-selector">${allCard}${lvlCardsHtml}</div>
     <div class="s5-hist-link"><a href="https://t2p-dashboard.vercel.app/tracker.html" target="_blank" rel="noopener noreferrer">Previous T2P data ↗</a></div>
   </div>`;

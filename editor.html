@@ -950,20 +950,22 @@ function switchTab(tab,btn){
 // ── Score ─────────────────────────────────────────────────────────
 function setScore(sName,ws,val,btn){
   if(!s5data[sName])s5data[sName]={};
-  if(s5data[sName][ws]===val){delete s5data[sName][ws];if(s5data.__who__?.[sName])delete s5data.__who__[sName][ws];logAudit('score',sName,ws,null);btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');return;}
+  if(s5data[sName][ws]===val){delete s5data[sName][ws];if(s5data.__who__?.[sName])delete s5data.__who__[sName][ws];logAudit('score',sName,ws,null);btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');saveAll();return;}
   s5data[sName][ws]=val;if(!s5data.__who__)s5data.__who__={};if(!s5data.__who__[sName])s5data.__who__[sName]={};s5data.__who__[sName][ws]=currentUser;logAudit('score',sName,ws,val);
   btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>{b.className='score-btn';if(b.dataset.val===val)b.classList.add(val==='Passed'?'active-pass':val==='Not Yet'?'active-fail':val==='Absent'?'active-absent':'active-pass');});
+  saveAll();
 }
 function setCheckpoint(sName,ws,ck,val,btn){
   if(!s5data[sName])s5data[sName]={};
   const key=chkKey(ws,ck);const prev=s5data[sName][key];
-  if(prev===val){delete s5data[sName][key];if(s5data.__who__?.[sName])delete s5data.__who__[sName][key];btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');return;}
+  if(prev===val){delete s5data[sName][key];if(s5data.__who__?.[sName])delete s5data.__who__[sName][key];btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');saveAll();return;}
   s5data[sName][key]=val;if(!s5data.__who__)s5data.__who__={};if(!s5data.__who__[sName])s5data.__who__[sName]={};s5data.__who__[sName][key]=currentUser;logAudit('score',sName,`${ws} [${ck}]`,val);
   btn.closest('.score-btns').querySelectorAll('.score-btn').forEach(b=>{
     b.className='score-btn';
     const opt=getChkOptions(ck).find(o=>o.val===val);
     if(b.dataset.val===val&&opt)b.classList.add(opt.cls);
   });
+  saveAll();
 }
 
 // ── Guides ────────────────────────────────────────────────────────
