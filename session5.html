@@ -763,7 +763,8 @@ function render(){
       function tc3cCell(sName,wkKey){
         const isDueWk=due&&due.type==='3cs'&&due.key===wkKey;
         const d=s5data.__3cs__?.[sName]?.[wkKey]||{};
-        if(!d.lovesSchool&&!d.learning2x&&!d.onTrack)return`<td class="tc-td${isDueWk?' due-col':''}"><span style="color:var(--border2);font-size:16px">○</span></td>`;
+        const editorLink=`https://session5-progress.vercel.app/editor.html?level=${lvl}`;
+        if(!d.lovesSchool&&!d.learning2x&&!d.onTrack)return`<td class="tc-td${isDueWk?' due-col':''}"><a href="${editorLink}" class="dot-link" title="Enter 3Cs for ${sName}"><span style="color:var(--border2);font-size:16px">○</span></a></td>`;
         const lC=d.lovesSchool==='Yes'?'#34d399':d.lovesSchool==='No'?'#f87171':'var(--muted2)';
         const lT=d.lovesSchool==='Yes'?'♥':d.lovesSchool==='No'?'✗':'·';
         const lBg=d.lovesSchool==='Yes'?'rgba(52,211,153,.12)':d.lovesSchool==='No'?'rgba(248,113,113,.12)':'transparent';
@@ -772,9 +773,11 @@ function render(){
         const tC=d.onTrack==='Yes'?'#34d399':d.onTrack==='No'?'#f87171':'var(--muted2)';
         const tT=d.onTrack==='Yes'?'T✓':d.onTrack==='No'?'T✗':'·';
         return`<td class="tc-td${isDueWk?' due-col':''}" title="Loves School: ${d.lovesSchool||'—'} · 2×: ${d.learning2x||'—'} · T2P: ${d.onTrack||'—'}">
-          <span class="tc-dot" style="color:${lC};background:${lBg}">${lT}</span>
-          <span class="tc-dot" style="color:${xC}">${xT}</span>
-          <span class="tc-dot" style="color:${tC}">${tT}</span>
+          <a href="${editorLink}" class="dot-link" style="display:flex;gap:3px;justify-content:center;">
+            <span class="tc-dot" style="color:${lC};background:${lBg}">${lT}</span>
+            <span class="tc-dot" style="color:${xC}">${xT}</span>
+            <span class="tc-dot" style="color:${tC}">${tT}</span>
+          </a>
         </td>`;
       }
       // Interleaved columns: w1, 3Cs·w2, w3, 3Cs·w4, w5, 3Cs·w6, w7, Status
