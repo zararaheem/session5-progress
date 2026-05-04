@@ -1207,58 +1207,95 @@ function renderList(){
       </div>
       <div class="row-body" id="body-${sl}">
         ${(()=>{
-          const due3cWeeks=['w2','w4','w6'];
-          const wkLabels={w2:'Week 2',w4:'Week 4',w6:'Week 6'};
           const due=getDueThisWeek();
-          const sorted=[...due3cWeeks].sort((a,b)=>(due&&due.key===b?1:due&&due.key===a?-1:0));
-          return`<div style="padding:14px 16px 8px;">
-            <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;">3Cs — Alpha's 3 Commitments</div>
-            ${sorted.map(wk=>{
-              const d3=s5data.__3cs__?.[s.n]?.[wk]||{};
-              const isDue=due&&due.type==='3cs'&&due.key===wk;
-              const safeN2=s.n.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-              return`<div style="margin-bottom:10px;border:1px solid ${isDue?'rgba(251,191,36,.35)':'var(--border)'};border-radius:8px;overflow:hidden;background:${isDue?'rgba(251,191,36,.04)':'var(--surface2)'}">
-                <div style="padding:5px 12px;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:${isDue?'#fbbf24':'var(--muted2)'};letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);">${wkLabels[wk]}${isDue?' · DUE THIS WEEK':''}</div>
-                <div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
-                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">Loves School?</span>
-                    <div style="display:flex;gap:4px;">
-                      ${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d3.lovesSchool===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" style="padding:3px 10px;font-size:10px;" onclick="set3C('${safeN2}','${wk}','lovesSchool','${v}',this);saveAll()">${v}</button>`).join('')}
-                    </div>
-                  </div>
-                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">Learning 2×?</span>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                      ${['All at 2x','Some at 2x','None at 2x'].map(v=>`<button class="score-btn ${d3.learning2x===v?'active-track':''}" style="padding:3px 8px;font-size:9px;" onclick="set3C('${safeN2}','${wk}','learning2x','${v}',this);saveAll()">${v}</button>`).join('')}
-                    </div>
-                  </div>
-                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">T2P on track?</span>
-                    <div style="display:flex;gap:4px;">
-                      ${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d3.onTrack===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" style="padding:3px 10px;font-size:10px;" onclick="set3C('${safeN2}','${wk}','onTrack','${v}',this);saveAll()">${v}</button>`).join('')}
-                    </div>
-                  </div>
+          const wkNum=getCurrentSessionWeek();
+          const safeN2=s.n.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+          const allWeeks=[
+            {w:1,type:'chk',key:'w1',label:'Week 1',sub:'Baseline'},
+            {w:2,type:'3cs',key:'w2',label:'Week 2',sub:'3Cs'},
+            {w:3,type:'chk',key:'w3',label:'Week 3',sub:'Checkpoint 1'},
+            {w:4,type:'3cs',key:'w4',label:'Week 4',sub:'3Cs'},
+            {w:5,type:'chk',key:'w5',label:'Week 5',sub:'Checkpoint 2'},
+            {w:6,type:'3cs',key:'w6',label:'Week 6',sub:'3Cs'},
+            {w:7,type:'chk',key:'w7',label:'Week 7',sub:'T2P'},
+          ];
+          return`<div style="padding:10px 12px;display:flex;flex-direction:column;gap:6px;">${allWeeks.map(item=>{
+            const isDue=due&&due.key===item.key;
+            const isPast=wkNum>item.w;
+            const isFuture=item.w>wkNum&&!isDue;
+
+            let isMissing=false;
+            if(isPast){
+              if(item.type==='chk') isMissing=levelWs.some(ws=>!scores[chkKey(ws.name,item.key)]);
+              else{const d3=s5data.__3cs__?.[s.n]?.[item.key]||{};isMissing=!d3.lovesSchool&&!d3.learning2x&&!d3.onTrack;}
+            }
+
+            const bdr=isDue?'rgba(251,191,36,.45)':isMissing?'rgba(248,113,113,.4)':'var(--border)';
+            const bg=isDue?'rgba(251,191,36,.06)':isMissing?'rgba(248,113,113,.05)':isFuture?'transparent':'var(--surface2)';
+            const hdrColor=isDue?'#fbbf24':isMissing?'#f87171':isFuture?'var(--muted)':'var(--muted2)';
+            const badge=isDue?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:1px 6px;border-radius:3px;margin-left:6px;">DUE</span>`
+              :isMissing?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.3);padding:1px 6px;border-radius:3px;margin-left:6px;">⚠ MISSING</span>`:'';
+
+            let content='';
+            if(isFuture){
+              content=`<div style="padding:6px 12px;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);opacity:.6">Not yet due</div>`;
+            } else if(item.type==='chk'){
+              content=levelWs.map(ws=>{
+                const kv=scores[chkKey(ws.name,item.key)];
+                const wsSlug2=slug(ws.name);
+                const opts=getChkOptions(item.key);
+                const btns=opts.map(opt=>`<button class="score-btn ${kv===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug2}" data-ck="${item.key}" onclick="setCheckpointBySlug(this)">${opt.label}</button>`).join('');
+                const coaching2=s5data.__coaching__?.[s.n]?.[ws.name]?.[item.key]||'';
+                const coachDiv2=item.key!=='w7'?`<div id="coach-${sl}-${slug(ws.name)}-${item.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:32px;font-size:11px;" placeholder="Coaching plan…" onchange="saveCoaching('${sl}','${wsSlug2}','${item.key}',this.value)">${coaching2}</textarea></div>`:'';
+                return`<div class="score-line" style="padding:5px 12px;border-top:1px solid var(--border);">
+                  <span class="score-ws-name" style="font-size:11px;color:var(--text)">${ws.code} · ${ws.name}</span>
+                  <div class="score-btns">${btns}</div>
+                </div>${coachDiv2}`;
+              }).join('');
+              if(item.key==='w7'){
+                const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
+                content+=levelWs.map(ws=>{
+                  const cur=scores[ws.name];const wsSlug2=slug(ws.name);
+                  const finalBtns=finalOpts.map(opt=>`<button class="score-btn ${cur===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug2}" onclick="setScoreBySlug(this)">${opt.label}</button>`).join('');
+                  return`<div class="score-line" style="padding:5px 12px;border-top:1px solid var(--border);background:rgba(0,0,0,.04)">
+                    <span class="score-ws-name" style="font-size:11px;color:var(--muted)">↳ ${ws.code} Final outcome</span>
+                    <div class="score-btns">${finalBtns}</div>
+                  </div>`;
+                }).join('');
+              }
+            } else {
+              const d3=s5data.__3cs__?.[s.n]?.[item.key]||{};
+              content=`<div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">Loves School?</span>
+                  <div style="display:flex;gap:4px;">${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d3.lovesSchool===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" style="padding:3px 10px;font-size:10px;" onclick="set3C('${safeN2}','${item.key}','lovesSchool','${v}',this);saveAll()">${v}</button>`).join('')}</div>
                 </div>
-                <details style="border-top:1px solid var(--border);">
-                  <summary style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted2);padding:7px 12px;cursor:pointer;list-style:none;user-select:none;">▸ Notes</summary>
-                  <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px;background:rgba(0,0,0,.1);">
-                    ${[
-                      {field:'noteSchool',label:'Loves School',placeholder:'What are they loving / not loving about school?'},
-                      {field:'noteMinimums',label:'Daily minimums',placeholder:'Is the student hitting their daily subject minimums AND earning 120 XP/day?'},
-                      {field:'noteSubjects',label:'Subjects (2×)',placeholder:'Which subjects are they excelling in or need support? If not 2×, is it a motivation or academics issue?'},
-                      {field:'noteT2p',label:'T2P on track',placeholder:'Is the student on track to pass their T2P workshop?'},
-                      {field:'noteSkills',label:'Skills & growth',placeholder:'Which skills is the student excelling in? Where are their areas of growth? Any skills needing more support?'},
-                    ].map(n=>`<div>
-                      <div style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">${n.label}</div>
-                      <textarea class="field-textarea" style="min-height:48px;font-size:11px;width:100%;" placeholder="${n.placeholder}" onchange="save3CNote('${safeN2}','${wk}','${n.field}',this.value)">${d3[n.field]||''}</textarea>
-                    </div>`).join('')}
-                  </div>
-                </details>
-              </div>`;
-            }).join('')}
-          </div>`;
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">Learning 2×?</span>
+                  <div style="display:flex;gap:4px;flex-wrap:wrap;">${['All at 2x','Some at 2x','None at 2x'].map(v=>`<button class="score-btn ${d3.learning2x===v?'active-track':''}" style="padding:3px 8px;font-size:9px;" onclick="set3C('${safeN2}','${item.key}','learning2x','${v}',this);saveAll()">${v}</button>`).join('')}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);min-width:80px;">T2P on track?</span>
+                  <div style="display:flex;gap:4px;">${['Yes','No','N/A'].map(v=>`<button class="score-btn ${d3.onTrack===v?(v==='Yes'?'active-pass':v==='No'?'active-fail':'active-absent'):''}" style="padding:3px 10px;font-size:10px;" onclick="set3C('${safeN2}','${item.key}','onTrack','${v}',this);saveAll()">${v}</button>`).join('')}</div>
+                </div>
+              </div>
+              <details style="border-top:1px solid var(--border);">
+                <summary style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted2);padding:7px 12px;cursor:pointer;list-style:none;user-select:none;">▸ Notes</summary>
+                <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px;background:rgba(0,0,0,.1);">
+                  ${[{field:'noteSchool',label:'Loves School',placeholder:'What are they loving / not loving about school?'},{field:'noteMinimums',label:'Daily minimums',placeholder:'Hitting daily subject minimums AND earning 120 XP/day?'},{field:'noteSubjects',label:'Subjects (2×)',placeholder:'Which subjects excelling or need support? Motivation vs academics?'},{field:'noteT2p',label:'T2P on track',placeholder:'On track to pass their T2P workshop?'},{field:'noteSkills',label:'Skills & growth',placeholder:'Skills excelling? Areas of growth? Needs support?'}].map(n=>`<div>
+                    <div style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">${n.label}</div>
+                    <textarea class="field-textarea" style="min-height:48px;font-size:11px;width:100%;" placeholder="${n.placeholder}" onchange="save3CNote('${safeN2}','${item.key}','${n.field}',this.value)">${d3[n.field]||''}</textarea>
+                  </div>`).join('')}
+                </div>
+              </details>`;
+            }
+
+            return`<div style="border:1px solid ${bdr};border-radius:8px;overflow:hidden;background:${bg}${isFuture?';opacity:.55':''}">
+              <div style="padding:5px 12px;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:${hdrColor};letter-spacing:.07em;text-transform:uppercase;border-bottom:${isFuture?'none':'1px solid var(--border)'};">${item.label} · ${item.sub}${badge}</div>
+              ${content}
+            </div>`;
+          }).join('')}</div>`;
         })()}
-        <div class="scores-section">${scoreLines}</div>
       </div>
     </div>`;
   }).join('');
@@ -1985,6 +2022,65 @@ document.addEventListener('keydown',e=>{
 // ── Export / Import data ──────────────────────────────────────────
 let _syncMode='export';
 
+function exportCsv(){
+  const students=[...STUDENTS].sort((a,b)=>{const d=LEVEL_ORDER.indexOf(a.l)-LEVEL_ORDER.indexOf(b.l);return d||a.n.localeCompare(b.n);});
+  const chkWeeks=[{key:'w1',label:'Week 1 Baseline'},{key:'w3',label:'Week 3 Chk1'},{key:'w5',label:'Week 5 Chk2'},{key:'w7',label:'Week 7 T2P'}];
+  const tc3Weeks=[{key:'w2',label:'Wk2'},{key:'w4',label:'Wk4'},{key:'w6',label:'Wk6'}];
+  const allLevelWs={};
+  ['LL','L1','L2','MS'].forEach(l=>{allLevelWs[l]=S5_WORKSHOPS[l]||[];});
+
+  // Build headers
+  const headers=['Student','Level'];
+  // Per-workshop checkpoint columns
+  students.forEach(s=>{});// just collecting unique workshop/chk combos per level
+  const lvlWsCols={};
+  ['LL','L1','L2','MS'].forEach(lvl=>{
+    lvlWsCols[lvl]=[];
+    (allLevelWs[lvl]||[]).forEach(ws=>{
+      chkWeeks.forEach(ck=>{lvlWsCols[lvl].push({ws,ck,col:`${ws.code} · ${ck.label}`});});
+      lvlWsCols[lvl].push({ws,ck:null,col:`${ws.code} · Final`});
+    });
+  });
+  // 3Cs columns (same for all levels)
+  const tc3Cols=[];
+  tc3Weeks.forEach(wk=>{
+    tc3Cols.push({wk,field:'lovesSchool',col:`${wk.label} Loves School`});
+    tc3Cols.push({wk,field:'learning2x',col:`${wk.label} Learning 2×`});
+    tc3Cols.push({wk,field:'onTrack',col:`${wk.label} T2P on track`});
+  });
+
+  // Collect all unique ws+chk cols across all levels for the header
+  const maxWsCols=Math.max(...['LL','L1','L2','MS'].map(l=>lvlWsCols[l].length));
+  // Use a per-level approach — each student only fills their own workshops
+  const allWsColLabels=['LL','L1','L2','MS'].flatMap(lvl=>lvlWsCols[lvl].map(c=>c.col));
+  const allHeaders=['Student','Level',...allWsColLabels,...tc3Cols.map(c=>c.col)];
+
+  const esc=v=>`"${String(v||'').replace(/"/g,'""')}"`;
+
+  const rows=students.map(s=>{
+    const wsCols=lvlWsCols[s.l]||[];
+    const allWsForAllLevels=['LL','L1','L2','MS'].flatMap(lvl=>{
+      if(lvl===s.l) return wsCols.map(c=>{
+        if(c.ck){
+          return esc(s5data[s.n]?.[chkKey(c.ws.name,c.ck.key)]||'');
+        }else{
+          return esc(s5data[s.n]?.[c.ws.name]||'');
+        }
+      });
+      return lvlWsCols[lvl].map(()=>esc(''));
+    });
+    const tc3Values=tc3Cols.map(c=>esc(s5data.__3cs__?.[s.n]?.[c.wk.key]?.[c.field]||''));
+    return[esc(s.n),esc(s.l),...allWsForAllLevels,...tc3Values].join(',');
+  });
+
+  const csv=[allHeaders.map(esc).join(','),...rows].join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='session5-data.csv';a.click();
+  URL.revokeObjectURL(url);
+}
+
 function openSyncModal(mode){
   _syncMode=mode;
   const box=document.getElementById('sync-box');
@@ -2082,8 +2178,8 @@ function mergeImportData(){
         <div class="sync-lbl">Your local data (copy this and send to Admin)</div>
         <textarea class="sync-textarea" id="sync-export-ta" readonly></textarea>
         <div class="sync-row">
-          <button class="sync-btn copy" onclick="copyExportData()">📋 Copy to clipboard</button>
-          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2)">Paste it in a message to Admin so they can merge it.</span>
+          <button class="sync-btn copy" onclick="copyExportData()">📋 Copy JSON</button>
+          <button class="sync-btn copy" onclick="exportCsv()" style="color:#34d399;border-color:rgba(52,211,153,.3)">⬇ Download CSV</button>
         </div>
       </div>
       <!-- Import section (admin only) -->
