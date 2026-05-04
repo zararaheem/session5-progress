@@ -1161,15 +1161,19 @@ function renderList(){
       const chkRows=CHECKPOINTS.map(chk=>{
         const kv=scores[chkKey(wsKey,chk.key)];
         const isDue=due&&due.type==='checkpoint'&&due.key===chk.key;
-        // Only show if this checkpoint is due this week OR already has data
-        if(!isDue&&!kv) return '';
+        const chkWeekNum=parseInt(chk.key.slice(1));
+        const isPastDue=getCurrentSessionWeek()>chkWeekNum;
+        // Show if: due this week, already has data, OR was due in a past week (overdue)
+        if(!isDue&&!kv&&!isPastDue) return '';
+        const isOverdue=isPastDue&&!kv&&!isDue;
         const opts=getChkOptions(chk.key);
         const btns=opts.map(opt=>`<button class="score-btn ${kv===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug}" data-ck="${chk.key}" onclick="setCheckpointBySlug(this)">${opt.label}</button>`).join('');
-        const dueBadge=isDue?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:600;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.05em">DUE THIS WEEK</span>`:'';
+        const dueBadge=isDue?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:600;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.05em">DUE THIS WEEK</span>`
+          :isOverdue?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:600;background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.3);padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.05em">NOT ENTERED</span>`:'';
         const coaching=s5data.__coaching__?.[s.n]?.[wsKey]?.[chk.key]||'';
         const coachPlaceholder=isDue?`${chk.label} is Behind — what's the coaching plan to get back on track? (Due this week)`:`Coaching / action plan to get back on track…`;
         const coachDiv=chk.key!=='w7'?`<div id="coach-${sl}-${wsSlug}-${chk.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:36px;font-size:11px;" placeholder="${coachPlaceholder}" onchange="saveCoaching('${sl}','${wsSlug}','${chk.key}',this.value)">${coaching}</textarea></div>`:'';
-        return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${coachDiv}`;
+        return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':isOverdue?'background:rgba(248,113,113,.03);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':isOverdue?'#f87171':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${coachDiv}`;
       }).join('');
       const isWeek7Plus=getCurrentSessionWeek()>=7;
       const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
@@ -1242,6 +1246,21 @@ function renderList(){
                     </div>
                   </div>
                 </div>
+                <details style="border-top:1px solid var(--border);">
+                  <summary style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted2);padding:7px 12px;cursor:pointer;list-style:none;user-select:none;">▸ Notes</summary>
+                  <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px;background:rgba(0,0,0,.1);">
+                    ${[
+                      {field:'noteSchool',label:'Loves School',placeholder:'What are they loving / not loving about school?'},
+                      {field:'noteMinimums',label:'Daily minimums',placeholder:'Is the student hitting their daily subject minimums AND earning 120 XP/day?'},
+                      {field:'noteSubjects',label:'Subjects (2×)',placeholder:'Which subjects are they excelling in or need support? If not 2×, is it a motivation or academics issue?'},
+                      {field:'noteT2p',label:'T2P on track',placeholder:'Is the student on track to pass their T2P workshop?'},
+                      {field:'noteSkills',label:'Skills & growth',placeholder:'Which skills is the student excelling in? Where are their areas of growth? Any skills needing more support?'},
+                    ].map(n=>`<div>
+                      <div style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">${n.label}</div>
+                      <textarea class="field-textarea" style="min-height:48px;font-size:11px;width:100%;" placeholder="${n.placeholder}" onchange="save3CNote('${safeN2}','${wk}','${n.field}',this.value)">${d3[n.field]||''}</textarea>
+                    </div>`).join('')}
+                  </div>
+                </details>
               </div>`;
             }).join('')}
           </div>`;
@@ -1252,6 +1271,14 @@ function renderList(){
   }).join('');
 }
 
+
+function save3CNote(sName,wkKey,field,val){
+  if(!s5data.__3cs__)s5data.__3cs__={};
+  if(!s5data.__3cs__[sName])s5data.__3cs__[sName]={};
+  if(!s5data.__3cs__[sName][wkKey])s5data.__3cs__[sName][wkKey]={};
+  s5data.__3cs__[sName][wkKey][field]=val;
+  saveAll();
+}
 
 function saveProfile(sName){
   const sl=slug(sName);
