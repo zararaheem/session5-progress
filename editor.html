@@ -115,7 +115,26 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
 .hdr-btn:hover{color:var(--accent2);border-color:var(--accent);}
 .hdr-btn.primary{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 2px 8px rgba(59,130,246,.3);}
 .hdr-btn.primary:hover{background:var(--accent2);}
-.hdr-btn.saving{opacity:.5;pointer-events:none;}
+.hdr-btn.export-btn{color:#34d399;border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.06);}
+.hdr-btn.export-btn:hover{background:rgba(52,211,153,.12);}
+/* DATA SYNC MODAL */
+.sync-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.sync-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.sync-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.sync-title{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--text);}
+.sync-close{background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer;line-height:1;padding:2px 6px;}
+.sync-close:hover{color:var(--text);}
+.sync-body{padding:16px 18px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;}
+.sync-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;}
+.sync-textarea{width:100%;height:160px;font-family:'DM Mono',monospace;font-size:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;resize:vertical;outline:none;}
+.sync-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.sync-btn{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;padding:7px 14px;border-radius:7px;border:none;cursor:pointer;transition:all .15s;}
+.sync-btn.copy{background:var(--surface2);color:var(--text);border:1px solid var(--border2);}
+.sync-btn.copy:hover{background:var(--border2);}
+.sync-btn.merge{background:#1a56db;color:#fff;}
+.sync-btn.merge:hover{background:#1745c0;}
+.sync-btn:disabled{opacity:.4;cursor:not-allowed;}
+.sync-status{font-family:'DM Mono',monospace;font-size:11px;min-height:18px;}
 .hdr-btn.audit{color:var(--admin);border-color:rgba(129,140,248,.3);background:rgba(129,140,248,.08);}
 .hdr-btn.audit:hover{background:rgba(129,140,248,.15);}
 
@@ -425,6 +444,8 @@ header{top:37px;background:rgba(13,24,41,.95);border-bottom:1px solid var(--bord
       <a href="home.html" class="hdr-btn">← Home</a>
       <a target="_blank" href="https://session5-progress.vercel.app/tracker.html" class="hdr-btn" style="color:#fbbf24;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06);">T2P Tracker ↗</a>
       <span class="superadmin-pill" id="superadmin-pill" style="display:none">★ Admin</span>
+      <button class="hdr-btn export-btn" id="export-btn" style="display:none" onclick="openSyncModal('export')">↓ Export data</button>
+      <button class="hdr-btn audit" id="import-btn" style="display:none" onclick="openSyncModal('import')">↑ Import data</button>
       <button class="hdr-btn audit" id="audit-btn" style="display:none" onclick="openAudit()">Audit log</button>
       <button class="hdr-btn primary" id="save-btn" onclick="saveAll()">↑ Save</button>
     </div>
@@ -792,6 +813,8 @@ function completeSelectWho(name){
   isSuperAdmin=CFG.superadmins.includes(name);
   document.getElementById('superadmin-pill').style.display=isSuperAdmin?'inline-flex':'none';
   document.getElementById('audit-btn').style.display=isSuperAdmin?'inline-flex':'none';
+  document.getElementById('export-btn').style.display='inline-flex';
+  document.getElementById('import-btn').style.display=isSuperAdmin?'inline-flex':'none';
   document.getElementById('activity-tab').style.display=isSuperAdmin?'inline-block':'none';
   document.getElementById('dashboard-tab').style.display=isSuperAdmin?'inline-block':'none';
   document.getElementById('ws-data-tab').style.display=name===WS_DATA_EDITOR?'inline-block':'none';
@@ -1936,8 +1959,124 @@ function openAudit(){
 function closeAudit(){document.getElementById('audit-overlay').classList.remove('open');document.body.style.overflow='';}
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeAssign();closeAudit();closeDetail();closeAdminPass();closeGuideAssignPanel();}
+  if(e.key==='Escape'){closeAssign();closeAudit();closeDetail();closeAdminPass();closeGuideAssignPanel();closeSyncModal();}
 });
+
+// ── Export / Import data ──────────────────────────────────────────
+let _syncMode='export';
+
+function openSyncModal(mode){
+  _syncMode=mode;
+  const box=document.getElementById('sync-box');
+  const title=document.getElementById('sync-title');
+  const exportSection=document.getElementById('sync-export-section');
+  const importSection=document.getElementById('sync-import-section');
+  const status=document.getElementById('sync-status');
+  status.textContent='';
+
+  if(mode==='export'){
+    title.textContent='Export your data';
+    exportSection.style.display='block';
+    importSection.style.display='none';
+    const json=JSON.stringify(s5data,null,2);
+    document.getElementById('sync-export-ta').value=json;
+  } else {
+    title.textContent='Import & merge data';
+    exportSection.style.display='none';
+    importSection.style.display='block';
+    document.getElementById('sync-import-ta').value='';
+  }
+  document.getElementById('sync-overlay').style.display='flex';
+}
+
+function closeSyncModal(){
+  document.getElementById('sync-overlay').style.display='none';
+}
+
+function copyExportData(){
+  const ta=document.getElementById('sync-export-ta');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    const s=document.getElementById('sync-status');
+    s.style.color='#4ade80';
+    s.textContent='✓ Copied! Paste this into a message to Admin.';
+  }).catch(()=>{
+    ta.select();
+    document.execCommand('copy');
+    const s=document.getElementById('sync-status');
+    s.style.color='#4ade80';
+    s.textContent='✓ Copied!';
+  });
+}
+
+function mergeImportData(){
+  const raw=document.getElementById('sync-import-ta').value.trim();
+  const status=document.getElementById('sync-status');
+  if(!raw){status.style.color='#f87171';status.textContent='Paste JSON first.';return;}
+  let incoming;
+  try{incoming=JSON.parse(raw);}catch(e){status.style.color='#f87171';status.textContent='Invalid JSON — make sure you copied the full export.';return;}
+
+  // Deep merge: incoming values win for individual keys; arrays/sub-objects merged
+  function deepMerge(base,src){
+    const out={...base};
+    for(const k of Object.keys(src)){
+      if(Array.isArray(src[k])){
+        // Concatenate audit log, deduplicate by ts
+        if(k==='__audit__'){
+          const combined=[...(base[k]||[]),...src[k]];
+          const seen=new Set();
+          out[k]=combined.filter(e=>{const id=e.ts+e.who+e.student;if(seen.has(id))return false;seen.add(id);return true;});
+          out[k].sort((a,b)=>b.ts.localeCompare(a.ts));
+          out[k]=out[k].slice(0,500);
+        } else {
+          out[k]=src[k];
+        }
+      } else if(src[k]&&typeof src[k]==='object'&&!Array.isArray(src[k])){
+        out[k]=deepMerge(base[k]||{},src[k]);
+      } else if(src[k]!==null&&src[k]!==undefined&&src[k]!==''){
+        out[k]=src[k];
+      }
+    }
+    return out;
+  }
+
+  s5data=deepMerge(s5data,incoming);
+  saveAll().then(()=>{
+    status.style.color='#4ade80';
+    status.textContent=`✓ Merged & saved. Refreshing…`;
+    setTimeout(()=>{closeSyncModal();render();renderDashboard();},900);
+  });
+}
 </script>
+
+<!-- Sync modal -->
+<div id="sync-overlay" class="sync-overlay" style="display:none" onclick="if(event.target===this)closeSyncModal()">
+  <div class="sync-box" id="sync-box">
+    <div class="sync-hdr">
+      <span class="sync-title" id="sync-title">Export data</span>
+      <button class="sync-close" onclick="closeSyncModal()">×</button>
+    </div>
+    <div class="sync-body">
+      <!-- Export section -->
+      <div id="sync-export-section">
+        <div class="sync-lbl">Your local data (copy this and send to Admin)</div>
+        <textarea class="sync-textarea" id="sync-export-ta" readonly></textarea>
+        <div class="sync-row">
+          <button class="sync-btn copy" onclick="copyExportData()">📋 Copy to clipboard</button>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2)">Paste it in a message to Admin so they can merge it.</span>
+        </div>
+      </div>
+      <!-- Import section (admin only) -->
+      <div id="sync-import-section" style="display:none">
+        <div class="sync-lbl">Paste exported JSON from a guide</div>
+        <textarea class="sync-textarea" id="sync-import-ta" placeholder='Paste the guide\'s exported JSON here…'></textarea>
+        <div class="sync-row">
+          <button class="sync-btn merge" onclick="mergeImportData()">⬆ Merge into current data</button>
+        </div>
+      </div>
+      <div class="sync-status" id="sync-status"></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
