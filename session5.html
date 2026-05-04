@@ -356,23 +356,34 @@ function getDueForWeek(w){
 }
 function getDueThisWeek(){return getDueForWeek(getCurrentSessionWeek());}
 function getDueNextWeek(){return getDueForWeek(getCurrentSessionWeek()+1);}
-function isFilledForWeek(w){
+
+// Returns how many students have data for week w (0 = none, total = all)
+function filledCountForWeek(w){
   const d=getDueForWeek(w);
-  if(!d)return true;
+  if(!d)return -1;
   const all=(CFG.students||[]).filter(s=>!s.inactive);
   if(d.type==='checkpoint'){
-    return all.some(s=>(WORKSHOPS[s.l]||[]).some(ws=>getChk(s.n,ws.name,d.key)));
+    return all.filter(s=>(WORKSHOPS[s.l]||[]).some(ws=>getChk(s.n,ws.name,d.key))).length;
   }
   if(d.type==='3cs'){
-    return all.some(s=>{const e=s5data.__3cs__?.[s.n]?.[d.key]||{};return e.lovesSchool||e.learning2x||e.onTrack;});
+    return all.filter(s=>{const e=s5data.__3cs__?.[s.n]?.[d.key]||{};return e.lovesSchool||e.learning2x||e.onTrack;}).length;
   }
-  return true;
+  return -1;
 }
+
+// A week is "filled" only when ≥80% of students have data
+function isFilledForWeek(w){
+  const all=(CFG.students||[]).filter(s=>!s.inactive);
+  const n=filledCountForWeek(w);
+  if(n<0)return true;
+  return n>=Math.ceil(all.length*0.8);
+}
+
 function getMissingWeeks(upToWeek){
   const missing=[];
   for(let w=1;w<upToWeek;w++){
     const d=getDueForWeek(w);
-    if(d&&!isFilledForWeek(w))missing.push({week:w,due:d});
+    if(d&&!isFilledForWeek(w))missing.push({week:w,due:d,filled:filledCountForWeek(w)});
   }
   return missing;
 }
@@ -406,10 +417,12 @@ function renderStats(){
   const nextWeekDue=getDueNextWeek();
   const nextDueLabel=dueItemLabel(nextWeekDue);
   const missingWeeks=getMissingWeeks(weekNum);
+  const totalStudents=(CFG.students||[]).filter(s=>!s.inactive).length;
   const missingHtml=missingWeeks.map(m=>{
     const label=dueItemLabel(m.due);
     const prefix=m.week===weekNum-1?'Due last week':'Missing';
-    return`<span class="ph-due-missing">⚠ ${prefix}: ${label}</span>`;
+    const count=m.filled>0?` — ${m.filled}/${totalStudents}`:'';
+    return`<span class="ph-due-missing">⚠ ${prefix}: ${label}${count}</span>`;
   }).join('');
   const weekInfoHtml=(weekNum>0&&weekNum<=7&&due)
     ?`<div class="s5-week-bar">
