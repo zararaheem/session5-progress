@@ -127,6 +127,26 @@ body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50
 select,input{padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid var(--border2);border-radius:7px;background:var(--surface2);color:var(--text);outline:none;}
 select option{background:var(--surface2);}
 .count-pill{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);background:var(--card);padding:3px 10px;border-radius:20px;border:1px solid var(--border);}
+.view-toggle{display:flex;border:1px solid var(--border2);border-radius:7px;overflow:hidden;}
+.vt-btn{font-family:'DM Mono',monospace;font-size:11px;padding:5px 13px;background:transparent;color:var(--muted2);border:none;cursor:pointer;transition:all .15s;}
+.vt-btn:hover{color:var(--text);background:var(--surface2);}
+.vt-btn.active{background:var(--surface2);color:var(--text);font-weight:600;}
+
+/* BY-STUDENT TABLE */
+.stu-table-wrap{overflow-x:auto;}
+.stu-table{width:100%;border-collapse:collapse;font-size:12px;}
+.stu-table th{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2);padding:8px 10px;border-bottom:1px solid var(--border);text-align:center;white-space:nowrap;}
+.stu-table th.stu-name-th{text-align:left;min-width:160px;}
+.stu-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle;text-align:center;}
+.stu-table td.stu-name-td{text-align:left;}
+.stu-table tr:hover td{background:rgba(59,130,246,.04);}
+.stu-table th.th-due{background:rgba(251,191,36,.06);color:#fbbf24;}
+.stu-table th.th-missing{background:rgba(248,113,113,.05);color:#f87171;}
+.stu-ws-dots{display:flex;gap:2px;justify-content:center;flex-wrap:wrap;}
+.stu-section-head{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:14px 18px 6px;color:var(--muted2);}
+.stu-ws-bar{display:flex;align-items:center;gap:5px;justify-content:center;}
+.stu-ws-bar-track{width:42px;height:4px;background:var(--border2);border-radius:2px;overflow:hidden;}
+.stu-ws-bar-fill{height:100%;border-radius:2px;background:#34d399;}
 
 /* WORKSHOP BLOCK */
 .page{padding:20px 28px;display:flex;flex-direction:column;gap:16px;position:relative;z-index:1;}
@@ -223,6 +243,10 @@ tr:hover td{background:rgba(59,130,246,.04);}
 </div>
 <div id="stats-hero"></div>
 <div class="controls">
+  <div class="view-toggle">
+    <button id="vt-workshop" class="vt-btn active" onclick="setViewMode('workshop')">By Workshop</button>
+    <button id="vt-student" class="vt-btn" onclick="setViewMode('student')">By Student</button>
+  </div>
   <select id="wsFilter" onchange="render()">
     <option value="">All workshops</option>
   </select>
@@ -345,6 +369,7 @@ const CHECKPOINTS = CFG.checkpoints || [
 ];
 
 let currentLevel = 'ALL';
+let viewMode = 'workshop';
 let s5data = {};
 let statMode = 'checkpoint';  // 'checkpoint' or '3cs'
 let threecsWeekFilter = '';  // 'w2', 'w4', 'w6', or '' for auto
@@ -720,8 +745,133 @@ function toggleWs(id){
   if(el)el.classList.toggle('open');
 }
 
+function setViewMode(mode){
+  viewMode=mode;
+  document.getElementById('vt-workshop').classList.toggle('active',mode==='workshop');
+  document.getElementById('vt-student').classList.toggle('active',mode==='student');
+  document.getElementById('wsFilter').style.display=mode==='workshop'?'':'none';
+  render();
+}
+
+function renderByStudent(){
+  const sort=document.getElementById('sortSel').value;
+  const due=getDueThisWeek();
+  const wkNum=getCurrentSessionWeek();
+  const levelsToRender=currentLevel==='ALL'?['LL','L1','L2','MS']:[currentLevel];
+  const lvlNames={LL:'Learning Lab',L1:'Level 1',L2:'Level 2',MS:'Middle School'};
+  const lvlColors={LL:'var(--ll)',L1:'var(--l1)',L2:'var(--l2)',MS:'var(--ms)'};
+  const editorBase='https://session5-progress.vercel.app/editor.html';
+
+  const allCols=[
+    {type:'chk',chk:CHECKPOINTS[0],sw:1},
+    {type:'3cs',tc:{key:'w2',label:'Wk 2'},sw:2},
+    {type:'chk',chk:CHECKPOINTS[1],sw:3},
+    {type:'3cs',tc:{key:'w4',label:'Wk 4'},sw:4},
+    {type:'chk',chk:CHECKPOINTS[2],sw:5},
+    {type:'3cs',tc:{key:'w6',label:'Wk 6'},sw:6},
+    {type:'chk',chk:CHECKPOINTS[3],sw:7},
+  ];
+
+  function colStatus(col){
+    const isDue=col.type==='chk'?(due&&due.type==='checkpoint'&&due.key===col.chk.key):(due&&due.type==='3cs'&&due.key===col.tc.key);
+    const isPast=wkNum>col.sw;
+    const filled=isPast?filledCountForWeek(col.sw):-1;
+    const isMissing=isPast&&filled>=0&&!isFilledForWeek(col.sw);
+    return{isDue,isMissing,filled};
+  }
+
+  function chkDotsForStudent(sName,lvl,chkKey){
+    const wsList=WORKSHOPS[lvl]||[];
+    return wsList.map(ws=>{
+      const val=getChk(sName,ws.name,chkKey);
+      return`<a href="${editorBase}?level=${lvl}" class="dot-link" title="${ws.name}: ${val||'—'}">${dotHtml(val)}</a>`;
+    }).join('');
+  }
+
+  function tc3cDots(sName,wkKey,lvl){
+    const d=s5data.__3cs__?.[sName]?.[wkKey]||{};
+    const editorLink=`${editorBase}?level=${lvl}`;
+    if(!d.lovesSchool&&!d.learning2x&&!d.onTrack){
+      return`<a href="${editorLink}" class="dot-link" title="Enter 3Cs"><span class="chk-dot st-empty"></span></a>`;
+    }
+    const lC=d.lovesSchool==='Yes'?'#34d399':d.lovesSchool==='No'?'#f87171':'var(--muted2)';
+    const lT=d.lovesSchool==='Yes'?'♥':d.lovesSchool==='No'?'✗':'·';
+    const lBg=d.lovesSchool==='Yes'?'rgba(52,211,153,.12)':d.lovesSchool==='No'?'rgba(248,113,113,.12)':'transparent';
+    const xC=d.learning2x?.includes('All')?'#4ade80':d.learning2x?.includes('Some')?'#fbbf24':d.learning2x?'#f87171':'var(--muted2)';
+    const xT=d.learning2x?.includes('All')?'2×':d.learning2x?.includes('Some')?'½×':d.learning2x?'✗':'·';
+    const tC=d.onTrack==='Yes'?'#34d399':d.onTrack==='No'?'#f87171':'var(--muted2)';
+    const tT=d.onTrack==='Yes'?'T✓':d.onTrack==='No'?'T✗':'·';
+    return`<a href="${editorLink}" class="dot-link" style="display:inline-flex;gap:3px;" title="Loves:${d.lovesSchool||'—'} 2×:${d.learning2x||'—'} T2P:${d.onTrack||'—'}">
+      <span class="tc-dot" style="color:${lC};background:${lBg}">${lT}</span>
+      <span class="tc-dot" style="color:${xC}">${xT}</span>
+      <span class="tc-dot" style="color:${tC}">${tT}</span>
+    </a>`;
+  }
+
+  const headerCells=allCols.map(col=>{
+    const{isDue,isMissing}=colStatus(col);
+    const cls=isDue?' th-due':isMissing?' th-missing':'';
+    const badge=isDue?'<br><span style="font-size:8px">Due this week</span>':isMissing?'<br><span style="font-size:8px">⚠ missing</span>':'';
+    if(col.type==='chk')return`<th class="${cls}">${col.chk.label}${badge}</th>`;
+    return`<th class="${cls}">3Cs · ${col.tc.label}${badge}</th>`;
+  }).join('');
+
+  let totalStudents=0;
+  const sections=levelsToRender.map(lvl=>{
+    let students=(CFG.students||[]).filter(s=>s.l===lvl&&!s.inactive);
+    if(!students.length)return'';
+    if(sort==='progress'){
+      students=students.sort((a,b)=>{
+        const pa=(WORKSHOPS[lvl]||[]).filter(w=>getFinal(a.n,w.name)==='Passed').length;
+        const pb=(WORKSHOPS[lvl]||[]).filter(w=>getFinal(b.n,w.name)==='Passed').length;
+        return pb-pa;
+      });
+    }else{students=students.sort((a,b)=>a.n.localeCompare(b.n));}
+    totalStudents+=students.length;
+    const wsList=WORKSHOPS[lvl]||[];
+
+    const rows=students.map(s=>{
+      const passed=wsList.filter(w=>getFinal(s.n,w.name)==='Passed').length;
+      const pct=wsList.length?Math.round(passed/wsList.length*100):0;
+      const cells=allCols.map(col=>{
+        const{isDue}=colStatus(col);
+        const dueCls=isDue?' due-col':'';
+        if(col.type==='chk'){
+          return`<td class="chk-td${dueCls}"><div class="stu-ws-dots">${chkDotsForStudent(s.n,lvl,col.chk.key)}</div></td>`;
+        }
+        return`<td class="tc-td${dueCls}">${tc3cDots(s.n,col.tc.key,lvl)}</td>`;
+      }).join('');
+      const wsBar=passed===wsList.length&&wsList.length>0
+        ?`<div class="stu-ws-bar"><span style="color:#4ade80;font-size:15px;font-weight:600">✓</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:#4ade80;margin-left:3px">All passed</span></div>`
+        :`<div class="stu-ws-bar">
+          <div class="stu-ws-bar-track"><div class="stu-ws-bar-fill" style="width:${pct}%"></div></div>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2)">${passed}/${wsList.length}</span>
+        </div>`;
+      return`<tr>
+        <td class="stu-name-td"><span class="s-name">${s.n}</span>${s.note?`<span class="s-note">* ${s.note}</span>`:''}</td>
+        ${cells}
+        <td>${wsBar}</td>
+      </tr>`;
+    }).join('');
+
+    const sectionHead=currentLevel==='ALL'?`<tr><td colspan="${allCols.length+2}" class="stu-section-head" style="color:${lvlColors[lvl]}">${lvlNames[lvl]} · ${students.length} students</td></tr>`:'';
+    return sectionHead+rows;
+  }).join('');
+
+  document.getElementById('count-pill').textContent=`${totalStudents} students`;
+  document.getElementById('page').innerHTML=`<div class="stu-table-wrap"><table class="stu-table">
+    <thead><tr>
+      <th class="stu-name-th">Student</th>
+      ${headerCells}
+      <th>Workshops</th>
+    </tr></thead>
+    <tbody>${sections}</tbody>
+  </table></div>`;
+}
+
 function render(){
   renderStats();
+  if(viewMode==='student'){renderByStudent();return;}
   const wsFilter=document.getElementById('wsFilter').value;
   const sort=document.getElementById('sortSel').value;
   const due=getDueThisWeek();
@@ -764,7 +914,7 @@ function render(){
         const isDueWk=due&&due.type==='3cs'&&due.key===wkKey;
         const d=s5data.__3cs__?.[sName]?.[wkKey]||{};
         const editorLink=`https://session5-progress.vercel.app/editor.html?level=${lvl}`;
-        if(!d.lovesSchool&&!d.learning2x&&!d.onTrack)return`<td class="tc-td${isDueWk?' due-col':''}"><a href="${editorLink}" class="dot-link" title="Enter 3Cs for ${sName}"><span style="color:var(--border2);font-size:16px">○</span></a></td>`;
+        if(!d.lovesSchool&&!d.learning2x&&!d.onTrack)return`<td class="tc-td${isDueWk?' due-col':''}"><a href="${editorLink}" class="dot-link" title="Enter 3Cs for ${sName}"><span class="chk-dot st-empty"></span></a></td>`;
         const lC=d.lovesSchool==='Yes'?'#34d399':d.lovesSchool==='No'?'#f87171':'var(--muted2)';
         const lT=d.lovesSchool==='Yes'?'♥':d.lovesSchool==='No'?'✗':'·';
         const lBg=d.lovesSchool==='Yes'?'rgba(52,211,153,.12)':d.lovesSchool==='No'?'rgba(248,113,113,.12)':'transparent';
