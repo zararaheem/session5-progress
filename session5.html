@@ -526,7 +526,7 @@ function openWeekDetail(key){
     statsHtml=statPill(st.behind,'s-behind','Behind')+statPill(st.track,'s-track','On Track')+statPill(st.ahead,'s-ahead','Ahead');
     missingList=allStu.filter(s=>{
       const wsList=WORKSHOPS[s.l]||[];
-      return wsList.length>0&&!wsList.some(ws=>{const v=getChk(s.n,ws.name,key);return v&&v!=='N/A';});
+      return wsList.length>0&&!wsList.some(ws=>getChk(s.n,ws.name,key));
     }).map(s=>s.n);
   }else{
     const st=threecsStatsFor(allStu,key);
