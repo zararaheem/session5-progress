@@ -67,6 +67,17 @@ body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50
 .stat-mode-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
 .stat-mode-select{font-family:'DM Mono',monospace;font-size:11px;padding:5px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);outline:none;}
 
+/* WEEK TRACKER ROW */
+.week-track{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:18px;}
+.wt-item{display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:8px;min-width:88px;text-align:center;cursor:default;}
+.wt-item-label{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;line-height:1.25;}
+.wt-item-sub{font-family:'DM Mono',monospace;font-size:9px;margin-top:1px;opacity:.8;}
+.wt-item-status{font-family:'DM Mono',monospace;font-size:9px;margin-top:5px;font-weight:600;}
+.wt-future{border:1px solid var(--border);color:var(--muted);background:transparent;}
+.wt-current{border:1px solid rgba(251,191,36,.5);color:#fbbf24;background:rgba(251,191,36,.08);}
+.wt-ok{border:1px solid rgba(74,222,128,.35);color:#4ade80;background:rgba(74,222,128,.07);}
+.wt-warn{border:1px solid rgba(248,113,113,.45);color:#f87171;background:rgba(248,113,113,.07);}
+
 /* STORAGE BADGE */
 .storage-badge{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:10px;}
 .storage-badge.kv{color:#4ade80;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);}
@@ -407,33 +418,47 @@ function renderStats(){
     const fmt=d=>`${d.getMonth()+1}/${d.getDate()}`;
     return`${fmt(mon)}–${fmt(fri)}`;
   }
-  function dueItemLabel(d){
-    if(!d)return'';
-    if(d.type==='checkpoint'){const ck=(CFG.checkpoints||[]).find(c=>c.key===d.key);return ck?ck.label:d.key;}
-    if(d.type==='3cs')return'3Cs';
-    return'';
-  }
-  const dueLabel=dueItemLabel(due);
-  const nextWeekDue=getDueNextWeek();
-  const nextDueLabel=dueItemLabel(nextWeekDue);
-  const missingWeeks=getMissingWeeks(weekNum);
+  // ── 7-week tracker row ────────────────────────────────────────────
+  const allWeekItems=[
+    {w:1,label:'Week 1',sub:'Baseline'},
+    {w:2,label:'Week 2',sub:'3Cs'},
+    {w:3,label:'Week 3',sub:'Checkpoint 1'},
+    {w:4,label:'Week 4',sub:'3Cs'},
+    {w:5,label:'Week 5',sub:'Checkpoint 2'},
+    {w:6,label:'Week 6',sub:'3Cs'},
+    {w:7,label:'Week 7',sub:'T2P'},
+  ];
   const totalStudents=(CFG.students||[]).filter(s=>!s.inactive).length;
-  const missingHtml=missingWeeks.map(m=>{
-    const label=dueItemLabel(m.due);
-    const prefix=m.week===weekNum-1?'Due last week':'Missing';
-    const count=m.filled>0?` — ${m.filled}/${totalStudents}`:'';
-    return`<span class="ph-due-missing">⚠ ${prefix}: ${label}${count}</span>`;
+  const weekPillsHtml=allWeekItems.map(item=>{
+    const n=filledCountForWeek(item.w);
+    let cls,status;
+    if(item.w>weekNum){
+      cls='wt-future';status='—';
+    } else if(item.w===weekNum){
+      cls='wt-current';
+      status=n>0?`Due · ${n}/${totalStudents}`:'Due now';
+    } else {
+      // past week
+      if(isFilledForWeek(item.w)){
+        cls='wt-ok';status=`✓ ${n}/${totalStudents}`;
+      } else {
+        cls='wt-warn';status=n>0?`⚠ ${n}/${totalStudents}`:'⚠ 0 entered';
+      }
+    }
+    return`<div class="wt-item ${cls}">
+      <span class="wt-item-label">${item.label}</span>
+      <span class="wt-item-sub">${item.sub}</span>
+      <span class="wt-item-status">${status}</span>
+    </div>`;
   }).join('');
-  const weekInfoHtml=(weekNum>0&&weekNum<=7&&due)
-    ?`<div class="s5-week-bar">
-        <span class="ph-week-badge">Week ${weekNum} · ${weekDateRange(weekNum)}</span>
-        ${missingHtml}
-        ${dueLabel?`<span class="ph-due-now">Due this week: ${dueLabel}</span>`:''}
-        ${nextDueLabel?`<span class="ph-due-next">Due next week: ${nextDueLabel}</span>`:''}
-        <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
-        <button class="reminder-btn" onclick="openReminderModal()">📧 Send reminder</button>
-      </div>`
-    :`<div class="s5-week-bar"><span class="ph-week-badge">Session ${weekNum>7?'Complete':'Starting'}</span></div>`;
+
+  const weekInfoHtml=`
+    <div class="week-track">${weekPillsHtml}</div>
+    <div class="s5-week-bar">
+      <span class="ph-week-badge">Week ${weekNum>0&&weekNum<=7?weekNum:(weekNum>7?'Session Complete':'Starting')}${weekNum>0&&weekNum<=7?' · '+weekDateRange(weekNum):''}</span>
+      <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
+      <button class="reminder-btn" onclick="openReminderModal()">📧 Send reminder</button>
+    </div>`;
 
   // ── Checkpoint stats ──────────────────────────────────────────────
   function mostRecentChkKey(){
