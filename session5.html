@@ -298,6 +298,7 @@ tr:hover td{background:rgba(59,130,246,.04);}
     <option value="progress">Sort: Most progress</option>
   </select>
   <span class="count-pill" id="count-pill"></span>
+  <button id="admin-lock-btn" onclick="toggleAdminMode()" style="font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted2);cursor:pointer;margin-left:auto;" title="Admin mode">🔒 Admin</button>
 </div>
 
 <div class="page" id="page"><div class="loading">Loading…</div></div>
@@ -414,7 +415,47 @@ const CHECKPOINTS = CFG.checkpoints || [
 let currentLevel = 'ALL';
 let viewMode = 'student';
 let s5data = {};
-const weekLevelFilters = {};  // per-week level filter: { w1:'LL', w2:'ALL', ... }
+const weekLevelFilters = {};
+
+let s5IsAdmin = sessionStorage.getItem('s5admin') === 'yes';
+function toggleAdminMode(){
+  if(s5IsAdmin){
+    sessionStorage.removeItem('s5admin');
+    s5IsAdmin=false;
+    _updateAdminBtn();
+    render();renderStats();
+    return;
+  }
+  const name=prompt('Enter admin name:');
+  if((CFG.superadmins||[]).includes(name)){
+    sessionStorage.setItem('s5admin','yes');
+    s5IsAdmin=true;
+    _updateAdminBtn();
+    render();renderStats();
+  }else if(name!==null){
+    alert('Not recognised as admin.');
+  }
+}
+function _updateAdminBtn(){
+  const btn=document.getElementById('admin-lock-btn');
+  if(!btn)return;
+  btn.textContent=s5IsAdmin?'🔓 Admin':'🔒 Admin';
+  btn.style.color=s5IsAdmin?'#4ade80':'var(--muted2)';
+  btn.style.borderColor=s5IsAdmin?'rgba(74,222,128,.3)':'var(--border2)';
+}
+
+function verifyGoals(studentName){
+  if(!s5IsAdmin)return;
+  if(!s5data.__goalsVerified__)s5data.__goalsVerified__={};
+  if(s5data.__goalsVerified__[studentName]){
+    delete s5data.__goalsVerified__[studentName];
+  }else{
+    s5data.__goalsVerified__[studentName]=true;
+  }
+  saveAll();
+  renderStats();
+  render();
+}
 
 function setWeekLevelFilter(wkKey, lvl){
   weekLevelFilters[wkKey] = lvl;
@@ -451,6 +492,7 @@ function filledCountForWeek(w){
     return all.filter(s=>(WORKSHOPS[s.l]||[]).some(ws=>getChk(s.n,ws.name,d.key))).length;
   }
   if(d.type==='3cs'){
+    if(d.key==='w2') return all.filter(s=>s5data.__goalsVerified__?.[s.n]).length;
     return all.filter(s=>{const e=s5data.__3cs__?.[s.n]?.[d.key]||{};return e.lovesSchool||e.learning2x||e.onTrack;}).length;
   }
   return -1;
@@ -686,13 +728,25 @@ function openStudentProfile(name){
   // Week overview: one pill per week, ✓ if all data filled, clickable ○ if missing
   const weekPills=WEEK_DEFS.map(wk=>{
     let filled=false;
+    const type=wk.type==='chk'?'checkpoint':'3cs';
+    if(wk.key==='w2'){
+      // Week 2 = Map Goals: filled only if admin-verified
+      filled=!!(s5data.__goalsVerified__?.[name]);
+      const verified=filled;
+      if(verified){
+        const handler=s5IsAdmin?`onclick="verifyGoals('${esc(name)}')"`:'' ;
+        return`<button ${handler} style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.25);cursor:${s5IsAdmin?'pointer':'default'};">${wk.label} ✓</button>`;
+      }
+      // Not verified — greyed for all, admin sees a verify button
+      if(s5IsAdmin)return`<button onclick="verifyGoals('${esc(name)}')" style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(251,191,36,.08);color:#fbbf24;border:1px solid rgba(251,191,36,.3);cursor:pointer;" title="Click to verify Map Goals submitted">${wk.label} ○</button>`;
+      return`<span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;background:transparent;color:var(--muted2);border:1px solid var(--border2);opacity:.4;">${wk.label}</span>`;
+    }
     if(wk.type==='chk'){
       filled=wsList.length>0&&wsList.every(ws=>!!getChk(name,ws.name,wk.key));
     }else{
       const d=s5data.__3cs__?.[name]?.[wk.key]||{};
       filled=!!(d.lovesSchool||d.learning2x||d.onTrack);
     }
-    const type=wk.type==='chk'?'checkpoint':'3cs';
     if(filled){
       return`<button onclick="openStudentWeekPopup('${esc(name)}','${wk.key}','${type}')" style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.25);cursor:pointer;">${wk.label} ✓</button>`;
     }else{
@@ -1074,8 +1128,20 @@ function renderByStudent(){
 
   function tc3cDotsClickable(sName,wkKey,lvl,isDue,isFuture){
     if(isFuture){return`<span class="chk-dot st-empty" style="cursor:default"></span>`;}
-    const d=s5data.__3cs__?.[sName]?.[wkKey]||{};
     const esc=s=>s.replace(/'/g,"\\'");
+
+    // Week 2 = Map Goals: greyed out; admin can verify
+    if(wkKey==='w2'){
+      const verified=!!(s5data.__goalsVerified__?.[sName]);
+      if(verified){
+        if(s5IsAdmin)return`<button class="dot-link" onclick="verifyGoals('${esc(sName)}')" title="Click to unverify goals for ${sName}"><span class="chk-dot st-track" title="Goals verified">✓</span></button>`;
+        return`<span class="chk-dot st-track" title="Goals verified">✓</span>`;
+      }
+      if(s5IsAdmin)return`<button class="dot-link" onclick="verifyGoals('${esc(sName)}')" title="Click to verify goals submitted for ${sName}"><span class="chk-dot st-empty" style="opacity:.4;border-style:dashed;">?</span></button>`;
+      return`<span class="chk-dot st-empty" style="opacity:.3;cursor:default;" title="Filled on Map Goals platform"></span>`;
+    }
+
+    const d=s5data.__3cs__?.[sName]?.[wkKey]||{};
     if(!d.lovesSchool&&!d.learning2x&&!d.onTrack){
       return`<button class="dot-link" onclick="openStudentWeekPopup('${esc(sName)}','${wkKey}','3cs')" title="Enter 3Cs for ${sName}"><span class="chk-dot st-empty"></span></button>`;
     }
@@ -1450,6 +1516,7 @@ function sendReminderEmail() {
 renderStats();
 populateWsFilter();
 loadData();
+_updateAdminBtn();
 </script>
 
 <!-- Reminder modal -->
