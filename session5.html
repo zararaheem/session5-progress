@@ -963,7 +963,7 @@ function renderStats(){
     <p class="s5-sub">Workshop progress, checkpoints &amp; 3Cs</p>
     <div class="s5-week-bar">
       <span class="ph-week-badge">Week ${weekNum>0&&weekNum<=7?weekNum:(weekNum>7?'Session Complete':'Starting')}${weekNum>0&&weekNum<=7?' · '+weekDateRange(weekNum):''}</span>
-      <a href="${due&&due.type==='3cs'?'https://map-goals-platform.vercel.app/':'https://session5-progress.vercel.app/editor.html'+(currentLevel!=='ALL'?'?level='+currentLevel:'')}" target="${due&&due.type==='3cs'?'_blank':''}" rel="noopener noreferrer" class="s5-enter-btn">${due&&due.type==='3cs'?'Fill 3Cs form ↗':'Enter data →'}</a>
+      <a href="${due&&due.key==='w2'?'https://map-goals-platform.vercel.app/':'https://session5-progress.vercel.app/editor.html'+(currentLevel!=='ALL'?'?level='+currentLevel:'')}" target="${due&&due.key==='w2'?'_blank':''}" rel="noopener noreferrer" class="s5-enter-btn">${due&&due.key==='w2'?'Fill Map Goals ↗':'Enter data →'}</a>
       <button class="reminder-btn" onclick="openReminderModal()">Send reminder</button>
     </div>
     ${weekHubHtml}
