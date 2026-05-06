@@ -811,7 +811,11 @@ function renderStats(){
       <div class="wh-now-left">
         <div class="wss-due-badge" style="margin-bottom:5px;">${isFilled?'✓ COMPLETE':'DUE THIS WEEK'}</div>
         <div class="wh-now-title">${dueItem.label} · ${dueItem.sub}</div>
-        <div class="wh-now-fill">${filled}/${total} entered · ${weekDateRange(dueItem.w)}${dueItem.type==='3cs'?` · <a href="https://map-goals-platform.vercel.app/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="color:#60a5fa;text-decoration:none;font-weight:700;">map-goals-platform.vercel.app ↗</a>`:''}</div>
+        <div class="wh-now-fill">${filled}/${total} entered · ${weekDateRange(dueItem.w)}</div>
+        ${dueItem.type==='3cs'?`<div style="margin-top:8px;padding:8px 10px;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:7px;font-size:11px;color:var(--muted2);">
+          <span style="font-weight:600;color:#60a5fa;">${dueItem.label} — Map Goals replace 3Cs.</span> Please fill out student goals here:
+          <a href="https://map-goals-platform.vercel.app/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:6px;background:#60a5fa;color:#0a0f1e;text-decoration:none;">Fill out goals ↗</a>
+        </div>`:''}
       </div>
       <div class="wh-now-right">
         <div class="wss-stats" style="justify-content:flex-end;">${statsHtml}</div>
