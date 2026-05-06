@@ -811,7 +811,7 @@ function renderStats(){
       <div class="wh-now-left">
         <div class="wss-due-badge" style="margin-bottom:5px;">${isFilled?'✓ COMPLETE':'DUE THIS WEEK'}</div>
         <div class="wh-now-title">${dueItem.label} · ${dueItem.sub}</div>
-        <div class="wh-now-fill">${filled}/${total} entered · ${weekDateRange(dueItem.w)}</div>
+        <div class="wh-now-fill">${filled}/${total} entered · ${weekDateRange(dueItem.w)}${dueItem.type==='3cs'?` · <a href="https://map-goals-platform.vercel.app/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="color:#60a5fa;text-decoration:none;font-weight:700;">map-goals-platform.vercel.app ↗</a>`:''}</div>
       </div>
       <div class="wh-now-right">
         <div class="wss-stats" style="justify-content:flex-end;">${statsHtml}</div>
@@ -905,7 +905,7 @@ function renderStats(){
     <p class="s5-sub">Workshop progress, checkpoints &amp; 3Cs</p>
     <div class="s5-week-bar">
       <span class="ph-week-badge">Week ${weekNum>0&&weekNum<=7?weekNum:(weekNum>7?'Session Complete':'Starting')}${weekNum>0&&weekNum<=7?' · '+weekDateRange(weekNum):''}</span>
-      <a href="https://session5-progress.vercel.app/editor.html${currentLevel!=='ALL'?'?level='+currentLevel:''}" class="s5-enter-btn">Enter data →</a>
+      <a href="${due&&due.type==='3cs'?'https://map-goals-platform.vercel.app/':'https://session5-progress.vercel.app/editor.html'+(currentLevel!=='ALL'?'?level='+currentLevel:'')}" target="${due&&due.type==='3cs'?'_blank':''}" rel="noopener noreferrer" class="s5-enter-btn">${due&&due.type==='3cs'?'Fill 3Cs form ↗':'Enter data →'}</a>
       <button class="reminder-btn" onclick="openReminderModal()">Send reminder</button>
     </div>
     ${weekHubHtml}
