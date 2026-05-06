@@ -1119,7 +1119,7 @@ function renderByStudent(){
     const idAttr=isDue?' id="due-col-header"':'';
     const badge=isDue?'<br><span style="font-size:8px">Due this week</span>':isMissing?'<br><span style="font-size:8px">⚠ missing</span>':'';
     if(col.type==='chk')return`<th class="${cls}"${idAttr}>${col.chk.label}${badge}</th>`;
-    return`<th class="${cls}"${idAttr}>${col.tc.label}: 3Cs${badge}</th>`;
+    return`<th class="${cls}"${idAttr}>${col.tc.label}: Map Goals<br><a href="https://map-goals-platform.vercel.app/" target="_blank" rel="noopener noreferrer" style="font-size:8px;color:#60a5fa;text-decoration:none;font-weight:600;" onclick="event.stopPropagation()">Fill here ↗</a>${badge}</th>`;
   }).join('');
 
   let totalStudents=0;
@@ -1269,7 +1269,7 @@ function render(){
         const cls=isDue?' chk-th-due':isMissing?' chk-th-missing':'';
         const badge=isDue?`<span class="due-col-badge">Due this Week</span>`:isMissing?`<span class="missing-col-badge">⚠ ${filled}/${total} entered</span>`:'';
         if(col.type==='chk')return`<th class="chk-th${cls}">${col.chk.label}${badge}</th>`;
-        return`<th class="tc-th${cls}">${col.tc.label}: 3Cs${badge}</th>`;
+        return`<th class="tc-th${cls}">${col.tc.label}: Map Goals<br><a href="https://map-goals-platform.vercel.app/" target="_blank" rel="noopener noreferrer" style="font-size:8px;color:#60a5fa;text-decoration:none;font-weight:600;" onclick="event.stopPropagation()">Fill here ↗</a>${badge}</th>`;
       }).join('')+`<th>Status</th>`;
       const bodyRows=students.map(s=>{
         const cells=allCols.map(col=>{
