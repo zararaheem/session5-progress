@@ -919,6 +919,10 @@ renderList();
 loadData();
 
 function applyLevelOverrides(){
+  // Re-inject manually added students (persisted in __extraStudents__)
+  (s5data.__extraStudents__||[]).forEach(es=>{
+    if(!CFG.students.find(s=>s.n===es.n)) CFG.students.push({n:es.n,l:es.l});
+  });
   const ov=s5data.__levelOverrides__||{};
   STUDENTS.forEach(s=>{if(ov[s.n])s.l=ov[s.n];});
 }
@@ -943,6 +947,22 @@ function setStudentGrade(name,grade){
     s5data.__studentGrades__[name]=grade;
   }
   saveAll();
+}
+
+function addStudentManually(){
+  const name=(prompt('Student full name:')||'').trim();
+  if(!name)return;
+  if(CFG.students.find(s=>s.n===name)||s5data.__extraStudents__?.find(s=>s.n===name)){
+    alert(`"${name}" is already on the roster.`);return;
+  }
+  const levels=['LL','L1','L2','MS'];
+  const lvl=prompt(`Level for ${name}?\nOptions: ${levels.join(', ')}`,'L1');
+  if(!lvl||!levels.includes(lvl)){alert('Invalid level. Student not added.');return;}
+  if(!s5data.__extraStudents__)s5data.__extraStudents__=[];
+  s5data.__extraStudents__.push({n:name,l:lvl,added:new Date().toISOString()});
+  // inject into CFG.students so all rendering picks them up
+  CFG.students.push({n:name,l:lvl});
+  saveAll().then(()=>{renderList();renderDashboard();renderRoster();});
 }
 
 function renderRoster(){
@@ -2240,7 +2260,10 @@ function mergeImportData(){
       </div>
       <!-- Roster section (admin only) -->
       <div id="sync-roster-section" style="display:none">
-        <div class="sync-lbl">Move students between levels — changes save instantly</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div class="sync-lbl" style="margin-bottom:0;">Move students between levels — changes save instantly</div>
+          <button onclick="addStudentManually()" style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:5px 11px;border-radius:6px;border:1px solid rgba(96,165,250,.4);background:rgba(96,165,250,.08);color:#60a5fa;cursor:pointer;">+ Add student</button>
+        </div>
         <div id="roster-body" style="max-height:340px;overflow-y:auto;padding:4px 0;"></div>
       </div>
       <div class="sync-status" id="sync-status"></div>
