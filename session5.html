@@ -298,6 +298,7 @@ tr:hover td{background:rgba(59,130,246,.04);}
     <option value="progress">Sort: Most progress</option>
   </select>
   <span class="count-pill" id="count-pill"></span>
+  <button id="add-student-btn" onclick="addStudentManually()" style="display:none;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid rgba(96,165,250,.4);background:rgba(96,165,250,.08);color:#60a5fa;cursor:pointer;" title="Add student to roster">+ Add student</button>
   <button id="admin-lock-btn" onclick="toggleAdminMode()" style="font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted2);cursor:pointer;margin-left:auto;" title="Admin mode">🔒 Admin</button>
 </div>
 
@@ -442,6 +443,8 @@ function _updateAdminBtn(){
   btn.textContent=s5IsAdmin?'🔓 Admin':'🔒 Admin';
   btn.style.color=s5IsAdmin?'#4ade80':'var(--muted2)';
   btn.style.borderColor=s5IsAdmin?'rgba(74,222,128,.3)':'var(--border2)';
+  const addBtn=document.getElementById('add-student-btn');
+  if(addBtn)addBtn.style.display=s5IsAdmin?'inline-flex':'none';
 }
 
 function verifyGoals(studentName){
@@ -866,7 +869,7 @@ function renderStats(){
         <div class="wss-due-badge" style="margin-bottom:5px;">${isFilled?'✓ COMPLETE':'DUE THIS WEEK'}</div>
         <div class="wh-now-title">${dueItem.label} · ${dueItem.sub}</div>
         <div class="wh-now-fill">${filled}/${total} entered · ${weekDateRange(dueItem.w)}</div>
-        ${dueItem.type==='3cs'?`<div style="margin-top:8px;padding:8px 10px;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:7px;font-size:11px;color:var(--muted2);">
+        ${dueItem.key==='w2'?`<div style="margin-top:8px;padding:8px 10px;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:7px;font-size:11px;color:var(--muted2);">
           <span style="font-weight:600;color:#60a5fa;">${dueItem.label} — Map Goals replace 3Cs.</span> Please fill out student goals here:
           <a href="https://map-goals-platform.vercel.app/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:6px;background:#60a5fa;color:#0a0f1e;text-decoration:none;">Fill out goals ↗</a>
         </div>`:''}
@@ -1008,8 +1011,26 @@ async function loadData(){
 }
 
 function applyLevelOverrides(){
+  (s5data.__extraStudents__||[]).forEach(es=>{
+    if(!CFG.students.find(s=>s.n===es.n)) CFG.students.push({n:es.n,l:es.l});
+  });
   const ov=s5data.__levelOverrides__||{};
   (CFG.students||[]).forEach(s=>{if(ov[s.n])s.l=ov[s.n];});
+}
+
+function addStudentManually(){
+  if(!s5IsAdmin){alert('Admin mode required.');return;}
+  const name=(prompt('Student full name:')||'').trim();
+  if(!name)return;
+  if(CFG.students.find(s=>s.n===name)||(s5data.__extraStudents__||[]).find(s=>s.n===name)){
+    alert(`"${name}" is already on the roster.`);return;
+  }
+  const lvl=prompt(`Level for ${name}?\nOptions: LL, L1, L2, MS`,'L1');
+  if(!lvl||!['LL','L1','L2','MS'].includes(lvl)){alert('Invalid level — student not added.');return;}
+  if(!s5data.__extraStudents__)s5data.__extraStudents__=[];
+  s5data.__extraStudents__.push({n:name,l:lvl,added:new Date().toISOString()});
+  CFG.students.push({n:name,l:lvl});
+  saveAll();render();renderStats();
 }
 
 function populateWsFilter(){
