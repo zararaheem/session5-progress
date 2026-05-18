@@ -736,6 +736,14 @@ function getMissingWeeks(){
   for(let i=1;i<w;i++){const d=getDueForWeek(i);if(d&&!isFilledForWeek(i))missing.push({week:i,due:d});}
   return missing;
 }
+function saveCheckpointDef(wsName,ck,val){
+  if(!s5data.__checkpointDefs__)s5data.__checkpointDefs__={};
+  if(!s5data.__checkpointDefs__[wsName])s5data.__checkpointDefs__[wsName]={};
+  if(val.trim()) s5data.__checkpointDefs__[wsName][ck]=val.trim();
+  else delete s5data.__checkpointDefs__[wsName][ck];
+  saveAll();
+}
+
 function saveCoaching(sSlug,wsSlug,ck,val){
   const sName=nameFromSlug(sSlug);
   const s=STUDENTS.find(s=>slug(s.n)===sSlug);
@@ -1288,7 +1296,9 @@ function renderList(){
         const coaching=s5data.__coaching__?.[s.n]?.[wsKey]?.[chk.key]||'';
         const coachPlaceholder=isDue?`${chk.label} is Behind — what's the coaching plan to get back on track? (Due this week)`:`Coaching / action plan to get back on track…`;
         const coachDiv=chk.key!=='w7'?`<div id="coach-${sl}-${wsSlug}-${chk.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:36px;font-size:11px;" placeholder="${coachPlaceholder}" onchange="saveCoaching('${sl}','${wsSlug}','${chk.key}',this.value)">${coaching}</textarea></div>`:'';
-        return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':isOverdue?'background:rgba(248,113,113,.03);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':isOverdue?'#f87171':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${coachDiv}`;
+        const existingDef=s5data.__checkpointDefs__?.[wsKey]?.[chk.key]||'';
+        const defDiv=`<div style="padding:3px 12px 5px 24px;"><textarea class="field-textarea" style="min-height:30px;font-size:10px;color:var(--muted2);resize:vertical;" placeholder="📋 What are we measuring this ${chk.label}? (shared for all students in this workshop)" onchange="saveCheckpointDef('${wsKey.replace(/'/g,"\\'")}','${chk.key}',this.value)">${existingDef}</textarea></div>`;
+        return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':isOverdue?'background:rgba(248,113,113,.03);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':isOverdue?'#f87171':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${defDiv}${coachDiv}`;
       }).join('');
       const isWeek7Plus=getCurrentSessionWeek()>=7;
       const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
@@ -1360,10 +1370,12 @@ function renderList(){
                 const btns=opts.map(opt=>`<button class="score-btn ${kv===opt.val?opt.cls:''}" data-val="${opt.val}" data-sslug="${sl}" data-wsslug="${wsSlug2}" data-ck="${item.key}" onclick="setCheckpointBySlug(this)">${opt.label}</button>`).join('');
                 const coaching2=s5data.__coaching__?.[s.n]?.[ws.name]?.[item.key]||'';
                 const coachDiv2=item.key!=='w7'?`<div id="coach-${sl}-${slug(ws.name)}-${item.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:32px;font-size:11px;" placeholder="Coaching plan…" onchange="saveCoaching('${sl}','${wsSlug2}','${item.key}',this.value)">${coaching2}</textarea></div>`:'';
+                const existingDef2=s5data.__checkpointDefs__?.[ws.name]?.[item.key]||'';
+                const defDiv2=`<div style="padding:3px 12px 5px 12px;border-top:1px solid rgba(255,255,255,.04);background:rgba(0,0,0,.03);"><textarea class="field-textarea" style="min-height:30px;font-size:10px;color:var(--muted2);resize:vertical;" placeholder="📋 What are we measuring this ${item.sub}? (shared for all students in this workshop)" onchange="saveCheckpointDef('${ws.name.replace(/'/g,"\\'")}','${item.key}',this.value)">${existingDef2}</textarea></div>`;
                 return`<div class="score-line" style="padding:5px 12px;border-top:1px solid var(--border);">
                   <span class="score-ws-name" style="font-size:11px;color:var(--text)">${ws.code} · ${ws.name}</span>
                   <div class="score-btns">${btns}</div>
-                </div>${coachDiv2}`;
+                </div>${defDiv2}${coachDiv2}`;
               }).join('');
               if(item.key==='w7'){
                 const finalOpts=[{val:'Passed',label:'✓ Passed',cls:'active-pass'},{val:'Not passed',label:'✗ Not yet',cls:'active-fail'},{val:'Absent',label:'– Absent',cls:'active-absent'}];
