@@ -9,7 +9,7 @@
 const T2P_CONFIG = {
   password: "nyc2025",
   superadmins: ["Admin","Liam"],
-  staff: ["Chauncey","Emily","Eric Salgado","Jenna K.","Jenna P.","Jesse","Liam","Nathan","Parthvi","Sam McDonald"].sort(),
+  staff: ["Chauncey","Emily","Eric Salgado","Jenna K.","Jenna P.","Jesse","Liam","Manuel","Nathan","Parthvi","Sam McDonald"].sort(),
   levelGuides: { LL:["Jenna K.","Jesse"], L1:["Parthvi","Nathan"], L2:["Jenna P."], MS:["Emily","Chauncey"] },
   checkpoints: [
     {key:"w1",label:"Week 1 Baseline"},{key:"w3",label:"Week 3: Checkpoint 1"},
@@ -651,22 +651,22 @@ const CHECKPOINTS  = CFG.checkpoints || [
 const STUDENTS = CFG.students || [];
 
 const S5_WORKSHOPS = {
-  LL:[{code:"SP-01",name:"Mission Laika — Storytelling",guide:"TBD",day:"Mon",skill:"Collaboration"},
+  LL:[{code:"SP-01",name:"Mission Laika — Storytelling",guide:"Manuel",day:"Mon",skill:"Collaboration"},
       {code:"SP-02",name:"Propulsion Lab",guide:"Jenna Klemm",day:"Tue/Thu",skill:"Critical Thinking"},
       {code:"SP-03",name:"Mission Control",guide:"Jesse Moskowitz",day:"Tue/Thu",skill:"Leadership"},
       {code:"SP-04",name:"Cadet Qualification Training",guide:"Jenna Klemm",day:"Wed",skill:"Grit"},
       {code:"SP-05",name:"Junior Space Camp — Island Standard",guide:"Jenna Klemm",day:"Fri",skill:"Teamwork"}],
-  L1:[{code:"OP-01",name:"Mission Laika — Media + Outreach",guide:"TBD",day:"Mon",skill:"Public Speaking"},
+  L1:[{code:"OP-01",name:"Mission Laika — Media + Outreach",guide:"Manuel",day:"Mon",skill:"Public Speaking"},
       {code:"OP-02",name:"Drone Wing",guide:"Parthvi Harde",day:"Tue/Thu",skill:"Teamwork"},
       {code:"OP-03",name:"Stock Simulator",guide:"Nathan Witkin",day:"Tue/Thu",skill:"Financial Literacy"},
       {code:"OP-04",name:"Recon Expedition",guide:"Jesse + Parthvi",day:"Wed",skill:"Grit"},
       {code:"OP-05",name:"Junior Space Camp — Island Standard",guide:"Parthvi",day:"Fri",skill:"Teamwork"}],
-  L2:[{code:"FC-01",name:"Mission Laika — Product + Sales",guide:"TBD",day:"Mon",skill:"Entrepreneurship"},
+  L2:[{code:"FC-01",name:"Mission Laika — Product + Sales",guide:"Manuel",day:"Mon",skill:"Entrepreneurship"},
       {code:"FC-02",name:"Alpha Emporium Exchange",guide:"Jenna Petrungaro",day:"Tue/Thu",skill:"Entrepreneurship"},
       {code:"FC-03",name:"Drone Wing",guide:"TBD",day:"Tue/Thu",skill:"Teamwork"},
       {code:"FC-04",name:"Tri Hard (Row · Ride · Run)",guide:"Chauncey Nartey",day:"Wed",skill:"Grit"},
       {code:"FC-05",name:"Junior Space Camp — Island Standard",guide:"Jenna P",day:"Fri",skill:"Teamwork"}],
-  MS:[{code:"MS-01",name:"Mission Laika — Strategy + Execution",guide:"TBD",day:"Mon",skill:"Leadership"},
+  MS:[{code:"MS-01",name:"Mission Laika — Strategy + Execution",guide:"Manuel",day:"Mon",skill:"Leadership"},
       {code:"MS-02",name:"Sail La Vie",guide:"Emily Lopez",day:"Tue/Thu",skill:"Teamwork"},
       {code:"MS-03",name:"Rover Engineering Corps",guide:"Emily Lopez",day:"Tue/Thu",skill:"Independence"},
       {code:"MS-04",name:"Tri Hard (Row · Ride · Run)",guide:"Chauncey Nartey",day:"Wed",skill:"Grit"},
@@ -901,6 +901,7 @@ async function loadData(){
     }
   }catch(e){console.error('loadData failed:',e);}
   applyLevelOverrides();
+  applyExtraStaff();
   _resolveDataReady();
   // Apply ?level= URL param from session5.html "Enter data" link
   const urlLevel=new URLSearchParams(window.location.search).get('level');
@@ -916,7 +917,7 @@ async function loadData(){
 // Render immediately so students are visible before storage resolves
 buildGuideBanner();
 renderList();
-loadData();
+loadData(); // calls applyExtraStaff() + buildGuideBanner() after data resolves
 
 function applyLevelOverrides(){
   // Re-inject manually added students (persisted in __extraStudents__)
@@ -925,6 +926,34 @@ function applyLevelOverrides(){
   });
   const ov=s5data.__levelOverrides__||{};
   STUDENTS.forEach(s=>{if(ov[s.n])s.l=ov[s.n];});
+}
+
+function applyExtraStaff(){
+  (s5data.__extraStaff__||[]).forEach(g=>{
+    if(!CFG.staff.includes(g.name)) CFG.staff.push(g.name);
+    if(g.level&&!CFG.levelGuides[g.level]?.includes(g.name)){
+      if(!CFG.levelGuides[g.level])CFG.levelGuides[g.level]=[];
+      CFG.levelGuides[g.level].push(g.name);
+    }
+  });
+  // Rebuild STAFF_SORTED in place
+  STAFF_SORTED.length=0;
+  [...CFG.staff].sort().forEach(s=>STAFF_SORTED.push(s));
+}
+
+function addGuideManually(){
+  if(!isSuperAdmin){alert('Admin access required.');return;}
+  const name=(prompt('Guide full name:')||'').trim();
+  if(!name)return;
+  if(CFG.staff.includes(name)||(s5data.__extraStaff__||[]).find(g=>g.name===name)){
+    alert(`"${name}" is already on the staff list.`);return;
+  }
+  const lvlInput=(prompt(`Assign ${name} to a level? (LL, L1, L2, MS — or leave blank for none)`)||'').trim().toUpperCase();
+  const level=['LL','L1','L2','MS'].includes(lvlInput)?lvlInput:null;
+  if(!s5data.__extraStaff__)s5data.__extraStaff__=[];
+  s5data.__extraStaff__.push({name,level,added:new Date().toISOString()});
+  applyExtraStaff();
+  saveAll().then(()=>{buildGuideBanner();updateChipStates();renderRoster();});
 }
 
 function setStudentLevel(name,newLvl){
@@ -2262,7 +2291,10 @@ function mergeImportData(){
       <div id="sync-roster-section" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <div class="sync-lbl" style="margin-bottom:0;">Move students between levels — changes save instantly</div>
-          <button onclick="addStudentManually()" style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:5px 11px;border-radius:6px;border:1px solid rgba(96,165,250,.4);background:rgba(96,165,250,.08);color:#60a5fa;cursor:pointer;">+ Add student</button>
+          <div style="display:flex;gap:6px;">
+            <button onclick="addGuideManually()" style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:5px 11px;border-radius:6px;border:1px solid rgba(167,139,250,.4);background:rgba(167,139,250,.08);color:#a78bfa;cursor:pointer;">+ Add guide</button>
+            <button onclick="addStudentManually()" style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:5px 11px;border-radius:6px;border:1px solid rgba(96,165,250,.4);background:rgba(96,165,250,.08);color:#60a5fa;cursor:pointer;">+ Add student</button>
+          </div>
         </div>
         <div id="roster-body" style="max-height:340px;overflow-y:auto;padding:4px 0;"></div>
       </div>
