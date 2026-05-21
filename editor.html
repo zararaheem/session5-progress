@@ -1297,7 +1297,7 @@ function renderList(){
         const coachPlaceholder=isDue?`${chk.label} is Behind — what's the coaching plan to get back on track? (Due this week)`:`Coaching / action plan to get back on track…`;
         const coachDiv=chk.key!=='w7'?`<div id="coach-${sl}-${wsSlug}-${chk.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:36px;font-size:11px;" placeholder="${coachPlaceholder}" onchange="saveCoaching('${sl}','${wsSlug}','${chk.key}',this.value)">${coaching}</textarea></div>`:'';
         const existingDef=s5data.__checkpointDefs__?.[wsKey]?.[chk.key]||'';
-        const defDiv=`<div style="padding:3px 12px 5px 24px;"><textarea class="field-textarea" style="min-height:30px;font-size:10px;color:var(--muted2);resize:vertical;" placeholder="📋 What are we measuring this ${chk.label}? (shared for all students in this workshop)" onchange="saveCheckpointDef('${wsKey.replace(/'/g,"\\'")}','${chk.key}',this.value)">${existingDef}</textarea></div>`;
+        const defDiv=(existingDef||isDue)?`<div style="padding:3px 12px 5px 24px;"><textarea class="field-textarea" style="min-height:30px;font-size:10px;color:var(--muted2);resize:vertical;" placeholder="📋 What are we measuring this ${chk.label}? (shared for all students in this workshop)" onchange="saveCheckpointDef('${wsKey.replace(/'/g,"\\'")}','${chk.key}',this.value)">${existingDef}</textarea></div>`:'';
         return`<div class="score-line" style="padding-left:12px;opacity:.85;${isDue?'background:rgba(251,191,36,.04);':isOverdue?'background:rgba(248,113,113,.03);':''}"><span class="score-ws-name" style="color:${isDue?'#fbbf24':isOverdue?'#f87171':'var(--muted)'};font-size:11px">↳ ${chk.label}${dueBadge}</span><div class="score-btns">${btns}</div></div>${defDiv}${coachDiv}`;
       }).join('');
       const isWeek7Plus=getCurrentSessionWeek()>=7;
@@ -1371,7 +1371,7 @@ function renderList(){
                 const coaching2=s5data.__coaching__?.[s.n]?.[ws.name]?.[item.key]||'';
                 const coachDiv2=item.key!=='w7'?`<div id="coach-${sl}-${slug(ws.name)}-${item.key}" style="display:${kv==='Behind'?'block':'none'};padding:2px 12px 6px 24px;"><textarea class="field-textarea" style="min-height:32px;font-size:11px;" placeholder="Coaching plan…" onchange="saveCoaching('${sl}','${wsSlug2}','${item.key}',this.value)">${coaching2}</textarea></div>`:'';
                 const existingDef2=s5data.__checkpointDefs__?.[ws.name]?.[item.key]||'';
-                const defDiv2=`<div style="padding:3px 12px 5px 12px;border-top:1px solid rgba(255,255,255,.04);background:rgba(0,0,0,.03);"><textarea class="field-textarea" style="min-height:30px;font-size:10px;color:var(--muted2);resize:vertical;" placeholder="📋 What are we measuring this ${item.sub}? (shared for all students in this workshop)" onchange="saveCheckpointDef('${ws.name.replace(/'/g,"\\'")}','${item.key}',this.value)">${existingDef2}</textarea></div>`;
+                const defDiv2=(existingDef2||isDue)?`<div style="padding:3px 12px 5px 12px;border-top:1px solid rgba(255,255,255,.04);background:rgba(0,0,0,.03);"><textarea class="field-textarea" style="min-height:30px;font-size:10px;color:var(--muted2);resize:vertical;" placeholder="📋 What are we measuring this ${item.sub}? (shared for all students in this workshop)" onchange="saveCheckpointDef('${ws.name.replace(/'/g,"\\'")}','${item.key}',this.value)">${existingDef2}</textarea></div>`:'';
                 return`<div class="score-line" style="padding:5px 12px;border-top:1px solid var(--border);">
                   <span class="score-ws-name" style="font-size:11px;color:var(--text)">${ws.code} · ${ws.name}</span>
                   <div class="score-btns">${btns}</div>
@@ -1420,10 +1420,13 @@ function renderList(){
               </div>`;
             }
 
-            return`<div style="border:1px solid ${bdr};border-radius:8px;overflow:hidden;background:${bg}${isFuture?';opacity:.55':''}">
-              <div style="padding:5px 12px;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:${hdrColor};letter-spacing:.07em;text-transform:uppercase;border-bottom:${isFuture?'none':'1px solid var(--border)'};">${item.label} · ${item.key==='w2'?'Map Goals':item.sub}${badge}</div>
+            return`<details ${isDue||isMissing?'open':''} style="border:1px solid ${bdr};border-radius:8px;overflow:hidden;background:${bg}${isFuture?';opacity:.55':''}">
+              <summary style="padding:5px 12px;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:${hdrColor};letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+                <span>${item.label} · ${item.key==='w2'?'Map Goals':item.sub}${badge}</span>
+                <span style="opacity:.35;font-size:10px;">▾</span>
+              </summary>
               ${content}
-            </div>`;
+            </details>`;
           }).join('')}</div>`;
         })()}
       </div>
