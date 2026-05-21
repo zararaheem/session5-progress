@@ -1350,14 +1350,18 @@ function renderList(){
             let isMissing=false;
             if(isPast){
               if(item.type==='chk') isMissing=levelWs.some(ws=>!scores[chkKey(ws.name,item.key)]);
+              else if(item.key==='w2') isMissing=!(s5data.__goalsVerified__?.[s.n]);
               else{const d3=s5data.__3cs__?.[s.n]?.[item.key]||{};isMissing=!d3.lovesSchool&&!d3.learning2x&&!d3.onTrack;}
             }
+            const isFilled=isPast&&!isMissing;
 
-            const bdr=isDue?'rgba(251,191,36,.45)':isMissing?'rgba(248,113,113,.4)':'var(--border)';
-            const bg=isDue?'rgba(251,191,36,.06)':isMissing?'rgba(248,113,113,.05)':isFuture?'transparent':'var(--surface2)';
-            const hdrColor=isDue?'#fbbf24':isMissing?'#f87171':isFuture?'var(--muted)':'var(--muted2)';
+            const bdr=isDue?'rgba(251,191,36,.45)':isMissing?'rgba(248,113,113,.4)':isFilled?'rgba(74,222,128,.35)':'var(--border)';
+            const bg=isDue?'rgba(251,191,36,.06)':isMissing?'rgba(248,113,113,.05)':isFilled?'rgba(74,222,128,.04)':isFuture?'transparent':'rgba(13,24,41,.6)';
+            const hdrColor=isDue?'#fbbf24':isMissing?'#f87171':isFilled?'#4ade80':isFuture?'var(--muted)':'var(--muted2)';
             const badge=isDue?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);padding:1px 6px;border-radius:3px;margin-left:6px;">DUE</span>`
-              :isMissing?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.3);padding:1px 6px;border-radius:3px;margin-left:6px;">⚠ MISSING</span>`:'';
+              :isMissing?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.3);padding:1px 6px;border-radius:3px;margin-left:6px;">⚠ MISSING</span>`
+              :isFilled?`<span style="font-family:'DM Mono',monospace;font-size:8px;font-weight:700;background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3);padding:1px 6px;border-radius:3px;margin-left:6px;">✓</span>`
+              :'';
 
             let content='';
             if(isFuture){
@@ -1420,7 +1424,7 @@ function renderList(){
               </div>`;
             }
 
-            return`<details ${isDue||isMissing?'open':''} style="border:1px solid ${bdr};border-radius:8px;overflow:hidden;background:${bg}${isFuture?';opacity:.55':''}">
+            return`<details ${isDue?'open':''} style="border:1px solid ${bdr};border-radius:8px;overflow:hidden;background:${bg}${isFuture?';opacity:.55':''}">
               <summary style="padding:5px 12px;font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:${hdrColor};letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;">
                 <span>${item.label} · ${item.key==='w2'?'Map Goals':item.sub}${badge}</span>
                 <span style="opacity:.35;font-size:10px;">▾</span>
