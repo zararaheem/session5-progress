@@ -2046,10 +2046,18 @@ function saveNotes(name){
 }
 
 // ── Workshop Data tab (Zara only) ─────────────────────────────────
+function saveWd3c(sName,wkKey,field,val){
+  if(!s5data.__3cs__)s5data.__3cs__={};
+  if(!s5data.__3cs__[sName])s5data.__3cs__[sName]={};
+  if(!s5data.__3cs__[sName][wkKey])s5data.__3cs__[sName][wkKey]={};
+  if(val) s5data.__3cs__[sName][wkKey][field]=val;
+  else delete s5data.__3cs__[sName][wkKey][field];
+  saveAll();
+}
+
 function renderWsData(){
   const lv=document.getElementById('wd-level').value;
   const wsArr=S5_WORKSHOPS[lv]||[];
-  // Populate workshop dropdown
   const wdSel=document.getElementById('wd-workshop');
   const prevWs=wdSel.value;
   wdSel.innerHTML=wsArr.map(ws=>`<option value="${ws.name}">${ws.code} — ${ws.name}</option>`).join('');
@@ -2058,32 +2066,78 @@ function renderWsData(){
   if(!wsName){document.getElementById('wd-content').innerHTML='<div style="color:var(--muted2);padding:20px;font-size:13px">Select a workshop</div>';return;}
 
   const students=[...STUDENTS].filter(s=>s.l===lv).sort((a,b)=>a.n.localeCompare(b.n));
+
+  const ALL_WEEKS=[
+    {w:1,type:'chk',key:'w1',label:'W1 Baseline'},
+    {w:2,type:'3cs',key:'w2',label:'W2 3Cs'},
+    {w:3,type:'chk',key:'w3',label:'W3 Checkpoint'},
+    {w:4,type:'3cs',key:'w4',label:'W4 3Cs'},
+    {w:5,type:'chk',key:'w5',label:'W5 Checkpoint'},
+    {w:6,type:'3cs',key:'w6',label:'W6 3Cs'},
+    {w:7,type:'chk',key:'w7',label:'W7 T2P'},
+  ];
+  const TC3_FIELDS=[
+    {key:'lovesSchool',label:'Loves School',opts:['Yes','No','N/A']},
+    {key:'learning2x',label:'Learning 2×',opts:['All at 2x','Some at 2x','None at 2x','N/A']},
+    {key:'onTrack',label:'T2P Track',opts:['Yes','No','N/A']},
+  ];
+
+  const headerCells=ALL_WEEKS.flatMap(wk=>{
+    if(wk.type==='chk') return[`<th>${wk.label}</th>`];
+    return TC3_FIELDS.map(f=>`<th style="font-size:9px;white-space:nowrap;background:rgba(96,165,250,.05);">${wk.label}<br><span style="opacity:.65;font-weight:400">${f.label}</span></th>`);
+  }).join('');
+
   const rows=students.map(s=>{
     const scores=s5data[s.n]||{};
-    const final=scores[wsName]||'';
-    const chkCells=CHECKPOINTS.map(chk=>{
-      const v=scores[chkKey(wsName,chk.key)]||'';
-      const opts=getChkOptions(chk.key);
-      const optHtml=opts.map(o=>`<option ${v===o.val?'selected':''}>${o.val}</option>`).join('');
-      return`<td><select class="ws-edit-input" id="wdchk-${slug(s.n)}-${chk.key}"><option value=""></option>${optHtml}</select></td>`;
+    const sl=slug(s.n);
+    const dataCells=ALL_WEEKS.flatMap(wk=>{
+      if(wk.type==='chk'){
+        const v=scores[chkKey(wsName,wk.key)]||'';
+        const opts=getChkOptions(wk.key);
+        const optHtml=opts.map(o=>`<option ${v===o.val?'selected':''}>${o.val}</option>`).join('');
+        return[`<td><select class="ws-edit-input" id="wdchk-${sl}-${wk.key}"><option value=""></option>${optHtml}</select></td>`];
+      } else {
+        const d3=s5data.__3cs__?.[s.n]?.[wk.key]||{};
+        const safeN=s.n.replace(/'/g,"\\'");
+        return TC3_FIELDS.map(f=>{
+          const v=d3[f.key]||'';
+          const optHtml=f.opts.map(o=>`<option ${v===o?'selected':''}>${o}</option>`).join('');
+          return`<td style="background:rgba(96,165,250,.03);"><select class="ws-edit-input" id="wd3c-${sl}-${wk.key}-${f.key}" onchange="saveWd3c('${safeN}','${wk.key}','${f.key}',this.value)"><option value=""></option>${optHtml}</select></td>`;
+        });
+      }
     }).join('');
+    const final=scores[wsName]||'';
     const finalOpts=['','Passed','Not passed','Absent'].map(o=>`<option ${final===o?'selected':''}>${o}</option>`).join('');
     return`<tr>
       <td style="font-weight:500;color:var(--text);white-space:nowrap">${s.n}</td>
-      ${chkCells}
-      <td><select class="ws-edit-input" id="wdfin-${slug(s.n)}"><option value=""></option>${finalOpts}</select></td>
+      ${dataCells}
+      <td><select class="ws-edit-input" id="wdfin-${sl}"><option value=""></option>${finalOpts}</select></td>
     </tr>`;
   }).join('');
 
+  const deliverables=s5data.__deliverables__?.[wsName]||[];
+  const delList=deliverables.length
+    ?`<ul style="margin:8px 0 0;padding:0 0 0 16px;">${deliverables.map(d=>`<li style="font-size:12px;color:var(--text);margin-bottom:5px;"><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);margin-right:8px;">Wk ${d.week||'?'}</span>${d.text||''}</li>`).join('')}</ul>`
+    :`<div style="font-size:11px;color:var(--muted2);margin-top:4px;font-style:italic">No deliverables added yet — add them in the Workshops tab of any student's detail panel.</div>`;
+
   document.getElementById('wd-content').innerHTML=`
-    <table class="ws-data-table">
-      <thead><tr>
-        <th>Student</th>
-        ${CHECKPOINTS.map(c=>`<th>${c.label}</th>`).join('')}
-        <th>Final (T2P)</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+    <div style="overflow-x:auto;">
+      <table class="ws-data-table">
+        <thead><tr>
+          <th>Student</th>
+          ${headerCells}
+          <th>Final (T2P)</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <details style="margin-top:16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <summary style="cursor:pointer;padding:10px 14px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;list-style:none;">
+        📋 Workshop Deliverables
+        <span style="font-size:9px;font-weight:400;opacity:.6">${deliverables.length} item${deliverables.length!==1?'s':''} · click to expand ▾</span>
+      </summary>
+      <div style="padding:10px 14px;border-top:1px solid var(--border);">${delList}</div>
+    </details>`;
 }
 
 function saveWsData(){
