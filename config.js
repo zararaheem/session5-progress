@@ -6,7 +6,7 @@ const T2P_CONFIG = {
 
   // ── Access ────────────────────────────────────────────────────
   // Admins — see everything, audit log, all students
-  superadmins: ["Admin"],
+  superadmins: ["Admin","Liam","Zara"],
 
   // Staff list (auto-sorted alphabetically)
   staff: [
