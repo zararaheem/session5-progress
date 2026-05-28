@@ -10,7 +10,7 @@ const T2P_CONFIG = {
   password: "nyc2025",
   superadmins: ["Admin","Liam","Zara"],
   staff: ["Chauncey","Emily","Eric Salgado","Jenna K.","Jenna P.","Jesse","Liam","Manuel","Nathan","Parthvi","Sam McDonald"].sort(),
-  levelGuides: { LL:["Jenna K.","Jesse"], L1:["Parthvi","Nathan"], L2:["Jenna P."], MS:["Emily","Chauncey"] },
+  levelGuides: { LL:["Jenna K.","Jesse","Manuel"], L1:["Parthvi","Nathan","Manuel"], L2:["Jenna P.","Manuel"], MS:["Emily","Chauncey","Manuel"] },
   checkpoints: [
     {key:"w1",label:"Week 1 Baseline"},{key:"w3",label:"Week 3: Checkpoint 1"},
     {key:"w5",label:"Week 5: Checkpoint 2"},{key:"w7",label:"Week 7: T2P"},
@@ -940,12 +940,12 @@ function applyLevelOverrides(){
 function applyExtraStaff(){
   (s5data.__extraStaff__||[]).forEach(g=>{
     if(!CFG.staff.includes(g.name)) CFG.staff.push(g.name);
-    if(g.level&&!CFG.levelGuides[g.level]?.includes(g.name)){
-      if(!CFG.levelGuides[g.level])CFG.levelGuides[g.level]=[];
-      CFG.levelGuides[g.level].push(g.name);
-    }
+    const levels=Array.isArray(g.levels)?g.levels:(g.level?[g.level]:[]);
+    levels.forEach(lvl=>{
+      if(!CFG.levelGuides[lvl])CFG.levelGuides[lvl]=[];
+      if(!CFG.levelGuides[lvl].includes(g.name)) CFG.levelGuides[lvl].push(g.name);
+    });
   });
-  // Rebuild STAFF_SORTED in place
   STAFF_SORTED.length=0;
   [...CFG.staff].sort().forEach(s=>STAFF_SORTED.push(s));
 }
@@ -990,10 +990,11 @@ function addGuideManually(){
   if(CFG.staff.includes(name)||(s5data.__extraStaff__||[]).find(g=>g.name===name)){
     alert(`"${name}" is already on the staff list.`);return;
   }
-  const lvlInput=(prompt(`Assign ${name} to a level? (LL, L1, L2, MS — or leave blank for none)`)||'').trim().toUpperCase();
-  const level=['LL','L1','L2','MS'].includes(lvlInput)?lvlInput:null;
+  const lvlInput=(prompt(`Assign ${name} to levels? Enter one or more: LL, L1, L2, MS\n(comma-separated, e.g. "L1,L2" — or leave blank for none)`)||'').toUpperCase();
+  const ALL_LVLS=['LL','L1','L2','MS'];
+  const levels=lvlInput.split(/[\s,]+/).map(s=>s.trim()).filter(s=>ALL_LVLS.includes(s));
   if(!s5data.__extraStaff__)s5data.__extraStaff__=[];
-  s5data.__extraStaff__.push({name,level,added:new Date().toISOString()});
+  s5data.__extraStaff__.push({name,levels,added:new Date().toISOString()});
   applyExtraStaff();
   saveAll().then(()=>{buildGuideBanner();updateChipStates();renderRoster();});
 }
