@@ -116,7 +116,7 @@
       <div class="bar" id="bar"><span></span></div>
       <div class="substats">
         <span><b id="p-units">0</b> units total</span>
-        <span class="wait-chip">🚚 <b id="p-await">0</b> awaiting delivery</span>
+        <span class="wait-chip"><b id="p-await">0</b> awaiting delivery</span>
       </div>
       <div class="stamp" id="stamp">READY TO ROLL</div>
     </div>
@@ -199,7 +199,7 @@ function render(){
         <span class="counter">
           <button data-dec="${i.id}">−</button>${countCtrl}<button data-inc="${i.id}">+</button>
         </span>
-        <span class="await-btn" data-await="${i.id}" title="Waiting on delivery">🚚</span>
+        <span class="await-btn" data-await="${i.id}" title="Waiting on delivery">ETA</span>
         <span class="del" data-del="${i.id}">×</span>
       </div>`;
     }).join("");
