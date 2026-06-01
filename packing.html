@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#16130f" />
+<title>T2P Supplies — Loading Manifest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3ecdc; --paper-2:#ece2cd; --ink:#17130d; --ink-soft:#5b5347;
+    --line:#cdbf9f; --accent:#e8470f; --accent-ink:#fff4ec;
+    --done:#1f6f4a; --done-soft:#e2eee4;
+    --wait:#b06a00; --wait-soft:#f4e6c6;
+    --shadow:0 1px 0 rgba(0,0,0,.04), 0 8px 24px -16px rgba(23,19,13,.5);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--paper);color:var(--ink)}
+  body{font-family:"Hanken Grotesk",system-ui,sans-serif;line-height:1.45;padding-bottom:150px;
+    background-image:radial-gradient(circle at 12% -10%, rgba(232,71,15,.06), transparent 40%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");}
+  .wrap{max-width:680px;margin:0 auto;padding:0 16px}
+
+  header{padding:26px 0 14px}
+  .kicker{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft)}
+  h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(34px,11vw,56px);line-height:.92;letter-spacing:-.02em;margin:6px 0 0}
+  .route{display:flex;align-items:center;gap:10px;margin-top:6px;font-family:"Space Mono",monospace;font-size:12px;color:var(--ink-soft)}
+  .route b{color:var(--ink)} .route .arrow{color:var(--accent);font-weight:700}
+
+  .progress-card{margin-top:18px;border:1.5px solid var(--ink);border-radius:14px;background:var(--paper-2);padding:14px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .progress-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .progress-top .count{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:26px;letter-spacing:-.02em}
+  .progress-top .count small{font-size:14px;color:var(--ink-soft);font-weight:600}
+  .progress-top .pct{font-family:"Space Mono",monospace;font-size:13px;color:var(--ink-soft)}
+  .bar{height:12px;border:1.5px solid var(--ink);border-radius:99px;margin-top:10px;background:repeating-linear-gradient(45deg,transparent,transparent 5px,rgba(23,19,13,.05) 5px,rgba(23,19,13,.05) 6px);overflow:hidden}
+  .bar > span{display:block;height:100%;width:0;background:var(--accent);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .bar.complete > span{background:var(--done)}
+  .substats{display:flex;gap:14px;margin-top:10px;font-family:"Space Mono",monospace;font-size:11px;color:var(--ink-soft);flex-wrap:wrap}
+  .substats b{color:var(--ink)}
+  .substats .wait-chip{color:var(--wait)} .substats .wait-chip b{color:var(--wait)}
+  .stamp{position:absolute;right:-8px;top:24px;transform:rotate(-9deg);font-family:"Space Mono",monospace;font-weight:700;font-size:13px;letter-spacing:.1em;color:var(--done);border:2px solid var(--done);border-radius:6px;padding:3px 8px;opacity:0;transition:opacity .3s}
+  .stamp.show{opacity:.9}
+
+  .toolbar{display:flex;gap:8px;margin:18px 0 4px;align-items:center;flex-wrap:wrap}
+  .tbtn{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid var(--ink);background:transparent;color:var(--ink);padding:7px 11px;border-radius:8px;cursor:pointer;transition:.15s}
+  .tbtn:hover{background:var(--ink);color:var(--paper)} .tbtn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .sync{margin-left:auto;font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.06em;color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+  .dot{width:7px;height:7px;border-radius:99px;background:var(--ink-soft)}
+  .dot.live{background:var(--done);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(31,111,74,.45)}70%{box-shadow:0 0 0 7px rgba(31,111,74,0)}100%{box-shadow:0 0 0 0 rgba(31,111,74,0)}}
+
+  .cat{margin-top:22px;animation:rise .4s both}
+  .cat-head{display:flex;align-items:center;gap:10px;padding:0 2px 8px}
+  .cat-head h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:19px;letter-spacing:-.01em}
+  .cat-head .badge{font-family:"Space Mono",monospace;font-size:11px;color:var(--ink-soft);border:1.5px solid var(--line);border-radius:99px;padding:2px 9px}
+  .cat-head .badge.full{color:var(--done);border-color:var(--done);background:var(--done-soft)}
+  .cat-head .rule{flex:1;height:0;border-top:1.5px dashed var(--line)}
+
+  .list{border:1.5px solid var(--ink);border-radius:14px;background:var(--paper-2);overflow:hidden;box-shadow:var(--shadow)}
+  .item{display:flex;align-items:center;gap:11px;padding:12px 13px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s;user-select:none}
+  .item:last-child{border-bottom:0}
+  .item:active{background:rgba(23,19,13,.04)}
+  .item.await{background:var(--wait-soft);box-shadow:inset 4px 0 0 var(--wait)}
+  .check{flex:0 0 auto;width:24px;height:24px;border:2px solid var(--ink);border-radius:7px;display:grid;place-items:center;transition:.18s;background:var(--paper)}
+  .check svg{width:15px;height:15px;stroke:var(--paper);stroke-width:3.5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .2s}
+  .item.done .check{background:var(--done);border-color:var(--done)} .item.done .check svg{stroke-dashoffset:0}
+  .item.await .check{border-color:var(--wait);border-style:dashed;background:transparent;opacity:.5}
+  .namewrap{flex:1;min-width:0}
+  .name{font-size:16px;font-weight:600;transition:.18s}
+  .item.done .name{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:var(--accent)}
+  .sub{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--wait);font-weight:700;display:none;margin-top:1px}
+  .item.await .sub{display:block}
+
+  .counter{flex:0 0 auto;display:flex;align-items:center;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper)}
+  .counter button{width:26px;height:28px;border:none;background:transparent;color:var(--ink);font-size:16px;font-weight:700;cursor:pointer;line-height:1}
+  .counter button:active{background:var(--accent);color:#fff}
+  .counter .val{min-width:26px;text-align:center;font-family:"Space Mono",monospace;font-size:13px;font-weight:700;border-left:1.5px solid var(--line);border-right:1.5px solid var(--line);cursor:text;padding:0 2px}
+  .counter input{width:42px;border:none;text-align:center;font-family:"Space Mono",monospace;font-size:13px;font-weight:700;outline:none;background:#fffdf6}
+
+  .await-btn{flex:0 0 auto;width:30px;height:30px;border:1.5px solid var(--line);background:var(--paper);border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:14px;color:var(--ink-soft)}
+  .await-btn:hover{border-color:var(--wait);color:var(--wait)}
+  .item.await .await-btn{background:var(--wait);border-color:var(--wait);color:#fff}
+  .del{flex:0 0 auto;width:30px;height:30px;border:1.5px solid var(--line);background:var(--paper);border-radius:8px;color:var(--accent);font-size:16px;line-height:1;display:none;place-items:center;cursor:pointer}
+  body.editing .del{display:grid} body.editing .item{cursor:default}
+  .del:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  .addbar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--paper);padding:12px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px -18px rgba(0,0,0,.6);z-index:20}
+  .addbar .wrap{display:flex;gap:8px;align-items:center}
+  .addbar input,.addbar select{font-family:"Hanken Grotesk",sans-serif;font-size:15px;border:none;border-radius:9px;padding:11px 12px;background:#241f17;color:var(--paper);outline:none}
+  .addbar input::placeholder{color:#8d8473}
+  #f-name{flex:1;min-width:0} #f-qty{width:54px} #f-cat{max-width:128px}
+  .addbar .add{flex:0 0 auto;background:var(--accent);color:var(--accent-ink);font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:15px;border:none;border-radius:9px;padding:11px 16px;cursor:pointer}
+  .addbar .add:active{transform:translateY(1px)}
+  #f-newcat{display:none}
+  .addbar.newcat #f-cat{display:none} .addbar.newcat #f-newcat{display:block;max-width:150px}
+
+  .empty{text-align:center;color:var(--ink-soft);font-family:"Space Mono",monospace;font-size:13px;padding:40px 0}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .foot{text-align:center;font-family:"Space Mono",monospace;font-size:10.5px;color:var(--ink-soft);margin:30px 0 6px;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Loading Manifest · T2P</div>
+    <h1>T2P Supplies</h1>
+    <div class="route"><b>ALPHA</b><span class="arrow">———▸</span><b>T2P VENUE</b></div>
+
+    <div class="progress-card">
+      <div class="progress-top">
+        <div class="count"><span id="p-done">0</span><small> / <span id="p-total">0</span> items packed</small></div>
+        <div class="pct" id="p-pct">0%</div>
+      </div>
+      <div class="bar" id="bar"><span></span></div>
+      <div class="substats">
+        <span><b id="p-units">0</b> units total</span>
+        <span class="wait-chip">🚚 <b id="p-await">0</b> awaiting delivery</span>
+      </div>
+      <div class="stamp" id="stamp">READY TO ROLL</div>
+    </div>
+
+    <div class="toolbar">
+      <button class="tbtn" id="t-hide">Hide packed</button>
+      <button class="tbtn" id="t-wait">Show awaiting only</button>
+      <button class="tbtn" id="t-edit">Edit</button>
+      <div class="sync"><span class="dot" id="dot"></span><span id="sync-txt">connecting…</span></div>
+    </div>
+  </header>
+
+  <main id="board"><div class="empty">Loading the manifest…</div></main>
+  <div class="foot">Live list · everyone with the link edits the same manifest</div>
+</div>
+
+<div class="addbar" id="addbar">
+  <div class="wrap">
+    <input id="f-name" placeholder="Add an item…" autocomplete="off" />
+    <input id="f-qty" type="number" min="1" value="1" />
+    <select id="f-cat"></select>
+    <input id="f-newcat" placeholder="New category" autocomplete="off" />
+    <button class="add" id="f-add">Add</button>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const SUPABASE_URL = "https://zbduxegkxhgyfvrfkgai.supabase.co";
+const SUPABASE_KEY = "sb_publishable_2e-YQ-M_0HJG9l7pXyy2mA_8YJiRMV4";
+const supa = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const CAT_ORDER = ["General","Special","Astro Arcade","Drones","Bikes"];
+let items = [], hidePacked = false, waitOnly = false, editingId = null;
+const $ = s => document.querySelector(s);
+const board = $("#board");
+const catRank = c => { const i = CAT_ORDER.indexOf(c); return i===-1?99:i; };
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function load(){
+  const { data, error } = await supa.from("t2p_supplies").select("*");
+  if(error){ console.error(error); setSync(false,"error — retrying"); setTimeout(load,3000); return; }
+  items = data; render();
+}
+function categories(){
+  return [...new Set(items.map(i=>i.category))].sort((a,b)=>catRank(a)-catRank(b)||a.localeCompare(b));
+}
+function render(){
+  const total = items.length;
+  const done = items.filter(i=>i.packed).length;
+  const units = items.reduce((s,i)=>s+(i.count||0),0);
+  const awaiting = items.filter(i=>i.awaiting).length;
+  const pct = total?Math.round(done/total*100):0;
+  $("#p-done").textContent=done; $("#p-total").textContent=total; $("#p-pct").textContent=pct+"%";
+  $("#p-units").textContent=units; $("#p-await").textContent=awaiting;
+  $("#bar").firstElementChild.style.width=pct+"%";
+  $("#bar").classList.toggle("complete", total>0&&done===total);
+  $("#stamp").classList.toggle("show", total>0&&done===total);
+
+  const sel=$("#f-cat"), cur=sel.value, cats=categories();
+  sel.innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join("")+`<option value="__new">+ New category…</option>`;
+  if([...sel.options].some(o=>o.value===cur||o.text===cur)) sel.value=cur;
+
+  if(!total){ board.innerHTML=`<div class="empty">No items yet — add the first one below.</div>`; return; }
+  board.innerHTML=cats.map(cat=>{
+    const list=items.filter(i=>i.category===cat).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
+    const d=list.filter(i=>i.packed).length, full=d===list.length;
+    let vis=list;
+    if(hidePacked) vis=vis.filter(i=>!i.packed);
+    if(waitOnly) vis=vis.filter(i=>i.awaiting);
+    if(!vis.length) return "";
+    const rows=vis.map(i=>{
+      const editing = editingId===i.id;
+      const countCtrl = editing
+        ? `<input class="cval-input" data-id="${i.id}" type="number" min="1" value="${i.count}" />`
+        : `<span class="val" data-edit="${i.id}">×${i.count}</span>`;
+      return `<div class="item ${i.packed?'done':''} ${i.awaiting?'await':''}" data-id="${i.id}">
+        <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span>
+        <span class="namewrap"><span class="name">${esc(i.name)}</span><span class="sub">Waiting on delivery</span></span>
+        <span class="counter">
+          <button data-dec="${i.id}">−</button>${countCtrl}<button data-inc="${i.id}">+</button>
+        </span>
+        <span class="await-btn" data-await="${i.id}" title="Waiting on delivery">🚚</span>
+        <span class="del" data-del="${i.id}">×</span>
+      </div>`;
+    }).join("");
+    return `<section class="cat">
+      <div class="cat-head"><h2>${esc(cat)}</h2><span class="badge ${full?'full':''}">${d}/${list.length}</span><span class="rule"></span></div>
+      <div class="list">${rows}</div></section>`;
+  }).join("") || `<div class="empty">Nothing matches this filter.</div>`;
+
+  const inp=board.querySelector(".cval-input");
+  if(inp){ inp.focus(); inp.select();
+    const save=async()=>{ const v=Math.max(1,parseInt(inp.value)||1); editingId=null; await update(inp.dataset.id,{count:v}); };
+    inp.addEventListener("blur",save);
+    inp.addEventListener("keydown",e=>{ if(e.key==="Enter") inp.blur(); if(e.key==="Escape"){editingId=null;render();} });
+  }
+}
+async function update(id,patch){
+  const it=items.find(i=>i.id===id); if(it) Object.assign(it,patch); render();
+  await supa.from("t2p_supplies").update(patch).eq("id",id);
+}
+
+board.addEventListener("click", async e=>{
+  const t=e.target;
+  const inc=t.closest("[data-inc]"), dec=t.closest("[data-dec]"), edit=t.closest("[data-edit]"),
+        aw=t.closest("[data-await]"), del=t.closest("[data-del]");
+  if(inc){ e.stopPropagation(); const it=items.find(i=>i.id===inc.dataset.inc); return update(it.id,{count:it.count+1}); }
+  if(dec){ e.stopPropagation(); const it=items.find(i=>i.id===dec.dataset.dec); return update(it.id,{count:Math.max(1,it.count-1)}); }
+  if(edit){ e.stopPropagation(); editingId=edit.dataset.edit; return render(); }
+  if(aw){ e.stopPropagation(); const it=items.find(i=>i.id===aw.dataset.await); return update(it.id,{awaiting:!it.awaiting, packed: it.awaiting?it.packed:false}); }
+  if(del){ e.stopPropagation(); const id=del.dataset.del; items=items.filter(i=>i.id!==id); render(); return void supa.from("t2p_supplies").delete().eq("id",id); }
+  if(document.body.classList.contains("editing")) return;
+  const row=t.closest(".item[data-id]"); if(!row) return;
+  const it=items.find(i=>i.id===row.dataset.id); if(!it) return;
+  if(it.awaiting) return; // can't pack what hasn't arrived
+  update(it.id,{packed:!it.packed});
+});
+
+async function addItem(){
+  const name=$("#f-name").value.trim(); if(!name){ $("#f-name").focus(); return; }
+  const count=Math.max(1,parseInt($("#f-qty").value)||1);
+  let cat=$("#f-cat").value; if(cat==="__new") cat=$("#f-newcat").value.trim()||"Misc";
+  const maxPos=Math.max(0,...items.filter(i=>i.category===cat).map(i=>i.position));
+  const row={category:cat,name,count,position:maxPos+1,packed:false,awaiting:false};
+  $("#f-name").value=""; $("#f-qty").value="1"; $("#f-newcat").value=""; $("#addbar").classList.remove("newcat");
+  const { data }=await supa.from("t2p_supplies").insert(row).select().single();
+  if(data){ if(!items.some(i=>i.id===data.id)) items.push(data); render(); }
+  $("#f-name").focus();
+}
+$("#f-add").addEventListener("click",addItem);
+$("#f-name").addEventListener("keydown",e=>{ if(e.key==="Enter") addItem(); });
+$("#f-newcat").addEventListener("keydown",e=>{ if(e.key==="Enter") addItem(); });
+$("#f-cat").addEventListener("change",e=>{ $("#addbar").classList.toggle("newcat",e.target.value==="__new"); if(e.target.value==="__new") $("#f-newcat").focus(); });
+
+$("#t-hide").addEventListener("click",e=>{ hidePacked=!hidePacked; e.target.classList.toggle("on",hidePacked); render(); });
+$("#t-wait").addEventListener("click",e=>{ waitOnly=!waitOnly; e.target.classList.toggle("on",waitOnly); render(); });
+$("#t-edit").addEventListener("click",e=>{ document.body.classList.toggle("editing"); e.target.classList.toggle("on",document.body.classList.contains("editing")); });
+
+function setSync(live,txt){ $("#dot").classList.toggle("live",live); $("#sync-txt").textContent=txt||(live?"live":"offline"); }
+supa.channel("t2p-room").on("postgres_changes",{event:"*",schema:"public",table:"t2p_supplies"},load)
+  .subscribe(s=>setSync(s==="SUBSCRIBED", s==="SUBSCRIBED"?"live":"connecting…"));
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) load(); });
+load();
+</script>
+</body>
+</html>
