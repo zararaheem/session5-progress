@@ -59,40 +59,73 @@
   .cat-head .rule{flex:1;height:0;border-top:1.5px dashed var(--line)}
 
   .list{border:1.5px solid var(--ink);border-radius:14px;background:var(--paper-2);overflow:hidden;box-shadow:var(--shadow)}
-  .item{display:flex;align-items:center;gap:11px;padding:12px 13px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s;user-select:none}
+  .item{display:flex;align-items:flex-start;gap:11px;padding:12px 13px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s;user-select:none}
   .item:last-child{border-bottom:0}
   .item:active{background:rgba(23,19,13,.04)}
   .item.await{background:var(--wait-soft);box-shadow:inset 4px 0 0 var(--wait)}
-  .check{flex:0 0 auto;width:24px;height:24px;border:2px solid var(--ink);border-radius:7px;display:grid;place-items:center;transition:.18s;background:var(--paper)}
+
+  /* Heading rows */
+  .item.is-heading{background:rgba(23,19,13,.04);cursor:default}
+  .item.is-heading .heading-label{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);flex:1}
+
+  .check{flex:0 0 auto;width:24px;height:24px;border:2px solid var(--ink);border-radius:7px;display:grid;place-items:center;transition:.18s;background:var(--paper);margin-top:2px}
   .check svg{width:15px;height:15px;stroke:var(--paper);stroke-width:3.5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .2s}
   .item.done .check{background:var(--done);border-color:var(--done)} .item.done .check svg{stroke-dashoffset:0}
   .item.await .check{border-color:var(--wait);border-style:dashed;background:transparent;opacity:.5}
   .namewrap{flex:1;min-width:0}
   .name{font-size:16px;font-weight:600;transition:.18s}
   .item.done .name{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:var(--accent)}
-  .sub{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--wait);font-weight:700;display:none;margin-top:1px}
+  .item-note{font-size:12px;color:var(--ink-soft);margin-top:3px;font-style:italic}
+  .await-note{font-size:12px;color:var(--wait);margin-top:3px;font-style:italic}
+  .sub{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--wait);font-weight:700;display:none;margin-top:2px}
   .item.await .sub{display:block}
 
-  .counter{flex:0 0 auto;display:flex;align-items:center;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper)}
+  .counter{flex:0 0 auto;display:flex;align-items:center;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper);margin-top:1px}
   .counter button{width:26px;height:28px;border:none;background:transparent;color:var(--ink);font-size:16px;font-weight:700;cursor:pointer;line-height:1}
   .counter button:active{background:var(--accent);color:#fff}
   .counter .val{min-width:26px;text-align:center;font-family:"Space Mono",monospace;font-size:13px;font-weight:700;border-left:1.5px solid var(--line);border-right:1.5px solid var(--line);cursor:text;padding:0 2px}
   .counter input{width:42px;border:none;text-align:center;font-family:"Space Mono",monospace;font-size:13px;font-weight:700;outline:none;background:#fffdf6}
 
-  .await-btn{flex:0 0 auto;width:30px;height:30px;border:1.5px solid var(--line);background:var(--paper);border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:14px;color:var(--ink-soft)}
+  .await-btn{flex:0 0 auto;width:38px;height:30px;border:1.5px solid var(--line);background:var(--paper);border-radius:8px;display:grid;place-items:center;cursor:pointer;font-family:"Space Mono",monospace;font-size:9px;font-weight:700;letter-spacing:.05em;color:var(--ink-soft);margin-top:1px}
   .await-btn:hover{border-color:var(--wait);color:var(--wait)}
   .item.await .await-btn{background:var(--wait);border-color:var(--wait);color:#fff}
-  .del{flex:0 0 auto;width:30px;height:30px;border:1.5px solid var(--line);background:var(--paper);border-radius:8px;color:var(--accent);font-size:16px;line-height:1;display:none;place-items:center;cursor:pointer}
+
+  /* Edit mode controls */
+  .del{flex:0 0 auto;width:30px;height:30px;border:1.5px solid var(--line);background:var(--paper);border-radius:8px;color:var(--accent);font-size:16px;line-height:1;display:none;place-items:center;cursor:pointer;margin-top:1px}
   body.editing .del{display:grid} body.editing .item{cursor:default}
   .del:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 
+  .move-btns{display:none;flex-direction:column;gap:2px;margin-top:1px}
+  body.editing .move-btns{display:flex}
+  .move-btn{width:24px;height:14px;border:1px solid var(--line);background:var(--paper);border-radius:4px;font-size:9px;cursor:pointer;display:grid;place-items:center;color:var(--ink-soft)}
+  .move-btn:hover{background:var(--ink);color:var(--paper)}
+  .move-btn:disabled{opacity:.2;cursor:default;background:var(--paper)}
+
+  /* Inline edit panel */
+  .edit-panel{display:none;flex-direction:column;gap:6px;padding:10px 13px 12px;border-top:1px solid var(--line);background:#fffdf6}
+  body.editing .edit-panel.open{display:flex}
+  .edit-panel input,.edit-panel textarea,.edit-panel select{font-family:"Hanken Grotesk",sans-serif;font-size:14px;border:1.5px solid var(--line);border-radius:7px;padding:7px 9px;background:var(--paper);color:var(--ink);outline:none;width:100%}
+  .edit-panel input:focus,.edit-panel textarea:focus,.edit-panel select:focus{border-color:var(--ink)}
+  .edit-panel textarea{resize:vertical;min-height:52px;font-size:13px}
+  .edit-panel .ep-row{display:flex;gap:8px}
+  .edit-panel .ep-row select{flex:1}
+  .edit-panel .ep-lbl{font-family:"Space Mono",monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:1px}
+  .ep-save{background:var(--ink);color:var(--paper);border:none;border-radius:7px;padding:7px 16px;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:14px;cursor:pointer}
+  .ep-save:hover{background:var(--accent)}
+
+  /* Note textarea for awaiting items (always visible) */
+  .await-note-input{width:100%;font-family:"Hanken Grotesk",sans-serif;font-size:12px;border:1px dashed var(--wait);border-radius:6px;padding:5px 8px;background:transparent;color:var(--ink);outline:none;resize:vertical;min-height:36px;margin-top:4px}
+  .await-note-input::placeholder{color:var(--wait);opacity:.6}
+
   .addbar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--paper);padding:12px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px -18px rgba(0,0,0,.6);z-index:20}
-  .addbar .wrap{display:flex;gap:8px;align-items:center}
+  .addbar .wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .addbar input,.addbar select{font-family:"Hanken Grotesk",sans-serif;font-size:15px;border:none;border-radius:9px;padding:11px 12px;background:#241f17;color:var(--paper);outline:none}
   .addbar input::placeholder{color:#8d8473}
-  #f-name{flex:1;min-width:0} #f-qty{width:54px} #f-cat{max-width:128px}
+  #f-name{flex:1;min-width:120px} #f-qty{width:54px} #f-cat{max-width:128px}
   .addbar .add{flex:0 0 auto;background:var(--accent);color:var(--accent-ink);font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:15px;border:none;border-radius:9px;padding:11px 16px;cursor:pointer}
   .addbar .add:active{transform:translateY(1px)}
+  .addbar .add-head{flex:0 0 auto;background:#241f17;color:#8d8473;font-family:"Space Mono",monospace;font-size:11px;border:none;border-radius:9px;padding:11px 12px;cursor:pointer;letter-spacing:.06em}
+  .addbar .add-head:hover{color:var(--paper)}
   #f-newcat{display:none}
   .addbar.newcat #f-cat{display:none} .addbar.newcat #f-newcat{display:block;max-width:150px}
 
@@ -140,6 +173,7 @@
     <select id="f-cat"></select>
     <input id="f-newcat" placeholder="New category" autocomplete="off" />
     <button class="add" id="f-add">Add</button>
+    <button class="add-head" id="f-head" title="Add a section heading">+ Heading</button>
   </div>
 </div>
 
@@ -150,11 +184,16 @@ const SUPABASE_KEY = "sb_publishable_2e-YQ-M_0HJG9l7pXyy2mA_8YJiRMV4";
 const supa = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const CAT_ORDER = ["General","Special","Astro Arcade","Drones","Bikes"];
-let items = [], hidePacked = false, waitOnly = false, editingId = null;
+let items = [], hidePacked = false, waitOnly = false, openEditId = null;
 const $ = s => document.querySelector(s);
 const board = $("#board");
 const catRank = c => { const i = CAT_ORDER.indexOf(c); return i===-1?99:i; };
 const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// name field stores "Item name\nOptional note" — parse both out
+function parseName(raw){ const nl=(raw||'').indexOf('\n'); return nl>-1?{name:raw.slice(0,nl),note:raw.slice(nl+1)}:{name:raw||'',note:''}; }
+function formatName(name,note){ const n=name.trim(),no=(note||'').trim(); return no?`${n}\n${no}`:n; }
+const isHeading = i => i.count===0;
 
 async function load(){
   const { data, error } = await supa.from("t2p_supplies").select("*");
@@ -164,11 +203,17 @@ async function load(){
 function categories(){
   return [...new Set(items.map(i=>i.category))].sort((a,b)=>catRank(a)-catRank(b)||a.localeCompare(b));
 }
+function catOptHtml(current, cats){
+  return (cats||categories()).map(c=>`<option value="${esc(c)}" ${c===current?'selected':''}>${esc(c)}</option>`).join('')
+    +`<option value="__new">+ New category…</option>`;
+}
+
 function render(){
-  const total = items.length;
-  const done = items.filter(i=>i.packed).length;
-  const units = items.reduce((s,i)=>s+(i.count||0),0);
-  const awaiting = items.filter(i=>i.awaiting).length;
+  const realItems = items.filter(i=>!isHeading(i));
+  const total = realItems.length;
+  const done = realItems.filter(i=>i.packed).length;
+  const units = realItems.reduce((s,i)=>s+(i.count||0),0);
+  const awaiting = realItems.filter(i=>i.awaiting).length;
   const pct = total?Math.round(done/total*100):0;
   $("#p-done").textContent=done; $("#p-total").textContent=total; $("#p-pct").textContent=pct+"%";
   $("#p-units").textContent=units; $("#p-await").textContent=awaiting;
@@ -177,84 +222,220 @@ function render(){
   $("#stamp").classList.toggle("show", total>0&&done===total);
 
   const sel=$("#f-cat"), cur=sel.value, cats=categories();
-  sel.innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join("")+`<option value="__new">+ New category…</option>`;
+  sel.innerHTML=catOptHtml(cur,cats);
   if([...sel.options].some(o=>o.value===cur||o.text===cur)) sel.value=cur;
 
-  if(!total){ board.innerHTML=`<div class="empty">No items yet — add the first one below.</div>`; return; }
+  if(!items.length){ board.innerHTML=`<div class="empty">No items yet — add the first one below.</div>`; return; }
+
+  const isEditing = document.body.classList.contains("editing");
+
   board.innerHTML=cats.map(cat=>{
     const list=items.filter(i=>i.category===cat).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
-    const d=list.filter(i=>i.packed).length, full=d===list.length;
+    const realInCat=list.filter(i=>!isHeading(i));
+    const d=realInCat.filter(i=>i.packed).length, full=realInCat.length>0&&d===realInCat.length;
     let vis=list;
-    if(hidePacked) vis=vis.filter(i=>!i.packed);
+    if(hidePacked) vis=vis.filter(i=>i.awaiting||isHeading(i)||!i.packed);
     if(waitOnly) vis=vis.filter(i=>i.awaiting);
     if(!vis.length) return "";
-    const rows=vis.map(i=>{
-      const editing = editingId===i.id;
-      const countCtrl = editing
-        ? `<input class="cval-input" data-id="${i.id}" type="number" min="1" value="${i.count}" />`
-        : `<span class="val" data-edit="${i.id}">×${i.count}</span>`;
+
+    const rows=vis.map((i,idx)=>{
+      const {name:iname,note:inote}=parseName(i.name);
+      const editOpen=openEditId===i.id && isEditing;
+
+      // Reorder buttons — compare against full sorted list for boundary detection
+      const listIdx=list.indexOf(i);
+      const moveBtns=`<div class="move-btns">
+        <button class="move-btn" data-up="${i.id}" ${listIdx===0?'disabled':''}>▲</button>
+        <button class="move-btn" data-dn="${i.id}" ${listIdx===list.length-1?'disabled':''}>▼</button>
+      </div>`;
+
+      if(isHeading(i)){
+        const epHtml=editOpen?`<div class="edit-panel open" data-ep="${i.id}">
+          <div><div class="ep-lbl">Heading text</div><input class="ep-name" data-id="${i.id}" value="${esc(iname)}" placeholder="Section heading…"></div>
+          <div class="ep-row">
+            <div style="flex:1"><div class="ep-lbl">Category</div><select class="ep-cat" data-id="${i.id}">${catOptHtml(i.category)}</select></div>
+          </div>
+          <button class="ep-save" data-save="${i.id}">Save</button>
+        </div>`:'';
+        return `<div class="item is-heading ${editOpen?'':''}${isEditing?'editable':''}" data-id="${i.id}">
+          <span class="heading-label" data-nameclick="${i.id}">${esc(iname)||'—'}</span>
+          ${moveBtns}
+          <span class="del" data-del="${i.id}">×</span>
+        </div>${epHtml}`;
+      }
+
+      // Normal item
+      const awNoteHtml=i.awaiting
+        ?`<textarea class="await-note-input" data-note-id="${i.id}" placeholder="Delivery note… (e.g. arriving Friday)">${esc(inote)}</textarea>`
+        :(inote?`<div class="item-note">${esc(inote)}</div>`:'');
+
+      const epHtml=editOpen?`<div class="edit-panel open" data-ep="${i.id}">
+        <div><div class="ep-lbl">Item name</div><input class="ep-name" data-id="${i.id}" value="${esc(iname)}" placeholder="Item name…"></div>
+        <div><div class="ep-lbl">Note (optional)</div><textarea class="ep-note" data-id="${i.id}" placeholder="Extra details, delivery info…">${esc(inote)}</textarea></div>
+        <div class="ep-row">
+          <div style="flex:1"><div class="ep-lbl">Category</div><select class="ep-cat" data-id="${i.id}">${catOptHtml(i.category)}</select></div>
+          <div style="width:80px"><div class="ep-lbl">Qty</div><input class="ep-qty" data-id="${i.id}" type="number" min="1" value="${i.count}" style="width:100%"></div>
+        </div>
+        <button class="ep-save" data-save="${i.id}">Save</button>
+      </div>`:'';
+
       return `<div class="item ${i.packed?'done':''} ${i.awaiting?'await':''}" data-id="${i.id}">
         <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span>
-        <span class="namewrap"><span class="name">${esc(i.name)}</span><span class="sub">Waiting on delivery</span></span>
-        <span class="counter">
-          <button data-dec="${i.id}">−</button>${countCtrl}<button data-inc="${i.id}">+</button>
+        <span class="namewrap">
+          <span class="name" data-nameclick="${i.id}">${esc(iname)}</span>
+          <span class="sub">Awaiting delivery</span>
+          ${awNoteHtml}
         </span>
-        <span class="await-btn" data-await="${i.id}" title="Waiting on delivery">ETA</span>
+        <span class="counter">
+          <button data-dec="${i.id}">−</button><span class="val">×${i.count}</span><button data-inc="${i.id}">+</button>
+        </span>
+        <span class="await-btn" data-await="${i.id}">ETA</span>
+        ${moveBtns}
         <span class="del" data-del="${i.id}">×</span>
-      </div>`;
+      </div>${epHtml}`;
     }).join("");
+
     return `<section class="cat">
-      <div class="cat-head"><h2>${esc(cat)}</h2><span class="badge ${full?'full':''}">${d}/${list.length}</span><span class="rule"></span></div>
+      <div class="cat-head"><h2>${esc(cat)}</h2><span class="badge ${full?'full':''}">${d}/${realInCat.length}</span><span class="rule"></span></div>
       <div class="list">${rows}</div></section>`;
   }).join("") || `<div class="empty">Nothing matches this filter.</div>`;
 
-  const inp=board.querySelector(".cval-input");
-  if(inp){ inp.focus(); inp.select();
-    const save=async()=>{ const v=Math.max(1,parseInt(inp.value)||1); editingId=null; await update(inp.dataset.id,{count:v}); };
-    inp.addEventListener("blur",save);
-    inp.addEventListener("keydown",e=>{ if(e.key==="Enter") inp.blur(); if(e.key==="Escape"){editingId=null;render();} });
-  }
+  // Bind await-note textareas (save on blur)
+  board.querySelectorAll(".await-note-input").forEach(ta=>{
+    ta.addEventListener("blur", async ()=>{
+      const it=items.find(i=>i.id===ta.dataset.noteId);
+      if(!it) return;
+      const {name:n}=parseName(it.name);
+      await update(it.id,{name:formatName(n,ta.value)});
+    });
+    ta.addEventListener("click",e=>e.stopPropagation());
+    ta.addEventListener("keydown",e=>e.stopPropagation());
+  });
+
+  // Bind edit panel saves
+  board.querySelectorAll(".ep-save").forEach(btn=>{
+    btn.addEventListener("click", async e=>{
+      e.stopPropagation();
+      const id=btn.dataset.save;
+      const panel=board.querySelector(`.edit-panel[data-ep="${id}"]`);
+      const nameEl=panel.querySelector(".ep-name");
+      const noteEl=panel.querySelector(".ep-note");
+      const catEl=panel.querySelector(".ep-cat");
+      const qtyEl=panel.querySelector(".ep-qty");
+      let cat=catEl.value; if(cat==="__new"){ cat=prompt("New category name:")||"Misc"; }
+      const patch={name: formatName(nameEl?.value||'',noteEl?.value||''), category:cat};
+      if(qtyEl) patch.count=Math.max(1,parseInt(qtyEl.value)||1);
+      openEditId=null;
+      await update(id,patch);
+    });
+  });
+
+  // Bind ep-cat new category prompt
+  board.querySelectorAll(".ep-cat").forEach(sel=>{
+    sel.addEventListener("change",()=>{ if(sel.value==="__new"){ const n=prompt("New category name:"); if(n) sel.value=n; else sel.value=items.find(i=>i.id===sel.dataset.id)?.category||''; } });
+    sel.addEventListener("click",e=>e.stopPropagation());
+  });
 }
+
+function updateStats(){
+  const realItems=items.filter(i=>!isHeading(i));
+  const total=realItems.length, done=realItems.filter(i=>i.packed).length;
+  const units=realItems.reduce((s,i)=>s+(i.count||0),0), awaiting=realItems.filter(i=>i.awaiting).length;
+  const pct=total?Math.round(done/total*100):0;
+  $("#p-done").textContent=done; $("#p-total").textContent=total; $("#p-pct").textContent=pct+"%";
+  $("#p-units").textContent=units; $("#p-await").textContent=awaiting;
+  $("#bar").firstElementChild.style.width=pct+"%";
+  $("#bar").classList.toggle("complete",total>0&&done===total);
+  $("#stamp").classList.toggle("show",total>0&&done===total);
+}
+
+async function updateQty(id, newCount){
+  const it=items.find(i=>i.id===id); if(!it) return;
+  it.count=newCount;
+  const valEl=board.querySelector(`.item[data-id="${id}"] .counter .val`);
+  if(valEl) valEl.textContent='×'+newCount;
+  // Keep edit panel qty in sync if open
+  const epQty=board.querySelector(`.ep-qty[data-id="${id}"]`);
+  if(epQty) epQty.value=newCount;
+  updateStats();
+  await supa.from("t2p_supplies").update({count:newCount}).eq("id",id);
+}
+
 async function update(id,patch){
   const it=items.find(i=>i.id===id); if(it) Object.assign(it,patch); render();
   await supa.from("t2p_supplies").update(patch).eq("id",id);
 }
 
+async function moveItem(id, dir){
+  const it=items.find(i=>i.id===id); if(!it) return;
+  const siblings=items.filter(i=>i.category===it.category).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
+  const idx=siblings.indexOf(it);
+  const swap=siblings[idx+dir]; if(!swap) return;
+  const pa=it.position, pb=swap.position;
+  // If positions are equal, assign distinct values first
+  if(pa===pb){ it.position=idx*10; swap.position=(idx+dir)*10; }
+  else { it.position=pb; swap.position=pa; }
+  render();
+  await Promise.all([
+    supa.from("t2p_supplies").update({position:it.position}).eq("id",it.id),
+    supa.from("t2p_supplies").update({position:swap.position}).eq("id",swap.id),
+  ]);
+}
+
 board.addEventListener("click", async e=>{
   const t=e.target;
-  const inc=t.closest("[data-inc]"), dec=t.closest("[data-dec]"), edit=t.closest("[data-edit]"),
-        aw=t.closest("[data-await]"), del=t.closest("[data-del]");
-  if(inc){ e.stopPropagation(); const it=items.find(i=>i.id===inc.dataset.inc); return update(it.id,{count:it.count+1}); }
-  if(dec){ e.stopPropagation(); const it=items.find(i=>i.id===dec.dataset.dec); return update(it.id,{count:Math.max(1,it.count-1)}); }
-  if(edit){ e.stopPropagation(); editingId=edit.dataset.edit; return render(); }
-  if(aw){ e.stopPropagation(); const it=items.find(i=>i.id===aw.dataset.await); return update(it.id,{awaiting:!it.awaiting, packed: it.awaiting?it.packed:false}); }
-  if(del){ e.stopPropagation(); const id=del.dataset.del; items=items.filter(i=>i.id!==id); render(); return void supa.from("t2p_supplies").delete().eq("id",id); }
+  const inc=t.closest("[data-inc]"), dec=t.closest("[data-dec]"),
+        aw=t.closest("[data-await]"), del=t.closest("[data-del]"),
+        up=t.closest("[data-up]"), dn=t.closest("[data-dn]"),
+        nc=t.closest("[data-nameclick]");
+
+  if(inc){ e.stopPropagation(); const it=items.find(i=>i.id===inc.dataset.inc); return updateQty(it.id,it.count+1); }
+  if(dec){ e.stopPropagation(); const it=items.find(i=>i.id===dec.dataset.dec); return updateQty(it.id,Math.max(1,it.count-1)); }
+  if(aw){ e.stopPropagation(); const it=items.find(i=>i.id===aw.dataset.await); return update(it.id,{awaiting:!it.awaiting,packed:it.awaiting?it.packed:false}); }
+  if(del){ e.stopPropagation(); if(!confirm("Delete this item?")) return; const id=del.dataset.del; items=items.filter(i=>i.id!==id); render(); return void supa.from("t2p_supplies").delete().eq("id",id); }
+  if(up){ e.stopPropagation(); return moveItem(up.dataset.up,-1); }
+  if(dn){ e.stopPropagation(); return moveItem(dn.dataset.dn,1); }
+  if(nc && document.body.classList.contains("editing")){
+    e.stopPropagation();
+    openEditId = openEditId===nc.dataset.nameclick ? null : nc.dataset.nameclick;
+    return render();
+  }
   if(document.body.classList.contains("editing")) return;
   const row=t.closest(".item[data-id]"); if(!row) return;
-  const it=items.find(i=>i.id===row.dataset.id); if(!it) return;
-  if(it.awaiting) return; // can't pack what hasn't arrived
+  const it=items.find(i=>i.id===row.dataset.id); if(!it||isHeading(it)) return;
+  if(it.awaiting) return;
   update(it.id,{packed:!it.packed});
 });
 
-async function addItem(){
-  const name=$("#f-name").value.trim(); if(!name){ $("#f-name").focus(); return; }
-  const count=Math.max(1,parseInt($("#f-qty").value)||1);
+async function addItem(heading=false){
   let cat=$("#f-cat").value; if(cat==="__new") cat=$("#f-newcat").value.trim()||"Misc";
   const maxPos=Math.max(0,...items.filter(i=>i.category===cat).map(i=>i.position));
+  if(heading){
+    const name=$("#f-name").value.trim()||"New Section";
+    const row={category:cat,name,count:0,position:maxPos+1,packed:false,awaiting:false};
+    $("#f-name").value="";
+    const {data}=await supa.from("t2p_supplies").insert(row).select().single();
+    if(data){ if(!items.some(i=>i.id===data.id)) items.push(data); render(); }
+    $("#f-name").focus(); return;
+  }
+  const name=$("#f-name").value.trim(); if(!name){ $("#f-name").focus(); return; }
+  const count=Math.max(1,parseInt($("#f-qty").value)||1);
   const row={category:cat,name,count,position:maxPos+1,packed:false,awaiting:false};
   $("#f-name").value=""; $("#f-qty").value="1"; $("#f-newcat").value=""; $("#addbar").classList.remove("newcat");
-  const { data }=await supa.from("t2p_supplies").insert(row).select().single();
+  const {data}=await supa.from("t2p_supplies").insert(row).select().single();
   if(data){ if(!items.some(i=>i.id===data.id)) items.push(data); render(); }
   $("#f-name").focus();
 }
-$("#f-add").addEventListener("click",addItem);
-$("#f-name").addEventListener("keydown",e=>{ if(e.key==="Enter") addItem(); });
-$("#f-newcat").addEventListener("keydown",e=>{ if(e.key==="Enter") addItem(); });
+
+$("#f-add").addEventListener("click",()=>addItem(false));
+$("#f-head").addEventListener("click",()=>addItem(true));
+$("#f-name").addEventListener("keydown",e=>{ if(e.key==="Enter") addItem(false); });
+$("#f-newcat").addEventListener("keydown",e=>{ if(e.key==="Enter") addItem(false); });
 $("#f-cat").addEventListener("change",e=>{ $("#addbar").classList.toggle("newcat",e.target.value==="__new"); if(e.target.value==="__new") $("#f-newcat").focus(); });
 
 $("#t-hide").addEventListener("click",e=>{ hidePacked=!hidePacked; e.target.classList.toggle("on",hidePacked); render(); });
 $("#t-wait").addEventListener("click",e=>{ waitOnly=!waitOnly; e.target.classList.toggle("on",waitOnly); render(); });
-$("#t-edit").addEventListener("click",e=>{ document.body.classList.toggle("editing"); e.target.classList.toggle("on",document.body.classList.contains("editing")); });
+$("#t-edit").addEventListener("click",e=>{ openEditId=null; document.body.classList.toggle("editing"); e.target.classList.toggle("on",document.body.classList.contains("editing")); render(); });
 
 function setSync(live,txt){ $("#dot").classList.toggle("live",live); $("#sync-txt").textContent=txt||(live?"live":"offline"); }
 supa.channel("t2p-room").on("postgres_changes",{event:"*",schema:"public",table:"t2p_supplies"},load)
