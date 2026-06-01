@@ -101,6 +101,14 @@
   .move-btn:hover{background:var(--ink);color:var(--paper)}
   .move-btn:disabled{opacity:.2;cursor:default;background:var(--paper)}
 
+  /* Drag-and-drop */
+  .drag-handle{display:none;align-self:center;cursor:grab;color:var(--line);font-size:15px;line-height:1;padding:0 3px;user-select:none;flex-shrink:0}
+  body.editing .drag-handle{display:block}
+  .drag-handle:hover{color:var(--ink-soft)}
+  .item.dragging{opacity:.35;pointer-events:none}
+  .item.drop-before{box-shadow:inset 0 3px 0 var(--accent)}
+  .item.drop-after{box-shadow:inset 0 -3px 0 var(--accent)}
+
   /* Inline edit panel */
   .edit-panel{display:none;flex-direction:column;gap:6px;padding:10px 13px 12px;border-top:1px solid var(--line);background:#fffdf6}
   body.editing .edit-panel.open{display:flex}
@@ -184,7 +192,7 @@ const SUPABASE_KEY = "sb_publishable_2e-YQ-M_0HJG9l7pXyy2mA_8YJiRMV4";
 const supa = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const CAT_ORDER = ["General","Special","Astro Arcade","Drones","Bikes"];
-let items = [], hidePacked = false, waitOnly = false, openEditId = null;
+let items = [], hidePacked = false, waitOnly = false, openEditId = null, dragId = null;
 const $ = s => document.querySelector(s);
 const board = $("#board");
 const catRank = c => { const i = CAT_ORDER.indexOf(c); return i===-1?99:i; };
@@ -257,7 +265,8 @@ function render(){
           </div>
           <button class="ep-save" data-save="${i.id}">Save</button>
         </div>`:'';
-        return `<div class="item is-heading ${editOpen?'':''}${isEditing?'editable':''}" data-id="${i.id}">
+        return `<div class="item is-heading ${editOpen?'':''}${isEditing?'editable':''}" data-id="${i.id}" ${isEditing?'draggable="true"':''}>
+          <span class="drag-handle">⠿</span>
           <span class="heading-label" data-nameclick="${i.id}">${esc(iname)||'—'}</span>
           ${moveBtns}
           <span class="del" data-del="${i.id}">×</span>
@@ -279,7 +288,8 @@ function render(){
         <button class="ep-save" data-save="${i.id}">Save</button>
       </div>`:'';
 
-      return `<div class="item ${i.packed?'done':''} ${i.awaiting?'await':''}" data-id="${i.id}">
+      return `<div class="item ${i.packed?'done':''} ${i.awaiting?'await':''}" data-id="${i.id}" ${isEditing?'draggable="true"':''}>
+        <span class="drag-handle">⠿</span>
         <span class="check"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span>
         <span class="namewrap">
           <span class="name" data-nameclick="${i.id}">${esc(iname)}</span>
@@ -382,7 +392,65 @@ async function moveItem(id, dir){
   ]);
 }
 
+function clearDropClasses(){
+  board.querySelectorAll(".drop-before,.drop-after,.dragging").forEach(el=>el.classList.remove("drop-before","drop-after","dragging"));
+}
+
+board.addEventListener("dragstart", e=>{
+  if(!document.body.classList.contains("editing")) return;
+  const row=e.target.closest(".item[data-id]"); if(!row) return;
+  dragId=row.dataset.id;
+  row.classList.add("dragging");
+  e.dataTransfer.effectAllowed="move";
+});
+
+board.addEventListener("dragend", ()=>{ dragId=null; clearDropClasses(); });
+
+board.addEventListener("dragover", e=>{
+  e.preventDefault(); if(!dragId) return;
+  const row=e.target.closest(".item[data-id]");
+  board.querySelectorAll(".drop-before,.drop-after").forEach(el=>el.classList.remove("drop-before","drop-after"));
+  if(row&&row.dataset.id!==dragId){
+    const mid=row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;
+    row.classList.add(e.clientY<mid?"drop-before":"drop-after");
+  }
+});
+
+board.addEventListener("drop", async e=>{
+  e.preventDefault(); if(!dragId) return;
+  const row=e.target.closest(".item[data-id]");
+  const captured=dragId; dragId=null; clearDropClasses();
+  if(!row||row.dataset.id===captured) return;
+  const mid=row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;
+  await reorderAfterDrop(captured, row.dataset.id, e.clientY<mid);
+});
+
+async function reorderAfterDrop(draggedId, targetId, insertBefore){
+  const dragged=items.find(i=>i.id===draggedId);
+  const target=items.find(i=>i.id===targetId);
+  if(!dragged||!target) return;
+  const oldCat=dragged.category, newCat=target.category;
+  dragged.category=newCat;
+
+  let catItems=items.filter(i=>i.category===newCat)
+    .sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
+  catItems=catItems.filter(i=>i.id!==draggedId);
+  const tIdx=catItems.findIndex(i=>i.id===targetId);
+  catItems.splice(insertBefore?tIdx:tIdx+1, 0, dragged);
+  catItems.forEach((item,idx)=>{ item.position=idx*10; });
+
+  const saves=catItems.map(item=>supa.from("t2p_supplies").update({position:item.position,category:item.category}).eq("id",item.id));
+  if(oldCat!==newCat){
+    const oldItems=items.filter(i=>i.category===oldCat).sort((a,b)=>a.position-b.position||a.created_at.localeCompare(b.created_at));
+    oldItems.forEach((item,idx)=>{ item.position=idx*10; });
+    oldItems.forEach(item=>saves.push(supa.from("t2p_supplies").update({position:item.position}).eq("id",item.id)));
+  }
+  render();
+  await Promise.all(saves);
+}
+
 board.addEventListener("click", async e=>{
+  if(e.target.closest(".drag-handle")) return;
   const t=e.target;
   const inc=t.closest("[data-inc]"), dec=t.closest("[data-dec]"),
         aw=t.closest("[data-await]"), del=t.closest("[data-del]"),
